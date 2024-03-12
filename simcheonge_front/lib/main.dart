@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:simcheonge_front/wedgets/bottom_nav_item.dart';
+import 'package:simcheonge_front/widgets/bottom_nav_item.dart';
 import 'package:simcheonge_front/screens/chatbot_screen.dart';
 import 'package:simcheonge_front/screens/article_screen.dart';
 import 'package:simcheonge_front/screens/home_screen.dart';
 import 'package:simcheonge_front/screens/news_screen.dart';
 import 'package:simcheonge_front/screens/search_screen.dart';
+import 'package:simcheonge_front/widgets/main_app_bar.dart';
 
 void main() {
   runApp(const MyApp());
@@ -18,7 +19,6 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: 'Your App Title',
       home: MyHomePage(),
     );
   }
@@ -39,7 +39,10 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
+      appBar: const PreferredSize(
+        preferredSize: Size.fromHeight(70), // 앱바 높이 조절
+        child: MainAppBar(), // 앱바 적용
+      ),
       body: IndexedStack(
         index: _selectedIndex,
         children: const [
