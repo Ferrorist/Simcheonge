@@ -28,6 +28,7 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
+  flutter_native_splash: ^2.3.13
   flutter:
     sdk: flutter
   http: ^1.2.1
@@ -60,7 +61,9 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
+  assets:
+    - assets/android12splash.gif
+    - assets/splash.png
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 
