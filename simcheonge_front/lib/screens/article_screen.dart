@@ -5,13 +5,13 @@ class ArticleScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(
-        child: Text(
-          'ArticleScreen',
-          style: TextStyle(
-            fontSize: 20.0,
-          ),
+    return SafeArea(
+      child: Scaffold(
+        body: Container(
+          alignment: Alignment.center,
+          width: double.infinity,
+          height: double.infinity,
+          child: const Text('게시글 페이지 입니다.'),
         ),
       ),
     );
