@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:simcheonge_front/widgets/main_app_bar.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -9,11 +8,6 @@ class HomeScreen extends StatelessWidget {
     return SafeArea(
       // 앱바가 이쁘게 자리 잡게 화면 틀을 잡아준다.
       child: Scaffold(
-        appBar: const PreferredSize(
-          // AppBar 클래스는 명시적으로 너비와 높이를 설정할 수 있는 PreferredSize 위젯을 상속 받는다.
-          preferredSize: Size.fromHeight(70), // 앱바 높이 조절
-          child: MainAppBar(), // 앱바 적용
-        ),
         body: Container(
           alignment: Alignment.center,
           width: double.infinity,
