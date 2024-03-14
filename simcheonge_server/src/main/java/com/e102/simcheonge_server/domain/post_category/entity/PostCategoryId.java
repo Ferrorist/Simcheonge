@@ -10,6 +10,6 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PostCategoryId implements Serializable {
+    private String categoryCode;
     private int postId;
-    private byte categoryId;
 }

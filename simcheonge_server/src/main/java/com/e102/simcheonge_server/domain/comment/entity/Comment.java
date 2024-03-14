@@ -1,6 +1,7 @@
 package com.e102.simcheonge_server.domain.comment.entity;
 
 import com.e102.simcheonge_server.common.BaseEntity;
+import com.e102.simcheonge_server.common.TargetType;
 import com.e102.simcheonge_server.domain.policy.entity.Policy;
 import com.e102.simcheonge_server.domain.post.entity.Post;
 import com.e102.simcheonge_server.domain.user.entity.User;
@@ -41,7 +42,8 @@ public class Comment extends BaseEntity {
     @Column(name = "comment_content", length = 1200, nullable = false)
     private String commentContent;
 
-    @Column(name = "comment_type", nullable = false)
+    @Column(name = "comment_type", length = 3, nullable = false)
     @Builder.Default()
-    private byte commentType = 1; //기본 게시글
+    private String commentType = "POS";
+
 }

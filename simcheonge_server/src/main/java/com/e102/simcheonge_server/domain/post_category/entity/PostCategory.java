@@ -17,10 +17,10 @@ import lombok.NoArgsConstructor;
 @IdClass(PostCategoryId.class)
 public class PostCategory {
     @Id
-    @Column(name = "post_id")
-    private int postId;
+    @Column(name = "category_code")
+    private String categoryCode;
 
     @Id
-    @Column(name = "category_id")
-    private byte categoryId;
+    @Column(name = "post_id")
+    private int postId;
 }
