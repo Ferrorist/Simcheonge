@@ -1,5 +1,6 @@
 package com.e102.simcheonge_server.domain.bookmark.entity;
 
+import com.e102.simcheonge_server.common.TargetType;
 import com.e102.simcheonge_server.domain.post.entity.Post;
 import com.e102.simcheonge_server.domain.user.entity.User;
 import com.e102.simcheonge_server.domain.policy.entity.Policy;
@@ -37,8 +38,7 @@ public class Bookmark {
     @NotNull
     private Post post;
 
-    @Column(name = "bookmark_type")
+    @Column(name = "bookmark_type", length = 3, nullable = false)
     @Builder.Default
-    @NotNull
-    private byte bookmarkType = 1; //기본 게시글
+    private String bookmarkType = "POS";
 }

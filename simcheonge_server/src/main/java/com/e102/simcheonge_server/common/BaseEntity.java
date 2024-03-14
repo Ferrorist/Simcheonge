@@ -12,14 +12,14 @@ import java.util.Date;
 @Getter
 @MappedSuperclass
 public class BaseEntity {
-    @Column(name = "created_at", columnDefinition = "DATE", nullable = false)
+    @Column(name = "created_at", columnDefinition = "DATETIME", nullable = false)
     @CreationTimestamp
     private Date createdAt;
 
     @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted = false;
 
-    @Column(name = "deleted_at", columnDefinition = "DATE")
+    @Column(name = "deleted_at", columnDefinition = "DATETIME")
     private Date deletedAt;
 
     public void setDeleted(boolean deleted) {
