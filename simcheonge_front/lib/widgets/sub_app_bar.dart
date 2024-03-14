@@ -3,7 +3,10 @@ import 'package:flutter/material.dart';
 class SubAppBar extends StatelessWidget {
   final String title;
 
-  const SubAppBar({super.key, required this.title});
+  const SubAppBar({
+    super.key,
+    required this.title,
+  });
 
   @override
   Widget build(BuildContext context) {
