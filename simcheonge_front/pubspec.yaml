@@ -74,7 +74,7 @@ flutter:
 
 flutter_icons:
   ios: true
-  image_path : "assets/user_edit_icon.png"
+  image_path: "assets/user_edit_icon.png"
   remove_alpha_ios: true
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
