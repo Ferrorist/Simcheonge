@@ -1,5 +1,6 @@
 package com.e102.simcheonge_server.domain.policy.entity;
 
+import com.e102.simcheonge_server.domain.category.entity.Category;
 import com.e102.simcheonge_server.domain.filter.entity.*;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -28,7 +29,7 @@ public class Policy {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "policy_area")
     @NotNull
-    private PolicyArea area;
+    private Category area;
 
     @Column(name = "policy_name", nullable = false, columnDefinition = "TEXT")
     private String name;
@@ -48,7 +49,7 @@ public class Policy {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "policy_field")
     @NotNull
-    private PolicyField field;
+    private Category field;
 
     @Column(name = "policy_business_period", columnDefinition = "TEXT")
     private String businessPeriod;
@@ -56,7 +57,7 @@ public class Policy {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "policy_period_type_code")
     @NotNull
-    private PolicyPeriodTypeCode periodTypeCode;
+    private Category periodTypeCode;
 
     @Column(name = "policy_start_date", columnDefinition = "DATE")
     private Date startDate;
@@ -73,17 +74,17 @@ public class Policy {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "policy_employment_status")
     @NotNull
-    private PolicyEmploymentStatus employmentStatus;
+    private Category employmentStatus;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "policy_specialized_field")
     @NotNull
-    private PolicySpecializedField specializedField;
+    private Category specializedField;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "policy_education_requirements")
     @NotNull
-    private PolicyEducationRequirements educationRequirements;
+    private Category educationRequirements;
 
     @Column(name = "policy_residence_income", columnDefinition = "TEXT")
     private String residenceIncome;
@@ -103,7 +104,7 @@ public class Policy {
     @Column(name = "policy_evaluation_content", columnDefinition = "TEXT")
     private String evaluationContent;
 
-    @Column(name = "policy_site_address", columnDefinition = "TEXT")
+    @Column(name = "policy_site_address", length = 1000)
     private String siteAddress;
 
     @Column(name = "policy_main_organization", columnDefinition = "TEXT")
@@ -121,7 +122,10 @@ public class Policy {
     @Column(name = "policy_is_processed", nullable = false)
     private boolean isProcessed = false;
 
-    @Column(name = "policy_processed_at", columnDefinition = "DATE")
+    @Column(name = "policy_processed_at", columnDefinition = "DATETIME")
     private Date processedAt;
+
+    @Column(name = "policy_created_at", columnDefinition = "DATETIME")
+    private Date createdAt;
 
 }
