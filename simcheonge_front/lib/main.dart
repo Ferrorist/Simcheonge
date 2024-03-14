@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:simcheonge_front/customIcons/custom_icons.dart';
+import 'package:simcheonge_front/screens/bookmark_screen.dart';
 import 'package:simcheonge_front/widgets/bottom_nav_item.dart';
 import 'package:simcheonge_front/screens/chatbot_screen.dart';
 import 'package:simcheonge_front/screens/article_screen.dart';
@@ -120,6 +121,12 @@ class _MyHomePageState extends State<MyHomePage> {
                           InkWell(
                             onTap: () {
                               print('게시글 클릭됨');
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const BookmarkScreen(),
+                                ),
+                              );
                             },
                             child: Container(
                               padding:
@@ -135,6 +142,12 @@ class _MyHomePageState extends State<MyHomePage> {
                           InkWell(
                             onTap: () {
                               print('게시글 댓글 클릭됨');
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const BookmarkScreen(),
+                                ),
+                              );
                             },
                             child: Container(
                               padding:
@@ -151,14 +164,28 @@ class _MyHomePageState extends State<MyHomePage> {
                           InkWell(
                             onTap: () {
                               print('정책 댓글 클릭됨');
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const BookmarkScreen(),
+                                ),
+                              );
                             },
                             child: Container(
-                              padding:
-                                  const EdgeInsets.symmetric(vertical: 8.0),
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 8.0,
+                              ),
                               child: const Row(
                                 children: <Widget>[
-                                  SizedBox(width: 70.0),
-                                  Text('정책 댓글', style: TextStyle(fontSize: 15)),
+                                  SizedBox(
+                                    width: 70.0,
+                                  ),
+                                  Text(
+                                    '정책 댓글',
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),
@@ -176,6 +203,12 @@ class _MyHomePageState extends State<MyHomePage> {
                           InkWell(
                             onTap: () {
                               print('책갈피 항목 1 클릭됨');
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const BookmarkScreen(),
+                                ),
+                              );
                             },
                             child: Container(
                               padding:
@@ -191,6 +224,12 @@ class _MyHomePageState extends State<MyHomePage> {
                           InkWell(
                             onTap: () {
                               print('책갈피 항목 2 클릭됨');
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const BookmarkScreen(),
+                                ),
+                              );
                             },
                             child: Container(
                               padding:
