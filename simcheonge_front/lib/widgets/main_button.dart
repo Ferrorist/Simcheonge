@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class MainButton extends StatelessWidget {
-  final String name, sub; // 'sub' 파라미터가 이미 존재
+  final String name; // 'sub' 제거
   final IconData icon;
   final bool isInverted;
   final _blackColor = const Color(0xFF1F2123);
@@ -11,7 +11,6 @@ class MainButton extends StatelessWidget {
   const MainButton({
     super.key,
     required this.name,
-    required this.sub,
     required this.icon,
     required this.isInverted,
     this.onPressed,
@@ -27,52 +26,32 @@ class MainButton extends StatelessWidget {
           color: isInverted ? Colors.white : _blackColor,
           borderRadius: BorderRadius.circular(25),
         ),
-        child: Padding(
-          padding:
-              const EdgeInsets.only(top: 10, left: 30, right: 30, bottom: 43),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
+        child: Stack(
+          children: [
+            // 이름 텍스트: 좌측 상단에 위치
+            Positioned(
+              top: 12,
+              left: 20,
+              child: Text(
                 name,
                 style: TextStyle(
                   color: isInverted ? _blackColor : Colors.white,
-                  fontSize: 32,
+                  fontSize: 33, // 텍스트 크기 조정
                   fontWeight: FontWeight.w600,
                 ),
-                overflow: TextOverflow.ellipsis,
               ),
-              const SizedBox(height: 13),
-              Text(
-                sub,
-                style: TextStyle(
-                  color: isInverted ? _blackColor : Colors.white,
-                  fontSize: 17,
-                  fontWeight: FontWeight.w400,
-                ),
+            ),
+            // 아이콘: 우측 하단에 위치, 일부 잘린 상태로 표시
+            Positioned(
+              right: -2, // 아이콘을 우측으로 이동시켜 잘리게 함
+              bottom: -2, // 아이콘을 하단으로 이동시켜 잘리게 함
+              child: Icon(
+                icon,
+                color: isInverted ? _blackColor : Colors.white,
+                size: 90, // 아이콘 크기 조정
               ),
-              // Spacer() 대신 사용할 수 있는 공간 조절 방법을 선택하세요.
-              const SizedBox(
-                height: 13,
-              ),
-              Align(
-                alignment: Alignment.bottomRight,
-                child: Transform.scale(
-                  scale: 2.2, // 아이콘 크기 배율 조정
-                  child: Transform.translate(
-                    offset: const Offset(5, 7), // 아이콘 위치 조정
-                    child: Icon(
-                      icon,
-                      color: isInverted ? _blackColor : Colors.white,
-                      size:
-                          50, // Transform.scale 사용 시 size는 실제 크기에 영향을 덜 미침, scale에 의해 조정됨
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
