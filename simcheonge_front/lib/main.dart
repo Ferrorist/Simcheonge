@@ -6,6 +6,7 @@ import 'package:simcheonge_front/screens/article_screen.dart';
 import 'package:simcheonge_front/screens/home_screen.dart';
 import 'package:simcheonge_front/screens/news_screen.dart';
 import 'package:simcheonge_front/screens/search_screen.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 void main() {
   runApp(const MyApp());
@@ -32,6 +33,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _selectedIndex = 0;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
   // 페이지마다 다른 제목을 반환하는 함수
   String getAppBarTitle() {
     switch (_selectedIndex) {
@@ -48,6 +50,12 @@ class _MyHomePageState extends State<MyHomePage> {
       default:
         return '앱';
     }
+  }
+
+  void changePage(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
   }
 
   @override
@@ -199,7 +207,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       ),
                       ExpansionTile(
                         leading: Icon(
-                          Icons.info_outline_rounded,
+                          FontAwesomeIcons.userPen,
                           color: Colors.grey[850],
                         ),
                         title: const Text('내 정보 관리',
@@ -261,12 +269,12 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: IndexedStack(
         index: _selectedIndex,
-        children: const [
-          HomeScreen(),
-          SearchScreen(),
-          ChatbotScreen(),
-          NewsScreen(),
-          ArticleScreen(),
+        children: [
+          HomeScreen(changePage: changePage), // 수정된 부분
+          const SearchScreen(),
+          const ChatbotScreen(),
+          const NewsScreen(),
+          const ArticleScreen(),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
