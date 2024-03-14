@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:simcheonge_front/screens/article_screen.dart';
+import 'package:simcheonge_front/screens/board_screen.dart';
 import 'package:simcheonge_front/screens/chatbot_screen.dart';
 import 'package:simcheonge_front/screens/news_screen.dart';
 import 'package:simcheonge_front/screens/search_screen.dart';
