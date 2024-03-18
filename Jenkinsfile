@@ -22,6 +22,21 @@ pipeline {
             }
         }
 
+         stage('Spring Env Prepare') {
+                when {
+                    expression { env.BUILD_BE == "true" }
+                }
+                steps {
+                    script{
+                    // Secret File Credential을 사용하여 설정 파일을 임시 경로로 복사
+                    withCredentials([file(credentialsId: 'Spring_Env', variable: 'CONFIG_FILE')]) {
+                        // 설정 파일을 현재 작업 디렉토리로 복사
+                        sh 'cp $CONFIG_FILE ./src/main/resources/application-env.properties'
+                    }
+                }
+            }
+        }
+
         stage('Build Spring Code') {
             when {
                 expression { env.BUILD_BE == "true" }
