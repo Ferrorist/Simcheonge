@@ -1,0 +1,13 @@
+package com.e102.simcheonge_server;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class SimcheongeServerApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(SimcheongeServerApplication.class, args);
+	}
+
+}
