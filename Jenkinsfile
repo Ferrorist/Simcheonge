@@ -31,15 +31,10 @@ pipeline {
                     withCredentials([file(credentialsId: 'Spring_Env', variable: 'properties')]) {
                     script{
                         sh 'pwd'
-                        sh 'ls'
-                        sh 'cd simcheonge_server/'
-                        sh 'ls'
-                        sh 'cd src/'
-                        sh 'ls'
-                        sh 'cd main/'
-                        sh 'ls'
-                        sh 'cd resources/'
-                        sh 'ls'
+                        sh 'ls simcheonge_server/src/'
+                        sh 'ls simcheonge_server/src/main/'
+                        sh 'ls simcheonge_server/src/main/resources/'
+
                         // 설정 파일을 현재 작업 디렉토리로 복사
                         sh 'cp $properties simcheonge_server/src/main/resources/application-env.properties'
                     }
