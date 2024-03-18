@@ -108,7 +108,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   MainButton(
                     name: '뉴스',
                     icon: FontAwesomeIcons.newspaper,
-                    isInverted: false,
+                    isInverted: true,
                     onPressed: () {
                       widget.changePage(3);
                     },
@@ -116,7 +116,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   MainButton(
                     name: '게시판',
                     icon: FontAwesomeIcons.chalkboard,
-                    isInverted: true,
+                    isInverted: false,
                     onPressed: () {
                       widget.changePage(4);
                     },

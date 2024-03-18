@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:simcheonge_front/widgets/custom_dropdown.dart'; // CustDropDown 정의된 경로에 맞게 수정
 import 'package:shared_preferences/shared_preferences.dart';
 
 class FilterScreen extends StatefulWidget {
@@ -17,7 +18,6 @@ class _FilterScreenState extends State<FilterScreen> {
   DateTime? startDate;
   DateTime? endDate;
 
-  // 옵션 목록
   List<String> regionOptions = [
     '중앙부처',
     '서울',
@@ -46,43 +46,34 @@ class _FilterScreenState extends State<FilterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('필터'),
-      ),
+      appBar: AppBar(title: const Text('필터')),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const SizedBox(height: 20), // 여기에 마진 추가
             buildDropdownTile('지역', regionOptions, selectedRegion,
                 (String? value) {
               setState(() => selectedRegion = value);
-            }, 7),
-            const SizedBox(height: 10), // 여기에 마진 추가
+            }, maxHeight: 200),
             buildDropdownTile('학력', educationOptions, selectedEducation,
                 (String? value) {
               setState(() => selectedEducation = value);
             }),
-            const SizedBox(height: 10), // 여기에 마진 추가
             buildDropdownTile(
                 '취업 상태', employmentStatusOptions, selectedEmploymentStatus,
                 (String? value) {
               setState(() => selectedEmploymentStatus = value);
             }),
-            const SizedBox(height: 10), // 여기에 마진 추가
             buildDropdownTile(
                 '특화 분야', specializationOptions, selectedSpecialization,
                 (String? value) {
               setState(() => selectedSpecialization = value);
             }),
-            const SizedBox(height: 10), // 여기에 마진 추가
             buildDropdownTile('관심 분야', interestOptions, selectedInterest,
                 (String? value) {
               setState(() => selectedInterest = value);
             }),
-            const SizedBox(height: 10), // 여기에 마진 추가
             buildDateSelectionTile(),
-            const SizedBox(height: 40),
           ],
         ),
       ),
@@ -90,18 +81,18 @@ class _FilterScreenState extends State<FilterScreen> {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
           child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
                 child: ElevatedButton.icon(
                   icon: const Icon(Icons.replay_outlined),
                   label: const Text('초기화'),
-                  onPressed: () => resetFilters(),
+                  onPressed: resetFilters,
                 ),
               ),
-              const SizedBox(width: 16.0),
               Expanded(
                 child: ElevatedButton(
-                  onPressed: () => saveFilters(),
+                  onPressed: saveFilters,
                   child: const Text('저장'),
                 ),
               ),
@@ -112,53 +103,35 @@ class _FilterScreenState extends State<FilterScreen> {
     );
   }
 
-  ListTile buildDropdownTile(String title, List<String> options,
+  Widget buildDropdownTile(String title, List<String> options,
       String? selectedValue, ValueChanged<String?> onChanged,
-      [int? maxShow]) {
+      {double? maxHeight}) {
     return ListTile(
-      title: Text(
-        title,
-        style: const TextStyle(
-          fontWeight: FontWeight.bold,
-          fontSize: 19,
-        ),
-      ),
+      title: Text(title,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 19)),
       subtitle: Container(
         margin: const EdgeInsets.only(top: 5),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(15),
-          border: Border.all(color: Colors.grey.shade300),
-        ),
-        child: DropdownButtonHideUnderline(
-          child: DropdownButton<String>(
-            isExpanded: true,
-            value: selectedValue,
-            hint: const Text('선택하세요'),
-            icon: const Icon(Icons.arrow_drop_down, color: Colors.black54),
-            items: options.map((String value) {
-              return DropdownMenuItem<String>(
-                value: value,
-                child: Text(value),
-              );
-            }).toList(),
-            onChanged: onChanged,
-            menuMaxHeight: maxShow != null ? 200.0 : null,
-          ),
+        child: CustDropDown<String>(
+          items: options
+              .map((String value) => CustDropdownMenuItem<String>(
+                  value: value, child: Text(value)))
+              .toList(),
+          onChanged: onChanged,
+          hintText: '선택하세요',
+          defaultSelectedIndex: options.indexOf(selectedValue ?? ''),
+          enabled: true,
+          borderRadius: 12,
+          maxListHeight: maxHeight ?? 150,
+          borderWidth: 1,
         ),
       ),
     );
   }
 
-  ListTile buildDateSelectionTile() {
+  Widget buildDateSelectionTile() {
     return ListTile(
-      title: const Text(
-        '기간 선택',
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
-          fontSize: 16,
-        ),
-      ),
+      title: const Text('기간 선택',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
       subtitle: Row(
         children: [
           Expanded(
