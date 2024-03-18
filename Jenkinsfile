@@ -30,7 +30,7 @@ pipeline {
                     script{
                     
                     sh 'ls -la'
-                    sh 'ls -la ./simc`heonge_server/'
+                    sh 'ls -la ./simcheonge_server/'
                     sh 'ls -la ./simcheonge_server/src/'
                     sh 'ls -la ./simcheonge_server/src/main/'
 
