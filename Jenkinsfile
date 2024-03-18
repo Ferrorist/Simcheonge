@@ -28,12 +28,20 @@ pipeline {
                 }
                 steps {
                     // Secret File Credential을 사용하여 설정 파일을 임시 경로로 복사
-                    withCredentials([file(credentialsId: 'Spring_Env', variable: 'CONFIG_FILE')]) {
+                    withCredentials([file(credentialsId: 'Spring_Env', variable: 'properties')]) {
                     script{
                         sh 'pwd'
                         sh 'ls'
+                        sh 'cd simcheonge_server/'
+                        sh 'ls'
+                        sh 'cd src/'
+                        sh 'ls'
+                        sh 'cd main/'
+                        sh 'ls'
+                        sh 'cd resources/'
+                        sh 'ls'
                         // 설정 파일을 현재 작업 디렉토리로 복사
-                        sh 'cp $CONFIG_FILE ./simcheonge_server/src/main/resources/application-env.properties'
+                        sh 'cp $properties simcheonge_server/src/main/resources/application-env.properties'
                     }
                 }   
             }
