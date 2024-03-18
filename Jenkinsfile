@@ -28,18 +28,12 @@ pipeline {
                 }
                 steps {
                     script{
-                    
-                    sh 'ls -la'
-                    sh 'ls -la ./simcheonge_server/'
-                    sh 'ls -la ./simcheonge_server/src/'
-                    sh 'ls -la ./simcheonge_server/src/main/'
-                    sh 'ls -la ./simcheonge_server/src/main/resources/'
 
                     // Secret File Credential을 사용하여 설정 파일을 임시 경로로 복사
                     withCredentials([file(credentialsId: 'Spring_Env', variable: 'CONFIG_FILE')]) {
                         // 설정 파일을 현재 작업 디렉토리로 복사
-                        sh 'ls -la'
-                        sh "cp $CONFIG_FILE ./simcheonge_server/src/main/resources/application-env.properties"
+                        sh 'ls -la ./simcheonge_server/src/main/resources/'
+                        sh 'cp $CONFIG_FILE ./simcheonge_server/src/main/resources/application-env.properties'
                     }
                 }
             }
