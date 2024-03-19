@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:simcheonge_front/widgets/side_app_bar.dart';
 
 class BookmarkPostScreen extends StatefulWidget {
   const BookmarkPostScreen({super.key});
@@ -8,6 +9,9 @@ class BookmarkPostScreen extends StatefulWidget {
 }
 
 class _BookmarkPostScreenState extends State<BookmarkPostScreen> {
+  final GlobalKey<ScaffoldState> _scaffoldKey =
+      GlobalKey<ScaffoldState>(); // Scaffold key 추가
+
   List<String> bookmarkedItems =
       List<String>.generate(20, (i) => 'Item ${i + 1}'); // 더미 데이터 20개 생성
   String searchQuery = ''; // 검색 쿼리를 저장하는 문자열
@@ -15,6 +19,8 @@ class _BookmarkPostScreenState extends State<BookmarkPostScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey, // Scaffold에 key 할당
+
       appBar: AppBar(
         title: const Text('정책 검색'),
         actions: [
@@ -27,8 +33,14 @@ class _BookmarkPostScreenState extends State<BookmarkPostScreen> {
               );
             },
           ),
+          IconButton(
+            icon: const Icon(Icons.person),
+            onPressed: () =>
+                _scaffoldKey.currentState?.openEndDrawer(), // 오른쪽 드로어를 여는 기능 추가
+          ),
         ],
       ),
+      endDrawer: const SideAppBar(),
       body: ListView.builder(
         itemCount: bookmarkedItems.length,
         itemBuilder: (context, index) {
