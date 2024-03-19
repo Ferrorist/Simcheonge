@@ -12,14 +12,14 @@ pipeline {
         stage('Check Changes') {
             steps {
                 script {
+
                 // 마지막 성공한 빌드 이후 변경된 파일 목록을 가져옴
                 def changedFiles = sh(script: "git diff --name-only HEAD \$(git rev-parse HEAD~1)", returnStdout: true).trim()
                 // 변경된 파일이 백엔드 디렉토리 내에 있는지 확인
-                env.BUILD_BE = "true"
-
-                // env.BUILD_FE = changedFiles.contains("simcheonge_front/") ? "true" : "false"
+                env.BUILD_FE = changedFiles.contains("simcheonge_front/") ? "true" : "false"
                 // 변경된 파일이 프론트엔드 디렉토리 내에 있는지 확인
-                // env.BUILD_BE = changedFiles.contains("simcheonge_server/") ? "true" : "false"
+                env.BUILD_BE = changedFiles.contains("simcheonge_server/") ? "true" : "false"
+
                 }
             }
         }
@@ -86,6 +86,37 @@ pipeline {
                     sh 'docker stop spring || true'
                     sh 'docker rm spring || true'
                     sh "docker run -d -p 8888:8888 --name spring ${IMAGE_NAME}:${IMAGE_TAG}"
+                }
+            }
+        }
+
+        stage('Build APK for Andrioid  ') {
+            when {
+                expression { env.BUILD_FE == "true" }
+            }
+            steps {
+
+                script {
+                    dir('simcheonge_front') {
+                        
+                    // Flutter 종속성 가져오기
+                    sh 'flutter pub get'
+                    
+                    // APK 빌드
+                    sh 'flutter build apk'
+                	}
+                }
+            }
+        }
+        stage('Upload APK to EC2 ') {
+             when {
+                expression { env.BUILD_FE == "true" }
+            }
+            
+            steps {
+                script {
+                // 빌드된 APK 파일을 EC2 인스턴스의 특정 디렉토리로 복사
+                sh 'cp simcheonge_front/build/app/outputs/flutter-apk/app-release.apk /flutter/deploy_apk/'
                 }
             }
         }
