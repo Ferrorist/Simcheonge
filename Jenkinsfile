@@ -32,11 +32,7 @@ pipeline {
                     // Secret File Credential을 사용하여 설정 파일을 임시 경로로 복사
                     withCredentials([file(credentialsId: 'Spring_Env', variable: 'properties')]) {
                     script{
-                        sh 'pwd'
-                        sh 'ls simcheonge_server/src/'
-                        sh 'ls simcheonge_server/src/main/'
-                        sh 'ls simcheonge_server/src/main/resources/'
-                        sh 'cd simcheonge_server/src/main/resources/'
+                        sh 'echo $properties'
 
                         // 설정 파일을 현재 작업 디렉토리로 복사
                         sh 'cp $properties simcheonge_server/src/main/resources/application-env.properties'
