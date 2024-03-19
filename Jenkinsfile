@@ -105,7 +105,8 @@ pipeline {
                     dir('simcheonge_front') {
                         
                     // flutter의 경우 flutter 명령어의 환경변수 설정을 별도로 해줘야됨
-                    sh 'export PATH=$PATH:/home/ubuntu/flutter/bin/'    
+                    sh 'export PATH=$PATH:/home/ubuntu/flutter/bin'
+                    sh 'source /home/ubuntu/.bashrc'
 
                     // Flutter 종속성 가져오기
                     sh 'flutter pub get'
