@@ -67,7 +67,7 @@ pipeline {
             steps {
                 // Docker 이미지 빌드
                 script {
-                    dir('simcheonge_server') {
+                    dir('simcheonge_server') { 
                     sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
                     }
                 }
