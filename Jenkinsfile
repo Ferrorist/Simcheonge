@@ -113,7 +113,6 @@ pipeline {
 
                     // Flutter 종속성 가져오기
                     sh '/home/ubuntu/snap/flutter/common/flutter/bin/flutter pub get'
-                    
                     // APK 빌드
                     sh '/home/ubuntu/snap/flutter/common/flutter/bin/flutter build apk'
                 	}
