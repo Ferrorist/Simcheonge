@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:simcheonge_front/customIcons/custom_icons.dart';
+import 'package:simcheonge_front/screens/bookmark_policy_screen.dart';
 import 'package:simcheonge_front/screens/bookmark_post_screen.dart';
+import 'package:simcheonge_front/screens/my_policy_comment_screen.dart';
+import 'package:simcheonge_front/screens/my_post_comment_screen.dart';
+import 'package:simcheonge_front/screens/my_post_screen.dart';
 import 'package:simcheonge_front/widgets/bottom_nav_item.dart';
 import 'package:simcheonge_front/screens/chatbot_screen.dart';
 import 'package:simcheonge_front/screens/board_screen.dart';
@@ -50,6 +53,16 @@ class _MyHomePageState extends State<MyHomePage> {
         return '뉴스';
       case 4:
         return '정보게시판';
+      case 5:
+        return '게시글';
+      case 6:
+        return '게시글 댓글';
+      case 7:
+        return '정책 댓글';
+      case 8:
+        return '정책';
+      case 9:
+        return '게시글';
       default:
         return '앱';
     }
@@ -61,7 +74,6 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  @override
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -112,6 +124,11 @@ class _MyHomePageState extends State<MyHomePage> {
             const ChatbotScreen(),
             const NewsScreen(),
             const BoardScreen(),
+            const MyPostScreen(),
+            const MyPostCommentScreen(),
+            const MyPolicyCommentScreen(),
+            const BookmarkPolicyScreen(),
+            const BookmarkPostScreen(),
           ],
         ),
         bottomNavigationBar: BottomNavigationBar(
