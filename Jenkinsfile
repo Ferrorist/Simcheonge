@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         // Docker 이미지 이름과 태그 설정
-        IMAGE_NAME = 'Simchengonge_spring'
+        IMAGE_NAME = 'simchengonge_spring'
         IMAGE_TAG = 'latest'
     }
 
