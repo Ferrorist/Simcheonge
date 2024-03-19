@@ -103,16 +103,19 @@ pipeline {
 
                 script {
                     dir('simcheonge_front') {
-                        
-                    // // flutter의 경우 flutter 명령어의 환경변수 설정을 별도로 해줘야됨
-                    // sh 'export PATH=$PATH:/home/ubuntu/flutter/bin'
-                    // sh 'source /home/ubuntu/.bashrc'
+
+                
+                    /*
+                    jenkins 컨테이너 내부에서 flutter 명령어를 사용하지 못함.
+                    jenkins 컨테이너 실행할 때 flutter 관련 볼륨마운트 했던
+                    /home/ubuntu/snap/flutter/common/flutter/bin/flutter 파일을 명시적으로 작성해서 flutter 명령어 사용 
+                    */
 
                     // Flutter 종속성 가져오기
-                    sh '/home/ubuntu/flutter/bin/flutter pub get'
+                    sh '/home/ubuntu/snap/flutter/common/flutter/bin/flutter pub get'
                     
                     // APK 빌드
-                    sh '/home/ubuntu/flutter/bin/flutter build apk'
+                    sh '/home/ubuntu/snap/flutter/common/flutter/bin/flutter build apk'
                 	}
                 }
             }
