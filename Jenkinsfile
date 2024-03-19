@@ -15,9 +15,11 @@ pipeline {
                 // 마지막 성공한 빌드 이후 변경된 파일 목록을 가져옴
                 def changedFiles = sh(script: "git diff --name-only HEAD \$(git rev-parse HEAD~1)", returnStdout: true).trim()
                 // 변경된 파일이 백엔드 디렉토리 내에 있는지 확인
-                env.BUILD_FE = changedFiles.contains("simcheonge_front/") ? "true" : "false"
+                env.BUILD_BE = "true"
+
+                // env.BUILD_FE = changedFiles.contains("simcheonge_front/") ? "true" : "false"
                 // 변경된 파일이 프론트엔드 디렉토리 내에 있는지 확인
-                env.BUILD_BE = changedFiles.contains("simcheonge_server/") ? "true" : "false"
+                // env.BUILD_BE = changedFiles.contains("simcheonge_server/") ? "true" : "false"
                 }
             }
         }
@@ -34,6 +36,7 @@ pipeline {
                         sh 'ls simcheonge_server/src/'
                         sh 'ls simcheonge_server/src/main/'
                         sh 'ls simcheonge_server/src/main/resources/'
+                        sh 'cd simcheonge_server/src/main/resources/'
 
                         // 설정 파일을 현재 작업 디렉토리로 복사
                         sh 'cp $properties simcheonge_server/src/main/resources/application-env.properties'
