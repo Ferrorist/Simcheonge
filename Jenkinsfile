@@ -32,11 +32,6 @@ pipeline {
                     // Secret File Credential을 사용하여 설정 파일을 임시 경로로 복사
                     withCredentials([file(credentialsId: 'Spring_Env', variable: 'properties')]) {
                     script{
-                        sh 'if [ -f "${properties}" ]; then echo "File exists"; else echo "File does not exist"; fi'
-                        sh 'head -n 1 "${properties}"' // 첫 번째 줄만 출력
-
-                        // 설정 파일을 현재 작업 디렉토리로 복사
-                        sh 'cp "${properties}" simcheonge_server/application-env.properties'
                         sh 'cp "${properties}" simcheonge_server/src/main/resources/application-env.properties'
                     }
                 }   
