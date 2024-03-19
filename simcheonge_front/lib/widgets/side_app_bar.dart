@@ -58,6 +58,8 @@ class SideAppBar extends StatelessWidget {
                         InkWell(
                           onTap: () {
                             print('게시글 클릭됨');
+                            Navigator.pop(context);
+
                             Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -78,6 +80,7 @@ class SideAppBar extends StatelessWidget {
                         InkWell(
                           onTap: () {
                             print('게시글 댓글 클릭됨');
+                            Navigator.pop(context);
                             Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -99,6 +102,7 @@ class SideAppBar extends StatelessWidget {
                         InkWell(
                           onTap: () {
                             print('정책 댓글 클릭됨');
+                            Navigator.pop(context);
                             Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -138,6 +142,7 @@ class SideAppBar extends StatelessWidget {
                         InkWell(
                           onTap: () {
                             print('책갈피 항목 1 클릭됨');
+                            Navigator.pop(context);
                             Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -159,6 +164,7 @@ class SideAppBar extends StatelessWidget {
                         InkWell(
                           onTap: () {
                             print('책갈피 항목 2 클릭됨');
+                            Navigator.pop(context);
                             Navigator.push(
                               context,
                               MaterialPageRoute(
