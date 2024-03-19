@@ -20,9 +20,9 @@ FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 
 # 1단계에서 생성된 JAR 파일 복사
-COPY --from=build /app/build/libs/*.jar /app/
+COPY --from=build /app/build/libs/*.jar /app/app.jar
 
 EXPOSE 8888
 
 # 애플리케이션 실행
-ENTRYPOINT ["java","-jar","app/app.jar"]
+ENTRYPOINT ["java","-jar","/app/app.jar"]
