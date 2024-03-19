@@ -21,7 +21,7 @@ FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 
 # 1단계에서 생성된 JAR 파일 복사
-COPY --from=build /app/build/libs/*.jar /app/app.jar
+COPY --from=build /app/build/libs/*-SNAPSHOT.jar /app/app.jar
 
 EXPOSE 8888
 
