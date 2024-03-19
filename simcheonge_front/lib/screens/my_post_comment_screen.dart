@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
 
-class MyPage extends StatefulWidget {
-  const MyPage({super.key});
+class MyPostCommentScreen extends StatefulWidget {
+  const MyPostCommentScreen({super.key});
 
   @override
-  _MyPageState createState() => _MyPageState();
+  _MyPostCommentScreenState createState() => _MyPostCommentScreenState();
 }
 
-class _MyPageState extends State<MyPage> {
-  List<String> bookmarkedItems = []; // 북마크한 항목을 저장하는 리스트
+class _MyPostCommentScreenState extends State<MyPostCommentScreen> {
+  List<String> bookmarkedItems =
+      List<String>.generate(20, (i) => 'Item ${i + 1}'); // 더미 데이터 20개 생성
   String searchQuery = ''; // 검색 쿼리를 저장하는 문자열
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Page'),
+        title: const Text('내가 쓴 게시글 댓글'),
         actions: [
           IconButton(
             icon: const Icon(Icons.search),
@@ -59,6 +60,7 @@ class DataSearch extends SearchDelegate<String> {
       IconButton(
         icon: const Icon(Icons.clear),
         onPressed: () {
+          print('끔');
           query = '';
         },
       ),
@@ -73,6 +75,8 @@ class DataSearch extends SearchDelegate<String> {
         progress: transitionAnimation,
       ),
       onPressed: () {
+        print('끔');
+
         close(context, '');
       },
     );
