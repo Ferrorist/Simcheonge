@@ -15,10 +15,15 @@ pipeline {
 
                 // 마지막 성공한 빌드 이후 변경된 파일 목록을 가져옴
                 def changedFiles = sh(script: "git diff --name-only HEAD \$(git rev-parse HEAD~1)", returnStdout: true).trim()
-                // 변경된 파일이 백엔드 디렉토리 내에 있는지 확인
-                env.BUILD_FE = changedFiles.contains("simcheonge_front/") ? "true" : "false"
-                // 변경된 파일이 프론트엔드 디렉토리 내에 있는지 확인
-                env.BUILD_BE = changedFiles.contains("simcheonge_server/") ? "true" : "false"
+
+
+                env.BUILD_FE = "true"
+                env.BUILD_BE = "false"
+
+                // // 변경된 파일이 백엔드 디렉토리 내에 있는지 확인
+                // env.BUILD_FE = changedFiles.contains("simcheonge_front/") ? "true" : "false"
+                // // 변경된 파일이 프론트엔드 디렉토리 내에 있는지 확인
+                // env.BUILD_BE = changedFiles.contains("simcheonge_server/") ? "true" : "false"
 
                 }
             }
@@ -116,7 +121,7 @@ pipeline {
             steps {
                 script {
                 // 빌드된 APK 파일을 EC2 인스턴스의 특정 디렉토리로 복사
-                sh 'cp simcheonge_front/build/app/outputs/flutter-apk/app-release.apk /flutter/deploy_apk/'
+                sh 'cp simcheonge_front/build/app/outputs/flutter-apk/app-release.apk /home/ubuntu/flutter/deploy_apk/'
                 }
             }
         }
