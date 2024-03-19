@@ -85,7 +85,7 @@ pipeline {
                     // 실행중인 spring 컨테이너가 있으면 종료하고 삭제
                     sh 'docker stop spring || true'
                     sh 'docker rm spring || true'
-                    sh "docker run -d --name spring ${IMAGE_NAME}:${IMAGE_TAG}"
+                    sh "docker run -d -p 8888:8888 --name spring ${IMAGE_NAME}:${IMAGE_TAG}"
                 }
             }
         }
