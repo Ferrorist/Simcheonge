@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:simcheonge_front/screens/bookmark_screen.dart';
+import 'package:simcheonge_front/screens/bookmark_policy_screen.dart';
+import 'package:simcheonge_front/screens/bookmark_post_screen.dart';
+import 'package:simcheonge_front/screens/my_policy_comment_screen.dart';
+import 'package:simcheonge_front/screens/my_post_comment_screen.dart';
+import 'package:simcheonge_front/screens/my_post_screen.dart';
 
 class SideAppBar extends StatelessWidget {
   const SideAppBar({
@@ -57,7 +61,7 @@ class SideAppBar extends StatelessWidget {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => const BookmarkScreen(),
+                                builder: (context) => const MyPostScreen(),
                               ),
                             );
                           },
@@ -77,7 +81,8 @@ class SideAppBar extends StatelessWidget {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => const BookmarkScreen(),
+                                builder: (context) =>
+                                    const MyPostCommentScreen(),
                               ),
                             );
                           },
@@ -97,7 +102,8 @@ class SideAppBar extends StatelessWidget {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => const BookmarkScreen(),
+                                builder: (context) =>
+                                    const MyPolicyCommentScreen(),
                               ),
                             );
                           },
@@ -135,7 +141,8 @@ class SideAppBar extends StatelessWidget {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => const BookmarkScreen(),
+                                builder: (context) =>
+                                    const BookmarkPolicyScreen(),
                               ),
                             );
                           },
@@ -155,7 +162,8 @@ class SideAppBar extends StatelessWidget {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => const BookmarkScreen(),
+                                builder: (context) =>
+                                    const BookmarkPostScreen(),
                               ),
                             );
                           },
