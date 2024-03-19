@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
-class BookmarkScreen extends StatefulWidget {
-  const BookmarkScreen({super.key});
+class BookmarkPostScreen extends StatefulWidget {
+  const BookmarkPostScreen({super.key});
 
   @override
-  _BookmarkScreenState createState() => _BookmarkScreenState();
+  _BookmarkPostScreenState createState() => _BookmarkPostScreenState();
 }
 
-class _BookmarkScreenState extends State<BookmarkScreen> {
+class _BookmarkPostScreenState extends State<BookmarkPostScreen> {
   List<String> bookmarkedItems =
       List<String>.generate(20, (i) => 'Item ${i + 1}'); // 더미 데이터 20개 생성
   String searchQuery = ''; // 검색 쿼리를 저장하는 문자열

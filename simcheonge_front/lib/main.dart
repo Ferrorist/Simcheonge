@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:simcheonge_front/customIcons/custom_icons.dart';
-import 'package:simcheonge_front/screens/bookmark_screen.dart';
+import 'package:simcheonge_front/screens/bookmark_post_screen.dart';
 import 'package:simcheonge_front/widgets/bottom_nav_item.dart';
 import 'package:simcheonge_front/screens/chatbot_screen.dart';
 import 'package:simcheonge_front/screens/board_screen.dart';
