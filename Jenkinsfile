@@ -81,15 +81,13 @@ pipeline {
             steps {
                 // Docker 컨테이너 실행
                 script {
-                    sh "docker run -d --name my-spring-app ${IMAGE_NAME}:${IMAGE_TAG}"
+
+                    // 실행중인 spring 컨테이너가 있으면 종료하고 삭제
+                    sh 'docker stop spring || true'
+                    sh 'docker rm spring || true'
+                    sh "docker run -d --name spring ${IMAGE_NAME}:${IMAGE_TAG}"
                 }
             }
-        }
-    }
-
-    post {
-        always {
-            echo 'Build process completed.'
         }
     }
 }
