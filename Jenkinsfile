@@ -110,7 +110,9 @@ pipeline {
                     jenkins 컨테이너 실행할 때 flutter 관련 볼륨마운트 했던
                     /home/ubuntu/snap/flutter/common/flutter/bin/flutter 파일을 명시적으로 작성해서 flutter 명령어 사용 
                     */
-
+                    
+                    //flutter 파일에 실행권한 부여(flutter 명령어 사용 시 권한 문제 때문)
+                    sh 'chmod +x /home/ubuntu/snap/flutter/common/flutter'
                     // Flutter 종속성 가져오기
                     sh '/home/ubuntu/snap/flutter/common/flutter pub get'
                     // APK 빌드
