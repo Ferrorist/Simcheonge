@@ -24,15 +24,21 @@ pipeline {
             }
         }
 
+
+        // Spring 소스 코드 빌드에 사용될 env 파일을 Crenditals에서 소스코드의 디렉토리로 복사하는 단계
         stage('Spring Env Prepare') {
                 when {
                     expression { env.BUILD_BE == "true" }
                 }
                 steps {
-                    // Secret File Credential을 사용하여 설정 파일을 임시 경로로 복사
+  
                     withCredentials([file(credentialsId: 'Spring_Env', variable: 'properties')]) {
                     script{
-                        sh 'sudo cp "${properties}" simcheonge_server/src/main/resources/application-env.properties'
+                        // Jenkins가 EC2 내에서 특정 디렉토리를 수정할 수 있도록 권한 변경
+                        sh 'chmod +rw simcheonge_server/src/main/resources/'
+
+                        // Secret File Credential을 사용하여 설정 파일을 Spring 프로젝트의 resources 디렉토리로 복사
+                        sh 'cp "${properties}" simcheonge_server/src/main/resources/application-env.properties'
                     }
                 }   
             }
