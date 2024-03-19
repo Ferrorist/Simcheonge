@@ -15,8 +15,11 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   void _handleUserInput(String text) {
     setState(() {
       _messages.insert(0, {'text': text, 'sender': 'user'});
-      _messages.insert(
-          0, {'text': '안녕하세요, 당신을 도와줄 챗봇입니다. 무엇을 도와드릴까요?', 'sender': 'bot'});
+      _messages.insert(0, {
+        'text':
+            '안녕하세요, 당신을 도와줄 챗봇입니다. 무엇을 도와드릴까요?안녕하세요, 당신을 도와줄 챗봇입니다. 무엇을 도와드릴까요?안녕하세요, 당신을 도와줄 챗봇입니다. 무엇을 도와드릴까요?안녕하세요, 당신을 도와줄 챗봇입니다. 무엇을 도와드릴까요?안녕하세요, 당신을 도와줄 챗봇입니다. 무엇을 도와드릴까요?안녕하세요, 당신을 도와줄 챗봇입니다. 무엇을 도와드릴까요?',
+        'sender': 'bot'
+      });
     });
     _controller.clear();
   }
