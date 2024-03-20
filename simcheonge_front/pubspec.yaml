@@ -44,8 +44,10 @@ dependencies:
   carousel_slider: ^4.2.1
   smooth_page_indicator: ^1.1.0
   dropdown_button2: ^2.3.9
-  intl: ^0.19.0
+  intl: ^0.18.0
   syncfusion_flutter_datepicker: ^25.1.35
+  f_datetimerangepicker: ^0.2.0
+  flutter_localization: ^0.2.0
 
 dev_dependencies:
   flutter_test:

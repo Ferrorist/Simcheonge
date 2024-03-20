@@ -12,6 +12,7 @@ import 'package:simcheonge_front/screens/news_screen.dart';
 import 'package:simcheonge_front/screens/search_screen.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:simcheonge_front/widgets/side_app_bar.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() {
   runApp(const MyApp());
@@ -24,6 +25,15 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       home: MyHomePage(),
+      locale: Locale('ko', 'KR'), // 앱의 로케일을 한국어로 설정
+      supportedLocales: [
+        Locale('ko', 'KR'), // 지원하는 로케일 목록에 한국어 추가
+      ],
+      localizationsDelegates: [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
     );
   }
 }

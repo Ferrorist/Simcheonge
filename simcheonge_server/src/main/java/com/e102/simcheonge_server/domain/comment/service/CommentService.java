@@ -2,7 +2,7 @@ package com.e102.simcheonge_server.domain.comment.service;
 
 import com.e102.simcheonge_server.domain.comment.repository.CommentRepository;
 import com.e102.simcheonge_server.domain.post.repository.PostRepository;
-import com.e102.simcheonge_server.domain.user.repository.UserRepostory;
+import com.e102.simcheonge_server.domain.user.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 public class CommentService {
 
     private final CommentRepository commentRepository;
-    private final UserRepostory userRepostory;
+    private final UserRepository userRepostory;
     private final PostRepository postRepository;
 
 //    public void addComment(CommentRequest commentRequest, final int userId){
