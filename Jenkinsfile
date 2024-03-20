@@ -5,6 +5,9 @@ pipeline {
         // Docker 이미지 이름과 태그 설정
         IMAGE_NAME = 'simchengonge_spring'
         IMAGE_TAG = 'latest'
+
+        //ANDROID_HOME 환경변수 설정(flutter 빌드 시 필요)
+        ANDROID_HOME = '/home/ubuntu/android-studio/'
     }
 
 
