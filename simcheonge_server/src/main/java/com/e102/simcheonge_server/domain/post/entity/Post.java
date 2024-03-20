@@ -21,13 +21,11 @@ import java.util.Date;
 public class Post extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "post_id")
+    @Column(name = "post_id", nullable = false)
     private int postId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    @NotNull
-    private User userId;
+    @Column(name = "user_id", nullable = false)
+    private int userId;
 
     @Column(name = "post_name", length = 400, nullable = false)
     private String postName;
