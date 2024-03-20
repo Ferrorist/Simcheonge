@@ -27,6 +27,14 @@ public class User extends BaseEntity {
     @Column(name = "user_password", length = 64, nullable = false)
     private String userPassword;
 
-    @Column(name = "user_nickname", length = 16, nullable = false)
+    @Column(name = "user_nickname", length = 33, nullable = false)
     private String userNickname;
+
+    public void updateNickname(String userNickname){
+        this.userNickname=userNickname;
+    }
+
+    public void updatePassword(String userPassword){
+        this.userPassword=userPassword;
+    }
 }
