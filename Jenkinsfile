@@ -131,7 +131,8 @@ pipeline {
                 script {
                 dir('simcheonge_front') {
                     // 버전 정보 추출
-                    def version = sh(script: "grep version pubspec.yaml | awk '{print \$2}'", returnStdout: true).trim()
+                    // pubspec.yaml 파일에 version 이라는 단어가 많아서 8번째에 해당하는게 버전이라 그 부분만 추출하는 코드
+                    def version = sh(script: "grep version pubspec.yaml | head -n 8 | tail -n 1 | awk '{print \$2}'", returnStdout: true).trim()
                     echo "${version}"
                     // 클라이언트 다운로드 용 APK 파일 복사
                     sh "cp build/app/outputs/flutter-apk/app-release.apk /home/ubuntu/apk_files/deploy/simchengonge.apk"
