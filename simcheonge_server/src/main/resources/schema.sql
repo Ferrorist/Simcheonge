@@ -14,7 +14,7 @@ CREATE TABLE `user`
     `user_id`       INT         NOT NULL AUTO_INCREMENT PRIMARY KEY,
     `user_login_id` VARCHAR(16) NOT NULL,
     `user_password` VARCHAR(64) NOT NULL COMMENT 'SHA256',
-    `user_nickname` VARCHAR(16) NOT NULL,
+    `user_nickname` VARCHAR(33) NOT NULL,
     `created_at`    DATETIME    NOT NULL DEFAULT CURRENT_DATE,
     `is_deleted`    BIT         NOT NULL DEFAULT FALSE,
     `deleted_at`    DATETIME NULL DEFAULT NULL
