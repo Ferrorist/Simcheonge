@@ -134,7 +134,7 @@ pipeline {
                 def version = sh(script: "grep version pubspec.yaml | awk '{print \$2}'", returnStdout: true).trim()
 
                 // 빌드된 APK 파일을 EC2 인스턴스의 특정 디렉토리로 복사
-                sh 'cp simcheonge_front/build/app/outputs/flutter-apk/app-release.apk /home/ubuntu/deploy_apk/app-release-\${version}.apk'
+                sh "cp simcheonge_front/build/app/outputs/flutter-apk/app-release.apk /home/ubuntu/deploy_apk/app-release-${version}.apk"
                 }
             }
         }
