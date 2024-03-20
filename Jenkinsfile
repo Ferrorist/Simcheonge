@@ -134,10 +134,10 @@ pipeline {
                     def version = sh(script: "grep version pubspec.yaml | awk '{print \$2}'", returnStdout: true).trim()
 
                     // 클라이언트 다운로드 용 APK 파일 복사
-                    sh "cp simcheonge_front/build/app/outputs/flutter-apk/app-release.apk /home/ubuntu/apk_files/deploy/simchengonge.apk"
+                    sh "cp build/app/outputs/flutter-apk/app-release.apk /home/ubuntu/apk_files/deploy/simchengonge.apk"
                     
                     // 버전 관리 용 APK 파일 복사 (저장용)
-                    sh "cp simcheonge_front/build/app/outputs/flutter-apk/app-release.apk /home/ubuntu/apk_files/stores/simchengonge-${version}.apk"
+                    sh "cp build/app/outputs/flutter-apk/app-release.apk /home/ubuntu/apk_files/stores/simchengonge-${version}.apk"
                     }
                 }
             }
