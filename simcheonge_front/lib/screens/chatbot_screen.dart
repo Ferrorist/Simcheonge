@@ -148,7 +148,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                         color: Colors.blue,
                         shape: BoxShape.circle,
                       ),
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(11),
                       child: const Icon(Icons.send, color: Colors.white),
                     ),
                   ),
