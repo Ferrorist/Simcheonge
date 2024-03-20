@@ -23,22 +23,15 @@ public class Bookmark {
     @Column(name = "bookmark_id")
     private int bookmarkId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @Column(name = "user_id")
     @NotNull
-    private User user;
+    private int user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "policy_id")
+    @Column(name = "reference_id")
     @NotNull
-    private Policy policy;
+    private int reference;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "post_id")
-    @NotNull
-    private Post post;
-
-    @Column(name = "bookmark_type", length = 3, nullable = false)
+    @Column(name = "bookmark_type", length = 3)
     @Builder.Default
     private String bookmarkType = "POS";
 }
