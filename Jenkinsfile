@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         // Docker 이미지 이름과 태그 설정
-        IMAGE_NAME = 'simchengonge_spring'
+        IMAGE_NAME = 'simcheonge_spring'
         IMAGE_TAG = 'latest'
 
         //ANDROID_HOME 환경변수 설정(flutter 빌드 시 필요)
@@ -19,14 +19,10 @@ pipeline {
                 // 마지막 성공한 빌드 이후 변경된 파일 목록을 가져옴
                 def changedFiles = sh(script: "git diff --name-only HEAD \$(git rev-parse HEAD~1)", returnStdout: true).trim()
 
-
-                env.BUILD_FE = "true"
-                env.BUILD_BE = "false"
-
-                // // 변경된 파일이 백엔드 디렉토리 내에 있는지 확인
-                // env.BUILD_FE = changedFiles.contains("simcheonge_front/") ? "true" : "false"
-                // // 변경된 파일이 프론트엔드 디렉토리 내에 있는지 확인
-                // env.BUILD_BE = changedFiles.contains("simcheonge_server/") ? "true" : "false"
+                // 변경된 파일이 백엔드 디렉토리 내에 있는지 확인
+                env.BUILD_FE = changedFiles.contains("simcheonge_front/") ? "true" : "false"
+                // 변경된 파일이 프론트엔드 디렉토리 내에 있는지 확인
+                env.BUILD_BE = changedFiles.contains("simcheonge_server/") ? "true" : "false"
 
                 }
             }
@@ -135,10 +131,10 @@ pipeline {
                     def version = sh(script: "grep version pubspec.yaml | head -n 8 | tail -n 1 | awk '{print \$2}'", returnStdout: true).trim()
                     echo "${version}"
                     // 클라이언트 다운로드 용 APK 파일 복사
-                    sh "cp build/app/outputs/flutter-apk/app-release.apk /home/ubuntu/apk_files/deploy/simchengonge.apk"
+                    sh "cp build/app/outputs/flutter-apk/app-release.apk /home/ubuntu/apk_files/deploy/simcheonge.apk"
                     
                     // 버전 관리 용 APK 파일 복사 (저장용)
-                    sh "cp build/app/outputs/flutter-apk/app-release.apk /home/ubuntu/apk_files/stores/simchengonge-${version}.apk"
+                    sh "cp build/app/outputs/flutter-apk/app-release.apk /home/ubuntu/apk_files/stores/simcheonge-${version}.apk"
                     }
                 }
             }
