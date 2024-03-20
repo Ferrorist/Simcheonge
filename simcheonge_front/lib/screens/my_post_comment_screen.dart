@@ -33,6 +33,11 @@ class _MyPostCommentScreenState extends State<MyPostCommentScreen> {
               );
             },
           ),
+          IconButton(
+            icon: const Icon(Icons.person),
+            onPressed: () =>
+                _scaffoldKey.currentState?.openEndDrawer(), // 오른쪽 드로어를 여는 기능 추가
+          ),
         ],
       ),
       endDrawer: const SideAppBar(),
