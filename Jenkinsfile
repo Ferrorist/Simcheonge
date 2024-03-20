@@ -106,7 +106,7 @@ pipeline {
 
                 
                     /*
-                    jenkins 컨테이너 내부에서 flutter 명령어를 사용하지  못함.
+                    jenkins 컨테이너 내부에서 flutter 명령어를 사용하지 못함.
                     jenkins 컨테이너 실행할 때 flutter 관련 볼륨마운트 했던
                     /var/flutter/bin/flutter 파일을 명시적으로 작성해서 flutter 명령어 사용 
                     */
