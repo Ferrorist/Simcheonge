@@ -1,6 +1,5 @@
 package com.e102.simcheonge_server.domain.policy.entity;
 
-import com.e102.simcheonge_server.domain.category.entity.Category;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -25,10 +24,8 @@ public class Policy {
     @Column(name = "policy_code", length = 16, nullable = false)
     private String code;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "policy_area")
-    @NotNull
-    private Category area;
+    @Column(name = "policy_area", length = 21, nullable = false)
+    private String area;
 
     @Column(name = "policy_name", nullable = false, columnDefinition = "TEXT")
     private String name;
@@ -45,18 +42,15 @@ public class Policy {
     @Column(name = "policy_etc", columnDefinition = "TEXT")
     private String etc;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "policy_field")
+    @Column(name = "policy_field", nullable = false)
     @NotNull
-    private Category field;
+    private String field;
 
     @Column(name = "policy_business_period", columnDefinition = "TEXT")
     private String businessPeriod;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "policy_period_type_code")
-    @NotNull
-    private Category periodTypeCode;
+    @Column(name = "policy_period_type_code", length = 21, nullable = false)
+    private String periodTypeCode;
 
     @Column(name = "policy_start_date", columnDefinition = "DATE")
     private Date startDate;
@@ -70,20 +64,14 @@ public class Policy {
     @Column(name = "policy_major_requirements", columnDefinition = "TEXT")
     private String majorRequirements;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "policy_employment_status")
-    @NotNull
-    private Category employmentStatus;
+    @Column(name = "policy_employment_status", length = 31, nullable = false)
+    private String employmentStatus;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "policy_specialized_field")
-    @NotNull
-    private Category specializedField;
+    @Column(name = "policy_specialized_field", length = 31, nullable = false)
+    private String specializedField;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "policy_education_requirements")
-    @NotNull
-    private Category educationRequirements;
+    @Column(name = "policy_education_requirements", length = 31, nullable = false)
+    private String educationRequirements;
 
     @Column(name = "policy_residence_income", columnDefinition = "TEXT")
     private String residenceIncome;
