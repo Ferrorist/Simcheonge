@@ -4,9 +4,7 @@ import lombok.Data;
 
 @Data
 public class CommentRequest {
-    int commentId;
     String commentType;
-    int postId;
-    int policyId;
+    int referencedId;
     String content;
 }
