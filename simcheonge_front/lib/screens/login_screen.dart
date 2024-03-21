@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:simcheonge_front/screens/board_screen.dart';
+import 'dart:convert';
 import 'package:simcheonge_front/screens/signup_screen.dart';
+import 'package:simcheonge_front/screens/home_screen.dart'; // 가정: 로그인 성공 후 이동할 화면
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -9,9 +13,38 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  // TextEditingController를 사용하여 텍스트 필드 입력 값을 관리합니다.
   final TextEditingController _idController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+
+  Future<void> login() async {
+    final url = Uri.parse('https://j10e102.p.ssafy.io/api/user/login');
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'userLoginId': _idController.text,
+        'userPassword': _passwordController.text,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      // 로그인 성공 처리
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('로그인에 성공했습니다.')),
+      );
+      // 로그인 성공 시 홈 화면으로 이동
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+            builder: (context) => const BoardScreen()), // 가정: 로그인 성공 후 이동할 화면
+      );
+    } else {
+      // 로그인 실패 처리
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('로그인에 실패했습니다: ${response.body}')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +57,6 @@ class _LoginScreenState extends State<LoginScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // ID 입력 필드
             TextField(
               controller: _idController,
               decoration: const InputDecoration(
@@ -32,29 +64,23 @@ class _LoginScreenState extends State<LoginScreen> {
                 hintText: '아이디를 입력하세요',
               ),
             ),
-            const SizedBox(height: 10), // 입력 필드 간의 여백
-            // 비밀번호 입력 필드
+            const SizedBox(height: 10),
             TextField(
               controller: _passwordController,
               decoration: const InputDecoration(
                 labelText: 'PW',
                 hintText: '비밀번호를 입력하세요',
               ),
-              obscureText: true, // 비밀번호를 숨김 처리
+              obscureText: true,
             ),
             const SizedBox(height: 20),
-            // 로그인 버튼
             ElevatedButton(
-              onPressed: () {
-                // 로그인 로직 구현
-              },
+              onPressed: login, // 로그인 함수를 버튼 클릭 이벤트에 연결
               child: const Text('로그인'),
             ),
             const SizedBox(height: 10),
-            // 회원가입 텍스트 버튼
             TextButton(
               onPressed: () {
-                // 회원가입 화면으로 넘어가는 로직 구현
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => const SignUpScreen()),
@@ -70,7 +96,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   void dispose() {
-    // 컨트롤러 사용 후 자원 해제
     _idController.dispose();
     _passwordController.dispose();
     super.dispose();
