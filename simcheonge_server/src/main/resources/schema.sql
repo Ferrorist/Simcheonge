@@ -203,6 +203,8 @@ VALUES ('PFD', 23050, '참여,권리');
 
 -- 지역
 INSERT INTO category_detail (category_code, category_number, category_name)
+VALUES ('RGO', 3001, '중앙부처');
+INSERT INTO category_detail (category_code, category_number, category_name)
 VALUES ('RGO', 3002001, '서울');
 INSERT INTO category_detail (category_code, category_number, category_name)
 VALUES ('RGO', 3002002, '부산');
