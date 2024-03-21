@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:simcheonge_front/screens/post_create_screen.dart';
 
 class DataSearch extends SearchDelegate<String> {
   final List<String> items;
@@ -87,7 +88,12 @@ class _BoardScreenState extends State<BoardScreen> {
             IconButton(
               icon: const Icon(Icons.create),
               onPressed: () {
-                // 게시글 작성 아이콘을 클릭했을 때의 동작을 여기에 작성하세요.
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const PostCreateScreen(),
+                  ),
+                );
               },
             ),
           ],
