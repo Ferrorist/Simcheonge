@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 public class CommentController {
     private final CommentService commentService;
 
-    @PostMapping("/")
+    @PostMapping
     public ResponseEntity<?> addComment(@RequestBody CommentRequest commentRequest, @SessionAttribute(name = "user", required = false)
     SessionUser loginUser){
         commentService.addComment(commentRequest, loginUser.getUserId());

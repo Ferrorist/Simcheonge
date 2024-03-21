@@ -2,8 +2,10 @@ package com.e102.simcheonge_server.common.exception;
 
 
 import com.e102.simcheonge_server.common.response.ErrorResponse;
+import com.e102.simcheonge_server.common.util.ResponseUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -66,7 +68,12 @@ public class ApiExceptionController {
         return constructErrorResponse(e,HttpStatus.FORBIDDEN, "handleAccessDeniedException");
     }
 
-    // 권한없음(접근거부)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ExceptionHandler(DataNotFoundException.class)
+    public ResponseEntity<?> dataNotFoundException(DataNotFoundException e) {
+        log.error("[exceptionHandle] ex={}", e.getMessage());
+        return ResponseUtil.buildErrorResponse(HttpStatus.NOT_FOUND,"DataNotFoundException",e.getMessage());
+    }
 
 
     private ErrorResponse constructErrorResponse(Exception e, HttpStatus status, String errorType) {
