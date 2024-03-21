@@ -19,7 +19,7 @@ import static com.e102.simcheonge_server.common.util.ResponseUtil.buildBasicResp
 @RestController
 @AllArgsConstructor
 @Slf4j
-@RequestMapping("/user")
+@RequestMapping("/api/user")
 public class UserController {
     private final UserService userService;
     private final HttpSession httpSession;
