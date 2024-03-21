@@ -7,8 +7,10 @@ import com.e102.simcheonge_server.domain.post_category.repository.PostCategoryRe
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -24,30 +26,23 @@ public class PostService {
     }
 
     // 카테고리 코드에 따른 게시글 조회
-    public List<Post> findPostsByCategory(String categoryCode) {
-        if ("전체".equals(categoryCode)) {
-            return postRepository.findAll();
+    public List<Post> findPostsByCategoryAndKeyword(String categoryCode, Integer categoryNumber, String keyword) {
+        // 카테고리와 키워드 기반 검색 로직
+        if (keyword != null && !keyword.isEmpty()) {
+            return postRepository.findByKeywordAndCategoryCodeAndCategoryNumber(keyword, categoryCode, categoryNumber);
+        } else if (categoryCode != null && categoryNumber != null) {
+            return postRepository.findByCategoryCodeAndCategoryNumber(categoryCode, categoryNumber);
         } else {
-            List<Integer> postIds = postCategoryRepository.findPostIdsByCategoryCode(categoryCode);
-            return postRepository.findAllById(postIds);
+            return postRepository.findAll();
         }
     }
 
     // 게시글 등록
     @Transactional
-    public Post createPost(Post post, String categoryCode) {
-        // 게시글 저장
+    public Post createPost(Post post, String categoryCode, Integer categoryNumber) {
         Post savedPost = postRepository.save(post);
-
-        // 카테고리 정보 처리 (예시로, category_number = 1 고정, 실제 로직에 맞게 조정 필요)
-        PostCategory postCategory = PostCategory.builder()
-                .categoryCode(categoryCode)
-                .categoryNumber(1) // 실제 비즈니스 로직에 따라 조정
-                .postId(savedPost.getPostId())
-                .build();
-
+        PostCategory postCategory = new PostCategory(categoryCode, categoryNumber, savedPost.getPostId());
         postCategoryRepository.save(postCategory);
-
         return savedPost;
     }
 

@@ -5,6 +5,8 @@ public class PostRequest {
     private String postName;
     private String postContent;
     private String categoryCode;
+    private Integer categoryNumber;
+    private String keyword;
     private String userNickname;
 
     // Constructors, Getters, and Setters
@@ -35,6 +37,14 @@ public class PostRequest {
     public void setCategoryCode(String categoryCode) {
         this.categoryCode = categoryCode;
     }
+
+    public Integer getCategoryNumber() { return this.categoryNumber; }
+
+    public void setCategoryNumber(Integer categoryNumber) { this.categoryNumber = categoryNumber; }
+
+    public String getKeyword() { return keyword; }
+
+    public void setKeyword(String keyword) { this.keyword = keyword; }
 
     public String getUserNickname() {
         return userNickname;
