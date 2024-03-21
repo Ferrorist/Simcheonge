@@ -10,5 +10,8 @@ import java.util.Optional;
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Integer> {
 
-    List<Comment> findByReferenced(int referenced);
+    List<Comment> findByCommentTypeAndReferencedId(String commentType, int referencedId);
+
+    List<Comment> findByUserAndAndCommentType(int userId,String commentType);
+
 }
