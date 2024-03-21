@@ -37,6 +37,7 @@ pipeline {
                 steps {
   
                     withCredentials([file(credentialsId: 'Spring_Env', variable: 'properties')]) {
+
                     script{
                         // Jenkins가 EC2 내에서 특정 디렉토리를 수정할 수 있도록 권한 변경
                         sh 'chmod -R 755 simcheonge_server/src/main/resources/'
@@ -89,7 +90,7 @@ pipeline {
                     // 실행중인 spring 컨테이너가 있으면 종료하고 삭제
                     sh 'docker stop spring || true'
                     sh 'docker rm spring || true'
-                    sh "docker run -d -p 8080:8080 --name spring ${IMAGE_NAME}:${IMAGE_TAG}"
+                    sh "docker run -d -p 8090:8090 --name spring ${IMAGE_NAME}:${IMAGE_TAG}"
                 }
             }
         }
