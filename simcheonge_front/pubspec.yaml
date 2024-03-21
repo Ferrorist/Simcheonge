@@ -15,15 +15,15 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
-# of the product and file ver sions while build-number is used as the build suffix.
-version: 1.0.0
+# of the product and file versions while build-number is used as the build suffix.
+version: 1.0.0+1
 
 environment:
   sdk: ">=3.3.0 <4.0.0"
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
-# consider running `flutt er pub upgrade --major-versions`. Alternatively,
+# consider running `flutter pub upgrade --major-versions`. Alternatively,
 # dependencies can be manually updated by changing the version numbers below to
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
@@ -44,8 +44,10 @@ dependencies:
   carousel_slider: ^4.2.1
   smooth_page_indicator: ^1.1.0
   dropdown_button2: ^2.3.9
-  intl: ^0.19.0
+  intl: ^0.18.0
   syncfusion_flutter_datepicker: ^25.1.35
+  f_datetimerangepicker: ^0.2.0
+  flutter_localization: ^0.2.0
 
 dev_dependencies:
   flutter_test:

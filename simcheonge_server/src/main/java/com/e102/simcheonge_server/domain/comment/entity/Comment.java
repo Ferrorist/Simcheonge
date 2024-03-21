@@ -21,29 +21,21 @@ import lombok.NoArgsConstructor;
 public class Comment extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "comment_id")
+    @Column(name = "comment_id", nullable = false)
     private int commentId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @Column(name = "user_id", nullable = false)
     @NotNull
-    private User user;
+    private int user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "policy_id")
-    @NotNull
-    private Policy policy;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "post_id")
-    @NotNull
-    private Post post;
-
-    @Column(name = "comment_content", length = 1200, nullable = false)
-    private String commentContent;
+    @Column(name = "referenced_id", nullable = false)
+    private int referenced;
 
     @Column(name = "comment_type", length = 3, nullable = false)
     @Builder.Default()
     private String commentType = "POS";
+
+    @Column(name = "comment_content", length = 1200, nullable = false)
+    private String commentContent;
 
 }
