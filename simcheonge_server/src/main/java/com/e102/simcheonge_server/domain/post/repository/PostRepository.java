@@ -21,6 +21,10 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
     // 특정 사용자가 작성한 게시글 조회
     List<Post> findByUserId(int userId);
 
-    // 게시글 등록 및 수정: JpaRepository의 save 메서드 사용
-    // 게시글 삭제: JpaRepository의 deleteById 메서드 사용
+    @Query("SELECT p FROM Post p WHERE (:keyword IS NULL OR (p.postName LIKE %:keyword% OR p.postContent LIKE %:keyword%)) AND (:categoryCode IS NULL OR p.categoryDetail.code = :categoryCode) AND (:categoryNumber IS NULL OR p.categoryDetail.number = :categoryNumber)")
+    List<Post> findByKeywordAndCategoryCodeAndCategoryNumber(@Param("keyword") String keyword, @Param("categoryCode") String categoryCode, @Param("categoryNumber") Integer categoryNumber);
+
+    // 카테고리 코드와 번호로 게시글 검색
+    @Query("SELECT p FROM Post p WHERE p.categoryDetail.code = :categoryCode AND p.categoryDetail.number = :categoryNumber")
+    List<Post> findByCategoryCodeAndCategoryNumber(@Param("categoryCode") String categoryCode, @Param("categoryNumber") Integer categoryNumber);
 }
