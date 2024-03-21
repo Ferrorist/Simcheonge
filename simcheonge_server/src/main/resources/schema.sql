@@ -249,10 +249,10 @@ VALUES ('RGO', 3, '특정 기간');
 INSERT INTO category_detail (category_code, category_number, category_name)
 VALUES ('POS', 1, '전체');
 INSERT INTO category_detail (category_code, category_number, category_name)
-VALUES ('POS', 2, '정책추천');
+VALUES ('POS', 2, '정책 추천');
 INSERT INTO category_detail (category_code, category_number, category_name)
 VALUES ('POS', 3, '공모전');
 INSERT INTO category_detail (category_code, category_number, category_name)
-VALUES ('POS', 4, '생활꿀팁');
+VALUES ('POS', 4, '생활 꿀팁');
 INSERT INTO category_detail (category_code, category_number, category_name)
 VALUES ('POS', 5, '기타');
