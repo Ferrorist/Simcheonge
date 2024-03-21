@@ -31,4 +31,23 @@ public class CommentController {
         return ResponseUtil.buildBasicResponse(HttpStatus.OK, commentService.getBoardComments(commentType, referencedId, loginUser.getUserId()));
     }
 
+    @GetMapping("/{commentType}")
+    public ResponseEntity<?> getMyComments(@PathVariable("commentType") String commentType, @SessionAttribute(name = "user", required = false)
+    SessionUser loginUser) {
+        return ResponseUtil.buildBasicResponse(HttpStatus.OK, commentService.getMyComments(commentType, loginUser.getUserId()));
+    }
+
+    @GetMapping("/{commentType}/search")
+    public ResponseEntity<?> searchMyComments(@PathVariable("commentType") String commentType, @RequestParam(name="keyword", required = true) String keyword, @SessionAttribute(name = "user", required = false)
+    SessionUser loginUser) {
+        return ResponseUtil.buildBasicResponse(HttpStatus.OK, commentService.searchMyComments(commentType, keyword, loginUser.getUserId()));
+    }
+
+    @DeleteMapping("/{commentId}")
+    public ResponseEntity<?> deleteComment(@PathVariable("commentId") int commentId, @SessionAttribute(name = "user", required = false)
+    SessionUser loginUser) {
+        commentService.deleteComment(commentId, loginUser.getUserId());
+        return ResponseUtil.buildBasicResponse(HttpStatus.OK, "댓글 삭제에 성공했습니다.");
+    }
+
 }

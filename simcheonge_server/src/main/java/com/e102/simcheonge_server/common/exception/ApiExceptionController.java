@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
-import javax.naming.AuthenticationException;
 import java.nio.file.AccessDeniedException;
 
 
@@ -26,12 +25,6 @@ public class ApiExceptionController {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse illegalExHandle(IllegalArgumentException e) {
         return constructErrorResponse(e,HttpStatus.BAD_REQUEST,"IllegalArgumentException");
-    }
-
-    @ExceptionHandler(AuthenticationException.class)
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public ErrorResponse handleAuthenticationException(AuthenticationException e) {
-        return constructErrorResponse(e,HttpStatus.UNAUTHORIZED, "handleAuthenticationException");
     }
 
     // 부적절한 객체상태오류
@@ -68,11 +61,18 @@ public class ApiExceptionController {
         return constructErrorResponse(e,HttpStatus.FORBIDDEN, "handleAccessDeniedException");
     }
 
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(DataNotFoundException.class)
     public ResponseEntity<?> dataNotFoundException(DataNotFoundException e) {
         log.error("[exceptionHandle] ex={}", e.getMessage());
         return ResponseUtil.buildErrorResponse(HttpStatus.NOT_FOUND,"DataNotFoundException",e.getMessage());
+    }
+
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<?> AuthenticationException2(AuthenticationException e) {
+        log.error("[exceptionHandle] ex={}", e.getMessage());
+        return ResponseUtil.buildErrorResponse(HttpStatus.UNAUTHORIZED,"AuthenticationException",e.getMessage());
     }
 
 

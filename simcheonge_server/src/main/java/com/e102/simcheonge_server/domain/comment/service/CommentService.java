@@ -1,9 +1,10 @@
 package com.e102.simcheonge_server.domain.comment.service;
 
 import com.e102.simcheonge_server.common.exception.DataNotFoundException;
+import com.e102.simcheonge_server.common.exception.AuthenticationException;
 import com.e102.simcheonge_server.domain.comment.dto.request.CommentCreateRequest;
-import com.e102.simcheonge_server.domain.comment.dto.request.CommentReadRequest;
 import com.e102.simcheonge_server.domain.comment.dto.response.CommentResponse;
+import com.e102.simcheonge_server.domain.comment.dto.response.MyCommentResponse;
 import com.e102.simcheonge_server.domain.comment.entity.Comment;
 import com.e102.simcheonge_server.domain.comment.repository.CommentRepository;
 import com.e102.simcheonge_server.domain.policy.entity.Policy;
@@ -15,13 +16,11 @@ import com.e102.simcheonge_server.domain.user.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.text.SimpleDateFormat;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Slf4j
@@ -69,25 +68,93 @@ public class CommentService {
                     .orElseThrow(() -> new DataNotFoundException("해당 정책이 존재하지 않습니다."));
         }
 
-        List<Comment> commentList = commentRepository.findByCommentTypeAndReferencedId(commentType, referencedId);
+        List<Comment> commentList = commentRepository.findByCommentTypeAndReferencedIdAndIsDeletedFalse(commentType, referencedId);
         List<CommentResponse> responses = new ArrayList<>();
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         commentList.forEach(comment -> {
-            User commenter = userRepostory.findByUserId(comment.getUser())
-                    .orElseThrow(() -> new DataNotFoundException("해당 댓글 작성자가 존재하지 않습니다."));
-            String nickname = commenter.getUserNickname();
+            if (!comment.isDeleted()) {
+                User commenter = userRepostory.findByUserId(comment.getUser())
+                        .orElseThrow(() -> new DataNotFoundException("해당 댓글 작성자가 존재하지 않습니다."));
+                String nickname = commenter.getUserNickname();
 
-
-            CommentResponse commentResponse = CommentResponse.builder()
-                    .commentId(comment.getCommentId())
-                    .nickname(nickname)
-                    .content(comment.getCommentContent())
-                    .createAt(formatter.format(comment.getCreatedAt()).toString())
-                    .isMyComment(commenter.getUserId() == userId) //삭제된 회원이거나 요청 회원이 아닌 경우
-                    .build();
-            responses.add(commentResponse);
+                CommentResponse commentResponse = CommentResponse.builder()
+                        .commentId(comment.getCommentId())
+                        .nickname(nickname)
+                        .content(comment.getCommentContent())
+                        .createAt(formatter.format(comment.getCreatedAt()).toString())
+                        .isMyComment(commenter.getUserId() == userId) //삭제된 회원이거나 요청 회원이 아닌 경우
+                        .build();
+                responses.add(commentResponse);
+            }
         });
         return responses;
     }
 
+    public List<MyCommentResponse> getMyComments(String commentType, int userId) {
+        User user = userRepostory.findById(userId)
+                .orElseThrow(() -> new DataNotFoundException("해당 사용자가 존재하지 않습니다."));
+        List<Comment> commentList = commentRepository.findByUserAndCommentTypeAndIsDeletedFalseOrderByCreatedAtDesc(userId,commentType);
+        List<MyCommentResponse> responses = new ArrayList<>();
+        SimpleDateFormat formatter = new SimpleDateFormat("MM-dd");
+        commentList.forEach(comment -> {
+            if (!comment.isDeleted()) {
+                if (commentType.equals("POS")) {
+                    Post post = postRepository.findByPostId(comment.getReferencedId())
+                            .orElseThrow(() -> new DataNotFoundException("해당 게시물이 존재하지 않습니다."));
+                } else if (commentType.equals("POL")) {
+                    Policy policy = policyRepository.findByPolicyId(comment.getReferencedId())
+                            .orElseThrow(() -> new DataNotFoundException("해당 정책이 존재하지 않습니다."));
+                }
+                MyCommentResponse myCommentResponse=MyCommentResponse.builder()
+                        .commentId(comment.getCommentId())
+                        .commentType(commentType)
+                        .referencedId(comment.getReferencedId())
+                        .content(comment.getCommentContent())
+                        .createAt(formatter.format(comment.getCreatedAt()).toString())
+                        .build();
+                responses.add(myCommentResponse);
+            }
+        });
+        return responses;
+    }
+
+    public List<MyCommentResponse> searchMyComments(String commentType, String keyword, int userId) {
+        User user = userRepostory.findById(userId)
+                .orElseThrow(() -> new DataNotFoundException("해당 사용자가 존재하지 않습니다."));
+        List<Comment> commentList = commentRepository.findByUserAndCommentTypeAndCommentContentContainingAndIsDeletedFalseOrderByCreatedAtDesc(userId,commentType,keyword);
+        List<MyCommentResponse> responses = new ArrayList<>();
+        SimpleDateFormat formatter = new SimpleDateFormat("MM-dd");
+        commentList.forEach(comment -> {
+            if (!comment.isDeleted()) {
+                if (commentType.equals("POS")) {
+                    Post post = postRepository.findByPostId(comment.getReferencedId())
+                            .orElseThrow(() -> new DataNotFoundException("해당 게시물이 존재하지 않습니다."));
+                } else if (commentType.equals("POL")) {
+                    Policy policy = policyRepository.findByPolicyId(comment.getReferencedId())
+                            .orElseThrow(() -> new DataNotFoundException("해당 정책이 존재하지 않습니다."));
+                }
+                MyCommentResponse myCommentResponse=MyCommentResponse.builder()
+                        .commentId(comment.getCommentId())
+                        .commentType(commentType)
+                        .referencedId(comment.getReferencedId())
+                        .content(comment.getCommentContent())
+                        .createAt(formatter.format(comment.getCreatedAt()).toString())
+                        .build();
+                responses.add(myCommentResponse);
+            }
+        });
+        return responses;
+    }
+
+    @Transactional
+    public void deleteComment(int commentId, int userId) {
+        User user = userRepostory.findById(userId)
+                .orElseThrow(() -> new DataNotFoundException("해당 사용자가 존재하지 않습니다."));
+        Comment comment = commentRepository.findByCommentIdAndIsDeletedFalse(commentId)
+                .orElseThrow(() -> new DataNotFoundException("해당 댓글이 존재하지 않습니다."));
+        if(comment.getUser()!=userId){
+            throw new AuthenticationException("해당 댓글 삭제 권한이 존재하지 않습니다.");
+        }
+        comment.setDeleted(true);
+    }
 }
