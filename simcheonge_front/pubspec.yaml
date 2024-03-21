@@ -75,6 +75,7 @@ flutter:
     - assets/android12splash.gif
     - assets/splash.png
     - assets/bot_image.png
+    - assets/home_screen/
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 
