@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:simcheonge_front/screens/bookmark_policy_screen.dart';
 import 'package:simcheonge_front/screens/bookmark_post_screen.dart';
+import 'package:simcheonge_front/screens/login_screen.dart';
 import 'package:simcheonge_front/screens/my_policy_comment_screen.dart';
 import 'package:simcheonge_front/screens/my_post_comment_screen.dart';
 import 'package:simcheonge_front/screens/my_post_screen.dart';
@@ -118,6 +119,16 @@ class _MyHomePageState extends State<MyHomePage> {
           centerTitle: true, // 중앙 정렬
           elevation: 0.0,
           actions: <Widget>[
+            IconButton(
+              icon: const Icon(Icons.login),
+              onPressed: () {
+                // 로그인 화면으로 이동
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const LoginScreen()),
+                );
+              },
+            ),
             IconButton(
               icon: const Icon(Icons.person),
               onPressed: () =>
