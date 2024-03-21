@@ -26,7 +26,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
     final url = Uri.parse('https://j10e102.p.ssafy.io/api/user/signup');
     final requestData = jsonEncode({
-      'usernickname': _nicknameController.text,
+      'userNickname': _nicknameController.text,
       'userLoginId': _idController.text,
       'userPassword': _passwordController.text,
       'userPasswordCheck': _passwordConfirmController.text,
