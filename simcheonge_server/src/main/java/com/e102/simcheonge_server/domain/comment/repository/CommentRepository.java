@@ -10,5 +10,12 @@ import java.util.Optional;
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Integer> {
 
-    List<Comment> findByReferenced(int referenced);
+    Optional<Comment> findByCommentIdAndIsDeletedFalse(int commentId);
+
+    List<Comment> findByCommentTypeAndReferencedIdAndIsDeletedFalse(String commentType, int referencedId);
+
+    List<Comment> findByUserAndCommentTypeAndIsDeletedFalseOrderByCreatedAtDesc(int userId, String commentType);
+
+    List<Comment> findByUserAndCommentTypeAndCommentContentContainingAndIsDeletedFalseOrderByCreatedAtDesc(int userId, String commentType, String keyword);
+
 }
