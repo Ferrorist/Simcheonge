@@ -203,6 +203,8 @@ VALUES ('PFD', 23050, '참여,권리');
 
 -- 지역
 INSERT INTO category_detail (category_code, category_number, category_name)
+VALUES ('RGO', 3001, '중앙부처');
+INSERT INTO category_detail (category_code, category_number, category_name)
 VALUES ('RGO', 3002001, '서울');
 INSERT INTO category_detail (category_code, category_number, category_name)
 VALUES ('RGO', 3002002, '부산');
@@ -244,3 +246,15 @@ INSERT INTO category_detail (category_code, category_number, category_name)
 VALUES ('RGO', 2, '미정');
 INSERT INTO category_detail (category_code, category_number, category_name)
 VALUES ('RGO', 3, '특정 기간');
+
+-- 게시판
+INSERT INTO category_detail (category_code, category_number, category_name)
+VALUES ('POS', 1, '전체');
+INSERT INTO category_detail (category_code, category_number, category_name)
+VALUES ('POS', 2, '정책 추천');
+INSERT INTO category_detail (category_code, category_number, category_name)
+VALUES ('POS', 3, '공모전');
+INSERT INTO category_detail (category_code, category_number, category_name)
+VALUES ('POS', 4, '생활 꿀팁');
+INSERT INTO category_detail (category_code, category_number, category_name)
+VALUES ('POS', 5, '기타');
