@@ -24,11 +24,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
       return;
     }
 
-    final url = Uri.parse('http://j10e102.p.ssafy.io/api/user/signup');
+    final url = Uri.parse('https://j10e102.p.ssafy.io/api/user/signup');
     final requestData = jsonEncode({
-      'nickname': _nicknameController.text,
+      'usernickname': _nicknameController.text,
       'userLoginId': _idController.text,
       'userPassword': _passwordController.text,
+      'userPasswordCheck': _passwordConfirmController.text,
     });
 
     try {
