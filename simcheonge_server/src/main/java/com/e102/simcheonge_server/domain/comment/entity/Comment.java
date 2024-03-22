@@ -1,10 +1,6 @@
 package com.e102.simcheonge_server.domain.comment.entity;
 
 import com.e102.simcheonge_server.common.BaseEntity;
-import com.e102.simcheonge_server.common.TargetType;
-import com.e102.simcheonge_server.domain.policy.entity.Policy;
-import com.e102.simcheonge_server.domain.post.entity.Post;
-import com.e102.simcheonge_server.domain.user.entity.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -29,7 +25,7 @@ public class Comment extends BaseEntity {
     private int user;
 
     @Column(name = "referenced_id", nullable = false)
-    private int referenced;
+    private int referencedId;
 
     @Column(name = "comment_type", length = 3, nullable = false)
     @Builder.Default()
