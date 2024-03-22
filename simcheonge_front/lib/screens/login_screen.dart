@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:simcheonge_front/main.dart';
 import 'package:simcheonge_front/screens/board_screen.dart';
 import 'dart:convert';
 import 'package:simcheonge_front/screens/signup_screen.dart';
@@ -36,7 +37,7 @@ class _LoginScreenState extends State<LoginScreen> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-            builder: (context) => const BoardScreen()), // 가정: 로그인 성공 후 이동할 화면
+            builder: (context) => const MyHomePage()), // 가정: 로그인 성공 후 이동할 화면
       );
     } else {
       // 로그인 실패 처리
