@@ -195,7 +195,41 @@ class SideAppBar extends StatelessWidget {
                       children: <Widget>[
                         InkWell(
                           onTap: () {
-                            print('정보 관리 항목 1 클릭됨');
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                // 닉네임을 저장할 변수
+                                TextEditingController nicknameController =
+                                    TextEditingController();
+
+                                return AlertDialog(
+                                  title: const Text("닉네임 변경"),
+                                  content: TextField(
+                                    controller: nicknameController,
+                                    decoration: const InputDecoration(
+                                        hintText: "새 닉네임을 입력하세요"),
+                                  ),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      child: const Text('취소'),
+                                      onPressed: () {
+                                        Navigator.of(context).pop(); // 팝업 닫기
+                                      },
+                                    ),
+                                    TextButton(
+                                      child: const Text('변경'),
+                                      onPressed: () {
+                                        // 닉네임 변경 로직 구현
+                                        // 예: 데이터베이스에 닉네임 업데이트 요청
+                                        print(
+                                            '새 닉네임: ${nicknameController.text}');
+                                        Navigator.of(context).pop(); // 팝업 닫기
+                                      },
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
                           },
                           child: Container(
                             padding: const EdgeInsets.symmetric(vertical: 8.0),
