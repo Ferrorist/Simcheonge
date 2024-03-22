@@ -43,7 +43,7 @@ pipeline {
                         sh 'chmod -R 755 simcheonge_server/src/main/resources/'
 
                         // Secret File Credential을 사용하여 설정 파일을 Spring 프로젝트의 resources 디렉토리로 복사
-                        sh 'cp "${properties}" simcheonge_server/src/main/resources/application-env.properties'
+                        sh 'cp "${properties}" simcheonge_server/src/main/resources/application-prod.properties'
                     }
                 }   
             }

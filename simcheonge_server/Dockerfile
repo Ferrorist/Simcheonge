@@ -25,4 +25,4 @@ COPY --from=build /app/build/libs/*-SNAPSHOT.jar /app/app.jar
 EXPOSE 8090
 
 # 애플리케이션 실행
-ENTRYPOINT ["java", "-Duser.timezone=Asia/Seoul", "-jar","/app/app.jar"]
+ENTRYPOINT ["java", "-Duser.timezone=Asia/Seoul", "-Dspring.profiles.active=prod", "-jar", "/app/app.jar"]
