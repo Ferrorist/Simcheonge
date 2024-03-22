@@ -5,7 +5,7 @@ pipeline {
         // Docker 이미지 이름과 태그 설정
         IMAGE_NAME = 'simcheonge_spring'
         IMAGE_TAG = 'latest'
-
+        
         //ANDROID_HOME 환경변수 설정(flutter 빌드 시 필요)
         ANDROID_HOME = '/home/ubuntu/android-studio/'
     }
@@ -18,11 +18,12 @@ pipeline {
 
                 // 마지막 성공한 빌드 이후 변경된 파일 목록을 가져옴
                 def changedFiles = sh(script: "git diff --name-only HEAD \$(git rev-parse HEAD~1)", returnStdout: true).trim()
-
-                // 변경된 파일이 백엔드 디렉토리 내에 있는지 확인
-                env.BUILD_FE = changedFiles.contains("simcheonge_front/") ? "true" : "false"
-                // 변경된 파일이 프론트엔드 디렉토리 내에 있는지 확인
-                env.BUILD_BE = changedFiles.contains("simcheonge_server/") ? "true" : "false"
+                env.BUILD_BE = "true"
+                env.BUILD_FE = "true"
+                // // 변경된 파일이 백엔드 디렉토리 내에 있는지 확인
+                // env.BUILD_FE = changedFiles.contains("simcheonge_front/") ? "true" : "false"
+                // // 변경된 파일이 프론트엔드 디렉토리 내에 있는지 확인
+                // env.BUILD_BE = changedFiles.contains("simcheonge_server/") ? "true" : "false"
 
                 }
             }
@@ -86,7 +87,7 @@ pipeline {
             steps {
                 // Docker 컨테이너 실행
                 script {
-
+    
                     // 실행중인 spring 컨테이너가 있으면 종료하고 삭제
                     sh 'docker stop spring || true'
                     sh 'docker rm spring || true'
