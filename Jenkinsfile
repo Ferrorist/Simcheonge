@@ -86,7 +86,11 @@ pipeline {
             steps {
                 // Docker 컨테이너 실행
                 script {
-
+                    echo "${ACTIVE}"
+                    echo "${SPRING_SERVER_PORT}"
+                    echo "${SPRING_DATASOURCE_URL}"
+                    echo "${SPRING_DATASOURCE_USERNAME}"
+                    echo "${SPRING_DATASOURCE_PASSWORD}"
                     // 실행중인 spring 컨테이너가 있으면 종료하고 삭제
                     sh 'docker stop spring || true'
                     sh 'docker rm spring || true'
