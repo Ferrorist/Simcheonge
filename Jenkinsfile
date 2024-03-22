@@ -45,6 +45,7 @@ pipeline {
 
                         // Secret File Credential을 사용하여 설정 파일을 Spring 프로젝트의 resources 디렉토리로 복사
                         sh 'cp "${properties}" simcheonge_server/src/main/resources/application-prod.properties'
+                        echo "${properties}"
                     }
                 }   
             }
@@ -57,11 +58,12 @@ pipeline {
             steps {
                 script {
                     dir('simcheonge_server') {
-                        echo "${ACTIVE}"
-                        echo "${SPRING_SERVER_PORT}"
-                        echo "${SPRING_DATASOURCE_URL}"
-                        echo "${SPRING_DATASOURCE_USERNAME}"
-                        echo "${SPRING_DATASOURCE_PASSWORD}"
+                        echo "${properties}"
+                        // echo "${ACTIVE}"
+                        // echo "${SPRING_SERVER_PORT}"
+                        // echo "${SPRING_DATASOURCE_URL}"
+                        // echo "${SPRING_DATASOURCE_USERNAME}"
+                        // echo "${SPRING_DATASOURCE_PASSWORD}"
                         // Gradle을 사용하여 Spring 애플리케이션 빌드
                         sh 'chmod +x ./gradlew' // 실행 권한 추가
                         sh './gradlew build'
