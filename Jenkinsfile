@@ -60,7 +60,6 @@ pipeline {
                         // Gradle을 사용하여 Spring 애플리케이션 빌드
                         sh 'chmod +x ./gradlew' // 실행 권한 추가
                         sh './gradlew build'
-                        // sh './gradlew build -Dspring.profiles.active=prod'
                         echo "Spring Build finished"
                     }
                 }
