@@ -16,11 +16,15 @@ import org.springframework.web.bind.annotation.*;
 public class PolicyController {
     private final PolicyService policyService;
 
-    @GetMapping("/{policyId}")
-    public ResponseEntity<?> getPolicy(@PathVariable("policyId") int policyId, @SessionAttribute(name = "user", required = false)
-    SessionUser loginUser) {
-        policyService.getPolicy(policyId, loginUser.getUserId());
-        return ResponseUtil.buildBasicResponse(HttpStatus.OK, "댓글 삭제에 성공했습니다.");
-    }
+//    @GetMapping("/{policyId}")
+//    public ResponseEntity<?> getPolicy(@PathVariable("policyId") int policyId, @SessionAttribute(name = "user", required = false)
+//    SessionUser loginUser) {
+//        policyService.getPolicy(policyId, loginUser.getUserId());
+//        return ResponseUtil.buildBasicResponse(HttpStatus.OK, "댓글 삭제에 성공했습니다.");
+//    }
 
+    @GetMapping("/categories")
+    public ResponseEntity<?> getCategories(){
+        return ResponseUtil.buildBasicResponse(HttpStatus.OK,policyService.getCategories());
+    }
 }
