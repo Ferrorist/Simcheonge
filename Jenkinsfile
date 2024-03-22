@@ -57,6 +57,11 @@ pipeline {
             steps {
                 script {
                     dir('simcheonge_server') {
+                        echo "${ACTIVE}"
+                        echo "${SPRING_SERVER_PORT}"
+                        echo "${SPRING_DATASOURCE_URL}"
+                        echo "${SPRING_DATASOURCE_USERNAME}"
+                        echo "${SPRING_DATASOURCE_PASSWORD}"
                         // Gradle을 사용하여 Spring 애플리케이션 빌드
                         sh 'chmod +x ./gradlew' // 실행 권한 추가
                         sh './gradlew build'
@@ -87,11 +92,7 @@ pipeline {
             steps {
                 // Docker 컨테이너 실행
                 script {
-                    echo "${ACTIVE}"
-                    echo "${SPRING_SERVER_PORT}"
-                    echo "${SPRING_DATASOURCE_URL}"
-                    echo "${SPRING_DATASOURCE_USERNAME}"
-                    echo "${SPRING_DATASOURCE_PASSWORD}"
+    
                     // 실행중인 spring 컨테이너가 있으면 종료하고 삭제
                     sh 'docker stop spring || true'
                     sh 'docker rm spring || true'
