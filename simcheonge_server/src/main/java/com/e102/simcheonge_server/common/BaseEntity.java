@@ -2,12 +2,11 @@ package com.e102.simcheonge_server.common;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import lombok.Getter;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.util.Date;
+
 
 @Getter
 @MappedSuperclass
