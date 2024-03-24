@@ -40,7 +40,7 @@ class _MyPostCommentScreenState extends State<MyPostCommentScreen> {
           ),
         ],
       ),
-      endDrawer: const SideAppBar(),
+
       body: ListView.builder(
         itemCount: bookmarkedItems.length,
         itemBuilder: (context, index) {

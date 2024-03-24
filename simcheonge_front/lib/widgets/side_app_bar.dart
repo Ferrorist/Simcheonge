@@ -7,8 +7,10 @@ import 'package:simcheonge_front/screens/my_post_comment_screen.dart';
 import 'package:simcheonge_front/screens/my_post_screen.dart';
 
 class SideAppBar extends StatelessWidget {
+  final Function(int) changePage; // 페이지 변경 함수를 위한 변수 추가
   const SideAppBar({
     super.key,
+    required this.changePage, // 생성자를 통해 changePage 함수를 받음
   });
 
   @override
@@ -60,12 +62,7 @@ class SideAppBar extends StatelessWidget {
                             print('게시글 클릭됨');
                             Navigator.pop(context);
 
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const MyPostScreen(),
-                              ),
-                            );
+                            changePage(5);
                           },
                           child: Container(
                             padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -81,13 +78,7 @@ class SideAppBar extends StatelessWidget {
                           onTap: () {
                             print('게시글 댓글 클릭됨');
                             Navigator.pop(context);
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    const MyPostCommentScreen(),
-                              ),
-                            );
+                            changePage(6);
                           },
                           child: Container(
                             padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -103,13 +94,7 @@ class SideAppBar extends StatelessWidget {
                           onTap: () {
                             print('정책 댓글 클릭됨');
                             Navigator.pop(context);
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    const MyPolicyCommentScreen(),
-                              ),
-                            );
+                            changePage(7);
                           },
                           child: Container(
                             padding: const EdgeInsets.symmetric(
@@ -143,13 +128,7 @@ class SideAppBar extends StatelessWidget {
                           onTap: () {
                             print('책갈피 항목 1 클릭됨');
                             Navigator.pop(context);
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    const BookmarkPolicyScreen(),
-                              ),
-                            );
+                            changePage(8);
                           },
                           child: Container(
                             padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -165,13 +144,7 @@ class SideAppBar extends StatelessWidget {
                           onTap: () {
                             print('책갈피 항목 2 클릭됨');
                             Navigator.pop(context);
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    const BookmarkPostScreen(),
-                              ),
-                            );
+                            changePage(9);
                           },
                           child: Container(
                             padding: const EdgeInsets.symmetric(vertical: 8.0),
