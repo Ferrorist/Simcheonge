@@ -19,6 +19,8 @@ bin/
 
 ### IntelliJ IDEA ###
 application-env.properties
+application-local.properties
+application-prod.properties
 
 .idea
 *.iws

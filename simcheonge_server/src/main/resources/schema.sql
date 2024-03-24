@@ -131,17 +131,17 @@ CREATE TABLE `policy_category_detail`
 );
 
 INSERT INTO category (category_code, category_name)
-VALUES ('PFD', '정책 분야');
-INSERT INTO category (category_code, category_name)
 VALUES ('RGO', '지역');
-INSERT INTO category (category_code, category_name)
-VALUES ('APC', '신청 구분');
-INSERT INTO category (category_code, category_name)
-VALUES ('EPM', '취업 상태');
 INSERT INTO category (category_code, category_name)
 VALUES ('ADM', '학력');
 INSERT INTO category (category_code, category_name)
+VALUES ('EPM', '취업 상태');
+INSERT INTO category (category_code, category_name)
 VALUES ('SPC', '특화 분야');
+INSERT INTO category (category_code, category_name)
+VALUES ('PFD', '관심 분야');
+INSERT INTO category (category_code, category_name)
+VALUES ('APC', '신청 기간');
 INSERT INTO category (category_code, category_name)
 VALUES ('POS', '게시판');
 
@@ -151,7 +151,7 @@ VALUES ('EPM', 1, '제한 없음');
 INSERT INTO category_detail (category_code, category_number, category_name)
 VALUES ('EPM', 2, '재직자');
 INSERT INTO category_detail (category_code, category_number, category_name)
-VALUES ('EPM', 3, '개인사업자');
+VALUES ('EPM', 3, '개인 사업자');
 INSERT INTO category_detail (category_code, category_number, category_name)
 VALUES ('EPM', 4, '미취업자');
 
@@ -167,7 +167,7 @@ VALUES ('ADM', 4, '대졸 예정');
 INSERT INTO category_detail (category_code, category_number, category_name)
 VALUES ('ADM', 5, '대학 졸업');
 INSERT INTO category_detail (category_code, category_number, category_name)
-VALUES ('ADM', 6, '석, 박사');
+VALUES ('ADM', 6, '석/박사');
 
 -- 특화 분야
 INSERT INTO category_detail (category_code, category_number, category_name)
@@ -202,6 +202,8 @@ INSERT INTO category_detail (category_code, category_number, category_name)
 VALUES ('PFD', 23050, '참여,권리');
 
 -- 지역
+INSERT INTO category_detail (category_code, category_number, category_name)
+VALUES ('RGO', 3001, '중앙부처');
 INSERT INTO category_detail (category_code, category_number, category_name)
 VALUES ('RGO', 3002001, '서울');
 INSERT INTO category_detail (category_code, category_number, category_name)
@@ -239,11 +241,11 @@ VALUES ('RGO', 3002017, '세종');
 
 -- 신청 구분
 INSERT INTO category_detail (category_code, category_number, category_name)
-VALUES ('RGO', 1, '상시');
+VALUES ('APC', 1, '상시');
 INSERT INTO category_detail (category_code, category_number, category_name)
-VALUES ('RGO', 2, '미정');
+VALUES ('APC', 2, '미정');
 INSERT INTO category_detail (category_code, category_number, category_name)
-VALUES ('RGO', 3, '특정 기간');
+VALUES ('APC', 3, '기간 선택');
 
 -- 게시판
 INSERT INTO category_detail (category_code, category_number, category_name)

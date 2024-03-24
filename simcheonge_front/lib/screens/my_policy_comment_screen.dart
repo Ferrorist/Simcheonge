@@ -20,26 +20,7 @@ class _MyPolicyCommentScreenState extends State<MyPolicyCommentScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey, // Scaffold에 key 할당
-      appBar: AppBar(
-        title: const Text('내가 쓴 정책 댓글'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () async {
-              showSearch(
-                context: context,
-                delegate: DataSearch(bookmarkedItems),
-              );
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.person),
-            onPressed: () =>
-                _scaffoldKey.currentState?.openEndDrawer(), // 오른쪽 드로어를 여는 기능 추가
-          ),
-        ],
-      ),
-      endDrawer: const SideAppBar(),
+
       body: ListView.builder(
         itemCount: bookmarkedItems.length,
         itemBuilder: (context, index) {
