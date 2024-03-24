@@ -21,6 +21,7 @@ bin/
 application-env.properties
 application-local.properties
 application-prod.properties
+application-secret.properties
 
 .idea
 *.iws
