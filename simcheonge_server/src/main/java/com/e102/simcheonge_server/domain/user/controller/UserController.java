@@ -31,7 +31,6 @@ public class UserController {
         return buildBasicResponse(HttpStatus.OK,"회원 가입에 성공했습니다.");
     }
 
-
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginReqeust loginInReqeust){
         log.info("signUpRequestForm={}",loginInReqeust);
