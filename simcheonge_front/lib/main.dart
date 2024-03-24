@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:simcheonge_front/screens/bookmark_policy_screen.dart';
 import 'package:simcheonge_front/screens/bookmark_post_screen.dart';
+import 'package:simcheonge_front/screens/login_screen.dart';
 import 'package:simcheonge_front/screens/my_policy_comment_screen.dart';
 import 'package:simcheonge_front/screens/my_post_comment_screen.dart';
 import 'package:simcheonge_front/screens/my_post_screen.dart';
@@ -46,7 +47,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _selectedIndex = 0;
+  int _selectedIndex = 0; // 선택된 페이지 인덱스
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   DateTime? lastPressed;
 
@@ -78,9 +79,14 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  void changePage(int index) {
+  // 페이지 변경 함수 수정
+  void changePage(int index, {bool isSideBar = false}) {
     setState(() {
-      _selectedIndex = index;
+      // 사이드바에서 호출되면 _selectedIndex를 업데이트하고, 바텀 네비게이션 항목이 아니면 -1로 설정
+      _selectedIndex =
+          isSideBar && (index < 0 || index > bottomNavItems.length - 1)
+              ? -1
+              : index;
     });
   }
 
@@ -119,13 +125,23 @@ class _MyHomePageState extends State<MyHomePage> {
           elevation: 0.0,
           actions: <Widget>[
             IconButton(
+              icon: const Icon(Icons.login),
+              onPressed: () {
+                // 로그인 화면으로 이동
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const LoginScreen()),
+                );
+              },
+            ),
+            IconButton(
               icon: const Icon(Icons.person),
               onPressed: () =>
                   _scaffoldKey.currentState?.openEndDrawer(), // 오른쪽 드로어를 엽니다.
             ),
           ],
         ),
-        endDrawer: const SideAppBar(),
+        endDrawer: SideAppBar(changePage: changePage),
         body: IndexedStack(
           index: _selectedIndex,
           children: [
@@ -144,7 +160,12 @@ class _MyHomePageState extends State<MyHomePage> {
         bottomNavigationBar: BottomNavigationBar(
           backgroundColor: Colors.white,
           type: BottomNavigationBarType.fixed,
-          currentIndex: _selectedIndex,
+          // 바텀 네비게이션 바의 선택된 인덱스를 설정
+          // 선택된 인덱스가 지정 범위를 벗어날 경우, 모든 항목이 선택되지 않은 것처럼 처리
+          currentIndex:
+              _selectedIndex >= 0 && _selectedIndex < bottomNavItems.length
+                  ? _selectedIndex
+                  : 0,
           selectedItemColor: Colors.black,
           unselectedItemColor: Colors.black54,
           showSelectedLabels: false,
@@ -157,13 +178,11 @@ class _MyHomePageState extends State<MyHomePage> {
             });
           },
           items: bottomNavItems
-              .map(
-                (e) => BottomNavigationBarItem(
-                  icon: Icon(e.iconData),
-                  activeIcon: Icon(e.activeIconData),
-                  label: e.label,
-                ),
-              )
+              .map((e) => BottomNavigationBarItem(
+                    icon: Icon(e.iconData),
+                    activeIcon: Icon(e.activeIconData),
+                    label: e.label,
+                  ))
               .toList(),
         ),
       ),

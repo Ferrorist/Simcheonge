@@ -7,8 +7,10 @@ import 'package:simcheonge_front/screens/my_post_comment_screen.dart';
 import 'package:simcheonge_front/screens/my_post_screen.dart';
 
 class SideAppBar extends StatelessWidget {
+  final Function(int) changePage; // 페이지 변경 함수를 위한 변수 추가
   const SideAppBar({
     super.key,
+    required this.changePage, // 생성자를 통해 changePage 함수를 받음
   });
 
   @override
@@ -60,12 +62,7 @@ class SideAppBar extends StatelessWidget {
                             print('게시글 클릭됨');
                             Navigator.pop(context);
 
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const MyPostScreen(),
-                              ),
-                            );
+                            changePage(5);
                           },
                           child: Container(
                             padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -81,13 +78,7 @@ class SideAppBar extends StatelessWidget {
                           onTap: () {
                             print('게시글 댓글 클릭됨');
                             Navigator.pop(context);
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    const MyPostCommentScreen(),
-                              ),
-                            );
+                            changePage(6);
                           },
                           child: Container(
                             padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -103,13 +94,7 @@ class SideAppBar extends StatelessWidget {
                           onTap: () {
                             print('정책 댓글 클릭됨');
                             Navigator.pop(context);
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    const MyPolicyCommentScreen(),
-                              ),
-                            );
+                            changePage(7);
                           },
                           child: Container(
                             padding: const EdgeInsets.symmetric(
@@ -143,13 +128,7 @@ class SideAppBar extends StatelessWidget {
                           onTap: () {
                             print('책갈피 항목 1 클릭됨');
                             Navigator.pop(context);
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    const BookmarkPolicyScreen(),
-                              ),
-                            );
+                            changePage(8);
                           },
                           child: Container(
                             padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -165,13 +144,7 @@ class SideAppBar extends StatelessWidget {
                           onTap: () {
                             print('책갈피 항목 2 클릭됨');
                             Navigator.pop(context);
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    const BookmarkPostScreen(),
-                              ),
-                            );
+                            changePage(9);
                           },
                           child: Container(
                             padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -195,7 +168,41 @@ class SideAppBar extends StatelessWidget {
                       children: <Widget>[
                         InkWell(
                           onTap: () {
-                            print('정보 관리 항목 1 클릭됨');
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                // 닉네임을 저장할 변수
+                                TextEditingController nicknameController =
+                                    TextEditingController();
+
+                                return AlertDialog(
+                                  title: const Text("닉네임 변경"),
+                                  content: TextField(
+                                    controller: nicknameController,
+                                    decoration: const InputDecoration(
+                                        hintText: "새 닉네임을 입력하세요"),
+                                  ),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      child: const Text('취소'),
+                                      onPressed: () {
+                                        Navigator.of(context).pop(); // 팝업 닫기
+                                      },
+                                    ),
+                                    TextButton(
+                                      child: const Text('변경'),
+                                      onPressed: () {
+                                        // 닉네임 변경 로직 구현
+                                        // 예: 데이터베이스에 닉네임 업데이트 요청
+                                        print(
+                                            '새 닉네임: ${nicknameController.text}');
+                                        Navigator.of(context).pop(); // 팝업 닫기
+                                      },
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
                           },
                           child: Container(
                             padding: const EdgeInsets.symmetric(vertical: 8.0),

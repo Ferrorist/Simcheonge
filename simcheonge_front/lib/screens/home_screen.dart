@@ -27,14 +27,17 @@ class _HomeScreenState extends State<HomeScreen> {
     Colors.purple,
   ];
 
-  Widget colorSlider(Color color, int index) => Container(
+  Widget imageSlider(int index) => SizedBox(
         width: double.infinity,
         height: 240,
-        color: color,
+        child: Image.asset(
+          'assets/home_screen/home_img${index + 1}.png', // 인덱스에 1을 더해 이미지 파일 이름을 맞춤
+          fit: BoxFit.cover, // 이미지가 컨테이너를 꽉 채우도록 설정
+        ),
       );
 
   Widget indicator() => Container(
-        margin: const EdgeInsets.only(bottom: 20.0),
+        margin: const EdgeInsets.only(bottom: 5.0),
         alignment: Alignment.bottomCenter,
         child: AnimatedSmoothIndicator(
           activeIndex: activeIndex,
@@ -42,7 +45,7 @@ class _HomeScreenState extends State<HomeScreen> {
           effect: JumpingDotEffect(
               dotHeight: 6,
               dotWidth: 6,
-              activeDotColor: Colors.white,
+              activeDotColor: const Color.fromARGB(255, 7, 7, 7),
               dotColor: Colors.white.withOpacity(0.6)),
         ),
       );
@@ -57,7 +60,7 @@ class _HomeScreenState extends State<HomeScreen> {
           child: ListView(
             children: [
               Container(
-                  margin: const EdgeInsets.only(bottom: 48),
+                  margin: const EdgeInsets.only(bottom: 30),
                   child: Stack(
                       alignment: Alignment.bottomCenter,
                       children: <Widget>[
@@ -71,9 +74,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             viewportFraction: 1,
                             enlargeCenterPage: true,
                           ),
-                          itemCount: colors.length,
+                          itemCount: 5, // 총 5개의 이미지를 사용
                           itemBuilder: (context, index, realIndex) {
-                            return colorSlider(colors[index], index);
+                            return imageSlider(index); // 새로운 이미지 슬라이더 함수를 사용
                           },
                         ),
                         Align(
@@ -86,8 +89,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 crossAxisCount: 2, // 2개의 열
                 childAspectRatio: (1 / 0.85), // 아이템 비율 조정
                 crossAxisSpacing: 15, // 가로 간격
-                mainAxisSpacing: 15, // 세로 간격
-                padding: const EdgeInsets.all(16), // GridView 패딩
+                mainAxisSpacing: 20, // 세로 간격
+                padding: const EdgeInsets.all(15), // GridView 패딩
                 children: [
                   MainButton(
                     name: '챗봇',
@@ -123,7 +126,13 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: 30),
+              const SizedBox(height: 28),
+              const Center(
+                child: Text("ⓒ 2024. 9to6 all rights reserved."),
+              ),
+              const SizedBox(
+                height: 3,
+              )
             ],
           ),
         ),

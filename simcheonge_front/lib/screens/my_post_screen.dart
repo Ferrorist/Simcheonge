@@ -40,7 +40,6 @@ class _MyPostScreenState extends State<MyPostScreen> {
           ),
         ],
       ),
-      endDrawer: const SideAppBar(),
       body: ListView.builder(
         itemCount: bookmarkedItems.length,
         itemBuilder: (context, index) {
