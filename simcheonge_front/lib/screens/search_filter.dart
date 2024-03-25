@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; // DateFormat을 사용하기 위해 추가
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:simcheonge_front/models/filter_model.dart';
+import 'package:simcheonge_front/services/filter_api.dart';
 
 enum DateSelection { always, undecided, selectPeriod }
 
@@ -8,78 +10,100 @@ class FilterScreen extends StatefulWidget {
   const FilterScreen({super.key});
 
   @override
-  State<FilterScreen> createState() => _FilterScreenState();
+  _FilterScreenState createState() => _FilterScreenState();
 }
 
 class _FilterScreenState extends State<FilterScreen> {
-  List<bool> isSelectedRegion = List.generate(18, (index) => false);
-  List<bool> isSelectedEducation = List.generate(4, (index) => false);
-  List<bool> isSelectedEmploymentStatus = List.generate(4, (index) => false);
-  List<bool> isSelectedSpecialization = List.generate(4, (index) => false);
-  List<bool> isSelectedInterest = List.generate(6, (index) => false);
+  Map<String, bool> regionSelections = {};
+  Map<String, bool> educationSelections = {};
+  Map<String, bool> employmentStatusSelections = {};
+  Map<String, bool> specializationSelections = {};
+  Map<String, bool> interestSelections = {};
   DateTime? startDate;
   DateTime? endDate;
 
-  // 임시 날짜 변수 추가
   DateTime? tempStartDate;
   DateTime? tempEndDate;
 
   DateSelection dateSelection = DateSelection.always;
-  final ScrollController _scrollController = ScrollController(); // 스크롤 컨트롤러 추가
+  final ScrollController _scrollController = ScrollController();
 
-  // 위젯이 메모리에서 해제될 때 호출
   @override
   void dispose() {
-    _scrollController.dispose(); // 컨트롤러 해제
+    _scrollController.dispose();
     super.dispose();
   }
 
-  List<String> regionOptions = [
-    '중앙부처',
-    '서울',
-    '부산',
-    '대구',
-    '인천',
-    '광주',
-    '대전',
-    '울산',
-    '경기',
-    '강원',
-    '충북',
-    '충남',
-    '전북',
-    '전남',
-    '경북',
-    '경남',
-    '제주',
-    '세종'
-  ];
-  List<String> educationOptions = ['제한 없음', '고졸 이하', '대졸 이하', '석/박사'];
-  List<String> employmentStatusOptions = ['제한 없음', '재직자', '개인 사업자', '미취업자'];
-  List<String> specializationOptions = ['제한 없음', '여성', '장애인', '저소득층'];
-  List<String> interestOptions = ['제한 없음', '일자리', '주거', '교육', '복지/문화', '참여/권리'];
+  List<String> regionOptions = [];
+  List<String> educationOptions = [];
+  List<String> employmentStatusOptions = [];
+  List<String> specializationOptions = [];
+  List<String> interestOptions = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadFilterOptions();
+  }
+
+  Future<void> _loadFilterOptions() async {
+    try {
+      final filterModel = await FilterApi.fetchFilters();
+      setState(() {
+        regionOptions = _extractNames(filterModel, 'RGO');
+        educationOptions = _extractNames(filterModel, 'ADM');
+        employmentStatusOptions = _extractNames(filterModel, 'EPM');
+        specializationOptions = _extractNames(filterModel, 'SPC');
+        interestOptions = _extractNames(filterModel, 'PFD');
+        regionSelections = _initializeSelections(regionOptions);
+        educationSelections = _initializeSelections(educationOptions);
+        employmentStatusSelections =
+            _initializeSelections(employmentStatusOptions);
+        specializationSelections = _initializeSelections(specializationOptions);
+        interestSelections = _initializeSelections(interestOptions);
+      });
+    } catch (e) {
+      debugPrint("Failed to load filter options: $e");
+    }
+  }
+
+  List<String> _extractNames(FilterModel filterModel, String tag) {
+    return filterModel.data
+            ?.firstWhere((d) => d.tag == tag, orElse: () => Data())
+            .categoryList
+            ?.map((e) => e.name ?? '')
+            .toList() ??
+        [];
+  }
+
+  Map<String, bool> _initializeSelections(List<String> options) {
+    return {for (var option in options) option: false};
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('필터')),
+      appBar: AppBar(
+        title: const Text('필터'),
+      ),
       body: SingleChildScrollView(
+        controller: _scrollController,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            buildToggleButtons('지역', regionOptions, isSelectedRegion),
-            buildToggleButtons('학력', educationOptions, isSelectedEducation),
-            buildToggleButtons(
-                '취업 상태', employmentStatusOptions, isSelectedEmploymentStatus),
-            buildToggleButtons(
-                '특화 분야', specializationOptions, isSelectedSpecialization),
-            buildToggleButtons('관심 분야', interestOptions, isSelectedInterest),
+            _buildToggleButtons('지역', regionOptions, regionSelections),
+            _buildToggleButtons('학력', educationOptions, educationSelections),
+            _buildToggleButtons(
+                '취업 상태', employmentStatusOptions, employmentStatusSelections),
+            _buildToggleButtons(
+                '특화 분야', specializationOptions, specializationSelections),
+            _buildToggleButtons('관심 분야', interestOptions, interestSelections),
             const Padding(
               padding: EdgeInsets.all(8.0),
               child: Text('신청 기간',
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
             ),
-            buildDateSelectionContent(), // 이동된 위치에 선택 기간 표시 위젯 추가
+            buildDateSelectionContent(),
             buildDateSelection(),
           ],
         ),
@@ -94,12 +118,12 @@ class _FilterScreenState extends State<FilterScreen> {
                 child: ElevatedButton.icon(
                   icon: const Icon(Icons.replay_outlined),
                   label: const Text('초기화'),
-                  onPressed: resetFilters,
+                  onPressed: _resetFilters,
                 ),
               ),
               Expanded(
                 child: ElevatedButton(
-                  onPressed: saveFilters,
+                  onPressed: _saveFilters,
                   child: const Text('저장'),
                 ),
               ),
@@ -110,31 +134,25 @@ class _FilterScreenState extends State<FilterScreen> {
     );
   }
 
-  Widget buildToggleButtons(
-      String title, List<String> options, List<bool> isSelected) {
+  Widget buildDateSelectionContent() {
+    if (dateSelection != DateSelection.selectPeriod ||
+        startDate == null ||
+        endDate == null) {
+      return Container(); // 선택한 날짜 범위가 없으면 아무것도 표시하지 않음
+    }
+
+    final DateFormat formatter = DateFormat('yyyy-MM-dd');
+    final String formattedStartDate = formatter.format(startDate!);
+    final String formattedEndDate = formatter.format(endDate!);
+
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title,
-              style:
-                  const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-          Wrap(
-            spacing: 8.0,
-            children: List.generate(options.length, (index) {
-              return ChoiceChip(
-                label: Text(options[index]),
-                selected: isSelected[index],
-                selectedColor: Colors.blue.shade200,
-                showCheckmark: false,
-                onSelected: (bool selected) {
-                  setState(() {
-                    isSelected[index] = selected;
-                  });
-                },
-              );
-            }),
+          Text(
+            '선택 기간: $formattedStartDate - $formattedEndDate',
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
         ],
       ),
@@ -157,21 +175,28 @@ class _FilterScreenState extends State<FilterScreen> {
             onPressed: (int index) {
               setState(() {
                 dateSelection = DateSelection.values[index];
+                if (dateSelection == DateSelection.selectPeriod) {
+                  _showDateRangePickerModal();
+                } else {
+                  // 기간 선택이 아닌 다른 옵션을 선택했을 때 tempStartDate와 tempEndDate를 null로 설정
+                  tempStartDate = null;
+                  tempEndDate = null;
+                }
               });
-              if (dateSelection == DateSelection.selectPeriod) {
-                _showDateRangePickerModal();
-              }
             },
             children: const <Widget>[
               Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16),
-                  child: Text('상시')),
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                child: Text('상시'),
+              ),
               Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16),
-                  child: Text('미정')),
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                child: Text('미정'),
+              ),
               Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16),
-                  child: Text('기간 선택')),
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                child: Text('기간 선택'),
+              ),
             ],
           ),
         ],
@@ -179,28 +204,34 @@ class _FilterScreenState extends State<FilterScreen> {
     );
   }
 
-  Widget buildDateSelectionContent() {
-    if (dateSelection != DateSelection.selectPeriod ||
-        startDate == null ||
-        endDate == null) {
-      return Container(); // 선택한 날짜 범위가 없으면 아무것도 표시하지 않음
-    }
-
-    final DateFormat formatter = DateFormat('yyyy-MM-dd');
-    final String formattedStartDate = formatter.format(startDate!);
-    final String formattedEndDate = formatter.format(endDate!);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Text(
-            '선택 기간: $formattedStartDate - $formattedEndDate',
-            style: Theme.of(context).textTheme.titleMedium,
+  Widget _buildToggleButtons(
+      String title, List<String> options, Map<String, bool> selections) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title,
+              style:
+                  const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+          Wrap(
+            spacing: 8.0,
+            children: options.map((option) {
+              return ChoiceChip(
+                label: Text(option),
+                selected: selections[option] ?? false,
+                selectedColor: Colors.blue.shade200,
+                showCheckmark: false,
+                onSelected: (bool selected) {
+                  setState(() {
+                    selections[option] = selected;
+                  });
+                },
+              );
+            }).toList(),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -300,32 +331,24 @@ class _FilterScreenState extends State<FilterScreen> {
     });
   }
 
-  void resetFilters() {
+  void _resetFilters() {
     setState(() {
-      isSelectedRegion = List.generate(regionOptions.length, (index) => false);
-      isSelectedEducation =
-          List.generate(educationOptions.length, (index) => false);
-      isSelectedEmploymentStatus =
-          List.generate(employmentStatusOptions.length, (index) => false);
-      isSelectedSpecialization =
-          List.generate(specializationOptions.length, (index) => false);
-      isSelectedInterest =
-          List.generate(interestOptions.length, (index) => false);
-      startDate = null;
-      endDate = null;
-      dateSelection =
-          DateSelection.always; // Set date selection back to 'always'
-      tempStartDate = null; // Clear temporary start date
-      tempEndDate = null; // Clear temporary end date
+      regionSelections = _initializeSelections(regionOptions);
+      educationSelections = _initializeSelections(educationOptions);
+      employmentStatusSelections =
+          _initializeSelections(employmentStatusOptions);
+      specializationSelections = _initializeSelections(specializationOptions);
+      interestSelections = _initializeSelections(interestOptions);
+      dateSelection = DateSelection.always;
+      tempStartDate = null;
+      tempEndDate = null;
     });
   }
 
-  Future<void> saveFilters() async {
+  Future<void> _saveFilters() async {
     final prefs = await SharedPreferences.getInstance();
-    // 필터 상태를 저장하는 로직...
-
+// 필터 상태를 저장하는 로직...
     setState(() {
-      // tempStartDate와 tempEndDate에서 선택한 값을 실제 startDate와 endDate에 할당합니다.
       startDate = tempStartDate;
       endDate = tempEndDate;
     });
@@ -338,6 +361,4 @@ class _FilterScreenState extends State<FilterScreen> {
       );
     }
   }
-  // buildDateSelection과 buildDateSelectionContent 메서드는 기존 로직을 유지하되,
-  // 실제 날짜 변수가 아닌 임시 날짜 변수를 사용하는 부분만 변경해 주세요.
 }

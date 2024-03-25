@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:simcheonge_front/widgets/side_app_bar.dart';
 
 class MyPostScreen extends StatefulWidget {
   const MyPostScreen({super.key});
@@ -9,47 +8,82 @@ class MyPostScreen extends StatefulWidget {
 }
 
 class _MyPostScreenState extends State<MyPostScreen> {
-  final GlobalKey<ScaffoldState> _scaffoldKey =
-      GlobalKey<ScaffoldState>(); // Scaffold key 추가
+  List<String> allItems = [];
+  List<String> displayedItems = [];
+  final TextEditingController _controller = TextEditingController();
 
-  List<String> bookmarkedItems =
-      List<String>.generate(20, (i) => 'Item ${i + 1}'); // 더미 데이터 20개 생성
-  String searchQuery = ''; // 검색 쿼리를 저장하는 문자열
+  @override
+  void initState() {
+    super.initState();
+    // 페이지 새로 로드될 때 검색 상태를 초기화
+    displayedItems = allItems;
+    _controller.clear();
+    _controller.addListener(() {
+      updateSearchQuery(_controller.text);
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void updateSearchQuery(String newQuery) {
+    if (mounted) {
+      setState(() {
+        displayedItems = newQuery.isNotEmpty
+            ? allItems
+                .where((item) =>
+                    item.toLowerCase().contains(newQuery.toLowerCase()))
+                .toList()
+            : allItems;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: _scaffoldKey, // Scaffold에 key 할당
-
       appBar: AppBar(
-        title: const Text('내가 쓴 게시글'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () async {
-              showSearch(
-                context: context,
-                delegate: DataSearch(bookmarkedItems),
-              );
-            },
+        automaticallyImplyLeading: false,
+        title: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
           ),
-          IconButton(
-            icon: const Icon(Icons.person),
-            onPressed: () =>
-                _scaffoldKey.currentState?.openEndDrawer(), // 오른쪽 드로어를 여는 기능 추가
+          child: TextField(
+            controller: _controller,
+            decoration: InputDecoration(
+              hintText: '검색...',
+              border: InputBorder.none,
+              prefixIcon: const Icon(Icons.search),
+              suffixIcon: _controller.text.isNotEmpty
+                  ? IconButton(
+                      icon: const Icon(Icons.clear),
+                      onPressed: () {
+                        _controller.clear();
+                        // 여기서 updateSearchQuery를 명시적으로 호출할 필요가 없습니다.
+                        // 왜냐하면 _controller.clear()가 리스너를 통해 이미 updateSearchQuery를 호출하기 때문입니다.
+                      },
+                    )
+                  : null,
+            ),
           ),
-        ],
+        ),
       ),
       body: ListView.builder(
-        itemCount: bookmarkedItems.length,
+        itemCount: displayedItems.length,
         itemBuilder: (context, index) {
           return ListTile(
-            title: Text(bookmarkedItems[index]),
+            title: Text(displayedItems[index]),
             trailing: IconButton(
               icon: const Icon(Icons.bookmark),
               onPressed: () {
                 setState(() {
-                  bookmarkedItems.removeAt(index);
+                  allItems.removeWhere((item) => item == displayedItems[index]);
+                  displayedItems.removeAt(index);
                 });
               },
             ),
@@ -60,55 +94,4 @@ class _MyPostScreenState extends State<MyPostScreen> {
   }
 }
 
-class DataSearch extends SearchDelegate<String> {
-  final List<String> items;
-
-  DataSearch(this.items);
-
-  @override
-  List<Widget> buildActions(BuildContext context) {
-    return [
-      IconButton(
-        icon: const Icon(Icons.clear),
-        onPressed: () {
-          print('끔');
-          query = '';
-        },
-      ),
-    ];
-  }
-
-  @override
-  Widget buildLeading(BuildContext context) {
-    return IconButton(
-      icon: AnimatedIcon(
-        icon: AnimatedIcons.menu_arrow,
-        progress: transitionAnimation,
-      ),
-      onPressed: () {
-        print('끔');
-
-        close(context, '');
-      },
-    );
-  }
-
-  @override
-  Widget buildResults(BuildContext context) {
-    return Container();
-  }
-
-  @override
-  Widget buildSuggestions(BuildContext context) {
-    final suggestionList = query.isEmpty
-        ? items
-        : items.where((p) => p.startsWith(query)).toList();
-
-    return ListView.builder(
-      itemBuilder: (context, index) => ListTile(
-        title: Text(suggestionList[index]),
-      ),
-      itemCount: suggestionList.length,
-    );
-  }
-}
+void main() => runApp(const MaterialApp(home: MyPostScreen()));
