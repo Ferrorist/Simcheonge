@@ -1,7 +1,6 @@
 package com.e102.simcheonge_server.domain.user.controller;
 
 import com.e102.simcheonge_server.domain.user.dto.SessionUser;
-import com.e102.simcheonge_server.domain.user.dto.request.LoginReqeust;
 import com.e102.simcheonge_server.domain.user.dto.request.SignUpRequest;
 import com.e102.simcheonge_server.domain.user.dto.request.UpdateNicknameRequest;
 import com.e102.simcheonge_server.domain.user.dto.request.UpdatePasswordRequest;
@@ -11,7 +10,6 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import static com.e102.simcheonge_server.common.util.ResponseUtil.buildBasicResponse;
@@ -29,19 +27,6 @@ public class UserController {
         log.info("signUpRequestForm={}",signUpRequestForm);
         userService.saveUser(signUpRequestForm);
         return buildBasicResponse(HttpStatus.OK,"회원 가입에 성공했습니다.");
-    }
-
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginReqeust loginInReqeust){
-        log.info("signUpRequestForm={}",loginInReqeust);
-        return buildBasicResponse(HttpStatus.OK,userService.login(loginInReqeust));
-    }
-
-    @PostMapping("/logout")
-    public ResponseEntity<?> logout(@SessionAttribute(name = "user", required = false)
-                                       SessionUser loginUser){
-        httpSession.removeAttribute("user");
-        return buildBasicResponse(HttpStatus.OK,"로그아웃에 성공했습니다.");
     }
 
     @GetMapping("/userInfo")
