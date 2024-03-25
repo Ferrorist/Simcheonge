@@ -1,4 +1,4 @@
-package com.e102.simcheonge_server.domain.user.dto.response;
+package com.e102.simcheonge_server.domain.auth.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,8 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class LoginResponse {
-    private int userId;
+public class LoginReqeust {
     private String userLoginId;
-    private String userNickname;
+    private String userPassword;
 }

@@ -1,4 +1,4 @@
-package com.e102.simcheonge_server.domain.jwt.constants;
+package com.e102.simcheonge_server.domain.auth.constants;
 
 // 해당 클래스는 Spring Security 및 JWT 관련 상수를 정의한 상수 클래스입니다.
 /**
