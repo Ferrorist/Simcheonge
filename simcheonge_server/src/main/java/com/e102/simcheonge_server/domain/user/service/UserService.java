@@ -7,6 +7,7 @@ import com.e102.simcheonge_server.domain.user.repository.UserRepository;
 import jakarta.servlet.http.HttpSession;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,17 +19,21 @@ import java.util.Optional;
 public class UserService {
     private final UserRepository userRepository;
     private final HttpSession httpSession;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional
-    public void saveUser(final SignUpRequest signUpRequestForm){
-        isValidateLoginId(signUpRequestForm.getUserLoginId());
-        isValidateNickname(signUpRequestForm.getUserNickname());
-        isValidatePassword(signUpRequestForm.getUserPassword(), signUpRequestForm.getUserPasswordCheck());
+    public void saveUser(final SignUpRequest signUpRequest){
+        isValidateLoginId(signUpRequest.getUserLoginId());
+        isValidateNickname(signUpRequest.getUserNickname());
+        isValidatePassword(signUpRequest.getUserPassword(), signUpRequest.getUserPasswordCheck());
+
+
+        String hashedPassword = passwordEncoder.encode(signUpRequest.getUserPassword());
 
         User user=User.builder()
-                .userLoginId(signUpRequestForm.getUserLoginId())
-                .userPassword(signUpRequestForm.getUserPassword())
-                .userNickname(signUpRequestForm.getUserNickname())
+                .userLoginId(signUpRequest.getUserLoginId())
+                .userPassword(hashedPassword)
+                .userNickname(signUpRequest.getUserNickname())
                 .build();
         userRepository.save(user);
     }
