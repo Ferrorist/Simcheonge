@@ -28,13 +28,6 @@ public class Post extends BaseEntity {
     @Column(name = "user_id", nullable = false)
     private int userId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumns({
-            @JoinColumn(name="category_code", referencedColumnName="category_code"),
-            @JoinColumn(name="category_number", referencedColumnName="category_number")
-    })
-    private CategoryDetail categoryDetail;
-
     @Column(name = "post_name", length = 400, nullable = false)
     private String postName;
 

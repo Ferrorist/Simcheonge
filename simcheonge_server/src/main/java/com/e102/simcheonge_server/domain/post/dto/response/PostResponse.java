@@ -1,4 +1,4 @@
-package com.e102.simcheonge_server.domain.post.dto;
+package com.e102.simcheonge_server.domain.post.dto.response;
 
 
 import java.util.Date;
