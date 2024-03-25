@@ -14,5 +14,5 @@ import java.io.Serializable;
 public class PolicyCategoryDetailId implements Serializable {
     private String code;
     private int number;
-    private int name;
+    private int policyId;
 }
