@@ -2,6 +2,7 @@ package com.e102.simcheonge_server.domain.post.service;
 
 import com.e102.simcheonge_server.common.exception.DataNotFoundException;
 import com.e102.simcheonge_server.domain.category_detail.entity.CategoryDetail;
+import com.e102.simcheonge_server.domain.category_detail.repository.CategoryDetailRepository;
 import com.e102.simcheonge_server.domain.post.dto.request.PostRequest;
 import com.e102.simcheonge_server.domain.post.dto.response.PostResponse;
 import com.e102.simcheonge_server.domain.post.entity.Post;
@@ -29,31 +30,7 @@ public class PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final PostCategoryRepository postCategoryRepository;
-
-//    public List<Post> searchPostsByCategoryAndKeyword(String categoryCode, Integer categoryNumber, String keyword) {
-//        // keyword가 주어졌을 때 해당 키워드를 포함하는 게시글 검색
-//        return postRepository.findByCategoryCodeAndCategoryNumberAndKeyword(categoryCode, categoryNumber, keyword);
-//    }
-//
-//    public List<Post> findPostsByCategory(String categoryCode, Integer categoryNumber) {
-//        // 카테고리 코드와 카테고리 넘버에 따라 게시글 조회
-//        return postRepository.findByCategoryCodeAndCategoryNumber(categoryCode, categoryNumber);
-//    }
-//
-//    // 카테고리 코드에 따른 게시글 조회
-//    @Transactional(readOnly = true)
-//    public List<Post> findPostsByCategoryAndKeyword(String categoryCode, Integer categoryNumber, String keyword) {
-//        // "POS" 카테고리 코드를 기본값으로 사용
-//        categoryCode = Optional.ofNullable(categoryCode).orElse("POS");
-//        // 카테고리와 키워드 기반 검색 로직
-//        if (keyword != null && !keyword.isEmpty()) {
-//            return postRepository.findByKeywordAndCategoryCodeAndCategoryNumber(keyword, categoryCode, categoryNumber);
-//        } else if (categoryCode != null && categoryNumber != null) {
-//            return postRepository.findByCategoryCodeAndCategoryNumber(categoryCode, categoryNumber);
-//        } else {
-//            return postRepository.findAll();
-//        }
-//    }
+    private final CategoryDetailRepository categoryDetailRepository;
 
     // 게시글 등록
     @Transactional
@@ -76,44 +53,42 @@ public class PostService {
         return savedPost;
     }
 
-    // 게시글 삭제
-//    @Transactional
-//    public void deletePost(int postId) {
-//        postRepository.deleteById(postId);
-//    }
-//
-//    // 게시글 수정
-//    @Transactional
-//    public Post updatePost(int postId, String postName, String postContent, String categoryCode, Integer categoryNumber) {
-//        Optional<Post> postOptional = postRepository.findByPostId(postId);
-//        if (postOptional.isPresent()) {
-//            Post post = postOptional.get();
-//            post.setPostName(postName);
-//            post.setPostContent(postContent);
-//            return postRepository.save(post);
-//        } else {
-//            // 예외 처리 혹은 다른 로직 구현
-//            return null;
-//        }
-//    }
-//
-//    // 게시글 상세 조회
-//    public Optional<Post> findPostById(int postId) {
-//        return postRepository.findByPostId(postId);
-//    }
-//
-//    // 게시글 검색 (제목 또는 내용 기준)
-//    public List<Post> searchPosts(String keyword) {
-//        return postRepository.findByKeyword(keyword);
-//    }
-//
-//    // 내가 쓴 게시글 조회
-//    public List<Post> findPostsByUserId(int userId) {
-//        return postRepository.findByUserId(userId);
-//    }
-//
-//    // 사용자 ID와 카테고리 코드, 넘버에 따라 게시글을 조회하는 메서드
-//    public List<Post> findPostsByUserIdAndCategory(int userId, String categoryCode, int categoryNumber) {
-//        return postRepository.findByUserIdAndCategoryCodeAndCategoryNumber(userId, categoryCode, categoryNumber);
-//    }
+    // 게시글 조회
+    public List<PostResponse> findPostsByCategoryCodeAndNumberWithKeyword(String categoryCode, Integer categoryNumber, String keyword) {
+        List<Post> posts;
+
+        // 키워드 검색 조건 처리
+        if (keyword != null && keyword.trim().isEmpty()) {
+            keyword = null; // 키워드가 공백인 경우 null로 처리하여 전체 조회
+        }
+
+        // 카테고리 넘버가 1인 경우 모든 게시글 조회
+        if (categoryNumber == 1) {
+            // 카테고리 코드나 넘버에 상관없이 모든 게시글을 검색 조건에 맞추어 조회
+            posts = postRepository.findAllByKeyword(keyword);
+        } else {
+            // 기존 로직을 유지하여 특정 카테고리에 대한 게시글 조회
+            posts = postRepository.findByCategoryDetailsAndKeyword(categoryCode, categoryNumber, keyword);
+        }
+
+        return posts.stream().map(post -> {
+            String userNickname = userRepository.findById(post.getUserId())
+                    .orElseThrow(() -> new IllegalArgumentException("User not found"))
+                    .getUserNickname();
+
+            String categoryName = categoryDetailRepository.findByCodeAndNumber(categoryCode, categoryNumber)
+                    .orElseThrow(() -> new IllegalArgumentException("CategoryDetail not found"))
+                    .getName();
+
+            return new PostResponse(
+                    post.getPostId(),
+                    post.getPostName(),
+                    post.getPostContent(),
+                    userNickname,
+                    post.getCreatedAt(),
+                    categoryName
+            );
+        }).collect(Collectors.toList());
+    }
+
 }
