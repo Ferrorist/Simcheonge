@@ -7,7 +7,9 @@ import 'package:simcheonge_front/screens/signup_screen.dart';
 import 'package:simcheonge_front/screens/home_screen.dart'; // 가정: 로그인 성공 후 이동할 화면
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  final Function(bool) updateLoginStatus;
+
+  const LoginScreen({super.key, required this.updateLoginStatus});
 
   @override
   _LoginScreenState createState() => _LoginScreenState();
@@ -33,6 +35,7 @@ class _LoginScreenState extends State<LoginScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('로그인에 성공했습니다.')),
       );
+      widget.updateLoginStatus(true);
       // 로그인 성공 시 홈 화면으로 이동
       Navigator.pushReplacement(
         context,
