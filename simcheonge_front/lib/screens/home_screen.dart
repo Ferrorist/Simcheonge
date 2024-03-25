@@ -19,13 +19,6 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int activeIndex = 0; // 'activeIndex'를 상태 변수로 선언
-  final List<Color> colors = [
-    Colors.red,
-    Colors.green,
-    Colors.blue,
-    Colors.yellow,
-    Colors.purple,
-  ];
 
   Widget imageSlider(int index) => SizedBox(
         width: double.infinity,
@@ -41,7 +34,7 @@ class _HomeScreenState extends State<HomeScreen> {
         alignment: Alignment.bottomCenter,
         child: AnimatedSmoothIndicator(
           activeIndex: activeIndex,
-          count: colors.length,
+          count: 5,
           effect: JumpingDotEffect(
               dotHeight: 6,
               dotWidth: 6,
@@ -53,7 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.indigo.shade50,
+      backgroundColor: const Color.fromARGB(186, 99, 194, 158),
       body: SafeArea(
         child: Container(
           margin: const EdgeInsets.only(top: 0, left: 0, right: 0),
@@ -86,22 +79,24 @@ class _HomeScreenState extends State<HomeScreen> {
               GridView.count(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(), // 스크롤 동작 비활성화
-                crossAxisCount: 2, // 2개의 열
-                childAspectRatio: (1 / 0.85), // 아이템 비율 조정
+                crossAxisCount: 1, // 2개의 열
+                childAspectRatio: (1 / 0.3), // 아이템 비율 조정
                 crossAxisSpacing: 15, // 가로 간격
                 mainAxisSpacing: 20, // 세로 간격
                 padding: const EdgeInsets.all(15), // GridView 패딩
                 children: [
                   MainButton(
                     name: '챗봇',
-                    icon: FontAwesomeIcons.robot,
-                    isInverted: false,
+                    descrip: '필요한 정책을 물어보세요!',
+                    icon: Icons.question_answer_rounded,
+                    isInverted: true,
                     onPressed: () {
                       widget.changePage(2);
                     },
                   ),
                   MainButton(
                     name: '검색',
+                    descrip: '검색을 통해 정책을 찾아요!',
                     icon: Icons.search,
                     isInverted: true,
                     onPressed: () {
@@ -110,6 +105,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   MainButton(
                     name: '뉴스',
+                    descrip: '오늘의 뉴스를 확인하세요!',
                     icon: FontAwesomeIcons.newspaper,
                     isInverted: true,
                     onPressed: () {
@@ -118,8 +114,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   MainButton(
                     name: '게시판',
+                    descrip: '유용한 정보를 공유해요!',
                     icon: FontAwesomeIcons.chalkboard,
-                    isInverted: false,
+                    isInverted: true,
                     onPressed: () {
                       widget.changePage(4);
                     },
