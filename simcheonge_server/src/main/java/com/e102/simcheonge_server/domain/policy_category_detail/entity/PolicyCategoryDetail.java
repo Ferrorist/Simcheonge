@@ -23,5 +23,5 @@ public class PolicyCategoryDetail {
     private int number;
 
     @Id  @Column(name = "policy_id", nullable = false)
-    private int name;
+    private int policyId;
 }
