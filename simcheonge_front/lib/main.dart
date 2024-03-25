@@ -50,6 +50,14 @@ class _MyHomePageState extends State<MyHomePage> {
   int _selectedIndex = 0; // 선택된 페이지 인덱스
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   DateTime? lastPressed;
+  bool isLoggedIn = false; // 로그인 상태 변수 추가
+
+  // 로그인 상태 업데이트 함수
+  void updateLoginStatus(bool status) {
+    setState(() {
+      isLoggedIn = status;
+    });
+  }
 
   // 페이지마다 다른 제목을 반환하는 함수
   String getAppBarTitle() {
@@ -124,16 +132,21 @@ class _MyHomePageState extends State<MyHomePage> {
           centerTitle: true, // 중앙 정렬
           elevation: 0.0,
           actions: <Widget>[
-            IconButton(
-              icon: const Icon(Icons.login),
-              onPressed: () {
-                // 로그인 화면으로 이동
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const LoginScreen()),
-                );
-              },
-            ),
+            if (!isLoggedIn)
+              IconButton(
+                icon: const Icon(Icons.login),
+                onPressed: () {
+                  // 로그인 화면으로 이동
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => LoginScreen(
+                              updateLoginStatus: updateLoginStatus,
+                            )),
+                  );
+                },
+              ),
+            // if (isLoggedIn)
             IconButton(
               icon: const Icon(Icons.person),
               onPressed: () =>
