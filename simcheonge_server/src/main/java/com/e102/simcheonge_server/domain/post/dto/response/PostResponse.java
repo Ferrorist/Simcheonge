@@ -1,6 +1,7 @@
 package com.e102.simcheonge_server.domain.post.dto.response;
 
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 public class PostResponse {
@@ -10,10 +11,17 @@ public class PostResponse {
     private String postContent;
     private String userNickname;
     private Date createdAt;
+    private String categoryName;
 
     // Constructors, Getters, and Setters
 
-    public PostResponse() {
+    public PostResponse(int postId, String postName, String postContent, String userNickname, Date createdAt, String categoryName) {
+        this.postId = postId;
+        this.postName = postName;
+        this.postContent = postContent;
+        this.userNickname = userNickname;
+        this.createdAt = createdAt;
+        this.categoryName = categoryName;
     }
 
     public int getPostId() {

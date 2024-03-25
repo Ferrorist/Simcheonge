@@ -34,15 +34,5 @@ public class Post extends BaseEntity {
     @Column(name = "post_content", length = 6000, nullable = false)
     private String postContent;
 
-    // 게시글 제목 설정 메서드
-    public void setPostName(String postName) {
-        this.postName = postName;
-    }
-
-    // 게시글 내용 설정 메서드
-    public void setPostContent(String postContent) {
-        this.postContent = postContent;
-    }
-
     // 삭제 상태 변경 및 삭제 시간 설정 메서드는 BaseEntity에서 상속받음
 }
