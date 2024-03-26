@@ -1,23 +1,22 @@
 package com.e102.simcheonge_server.domain.post.entity;
 
 import com.e102.simcheonge_server.common.BaseEntity;
+import com.e102.simcheonge_server.domain.category_detail.entity.CategoryDetail;
 import com.e102.simcheonge_server.domain.user.entity.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.util.Date;
 
+@Entity
+@Table(name = "post")
+@Getter
+@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
-@Entity
-@Table(name = "post")
 public class Post extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,4 +32,5 @@ public class Post extends BaseEntity {
     @Column(name = "post_content", length = 6000, nullable = false)
     private String postContent;
 
+    // 삭제 상태 변경 및 삭제 시간 설정 메서드는 BaseEntity에서 상속받음
 }
