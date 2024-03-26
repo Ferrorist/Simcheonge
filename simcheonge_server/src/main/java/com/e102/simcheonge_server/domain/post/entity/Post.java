@@ -5,10 +5,7 @@ import com.e102.simcheonge_server.domain.category_detail.entity.CategoryDetail;
 import com.e102.simcheonge_server.domain.user.entity.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.util.Date;
@@ -16,6 +13,7 @@ import java.util.Date;
 @Entity
 @Table(name = "post")
 @Getter
+@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
