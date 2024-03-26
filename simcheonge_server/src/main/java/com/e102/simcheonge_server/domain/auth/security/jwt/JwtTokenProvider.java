@@ -25,7 +25,6 @@ import java.util.stream.Collectors;
 public class JwtTokenProvider {
     private final JwtUtil jwtUtil;
 
-
     // Member 정보를 가지고 AccessToken, RefreshToken을 생성하는 메서드
     public JwtToken generateToken(Authentication authentication) {
 
@@ -52,6 +51,9 @@ public class JwtTokenProvider {
                 .setExpiration(new Date(now + 86400000))
                 .signWith(Keys.hmacShaKeyFor(signingKey), SignatureAlgorithm.HS256)
                 .compact();
+
+        // Refresh Toekn Redis에 저장
+        jwtUtil.saveRefreshToken(authentication.getName(), refreshToken);
 
         return JwtToken.builder()
                 .grantType("Bearer")
