@@ -126,27 +126,27 @@ public class PolicyCustomRepositoryImpl extends QueryDslSupport implements Polic
 //                .fetch();
         BooleanBuilder notInBuilder = new BooleanBuilder();
 
-        for (int i = 0; i < detailList.size(); i++) {
-            String code = detailList.get(i).getCode();
-            Integer number = detailList.get(i).getNumber();
+//        for (int i = 0; i < detailList.size(); i++) {
+//            String code = detailList.get(i).getCode();
+//            Integer number = detailList.get(i).getNumber();
+//
+//            notInBuilder.and(
+//                    QPolicyCategoryDetail.policyCategoryDetail.code.ne(code)
+//                            .or(QPolicyCategoryDetail.policyCategoryDetail.number.ne(number))
+//            );
+//        }
+//
+//        String notInBuilderString=notInBuilder.toString();
+//        log.info("notInBuilderString={}",notInBuilderString);
 
-            notInBuilder.and(
-                    QPolicyCategoryDetail.policyCategoryDetail.code.ne(code)
-                            .or(QPolicyCategoryDetail.policyCategoryDetail.number.ne(number))
-            );
-        }
-
-        String notInBuilderString=notInBuilder.toString();
-        log.info("notInBuilderString={}",notInBuilderString);
-
-        List<Integer> excludedPolicyIds = queryFactory
-                .select(QPolicyCategoryDetail.policyCategoryDetail.policyId)
-                .from(QPolicyCategoryDetail.policyCategoryDetail)
-                .where(notInBuilder)
-                .distinct()
-                .fetch();
-
-        resp.removeAll(excludedPolicyIds);
+//        List<Integer> excludedPolicyIds = queryFactory
+//                .select(QPolicyCategoryDetail.policyCategoryDetail.policyId)
+//                .from(QPolicyCategoryDetail.policyCategoryDetail)
+//                .where(notInBuilder)
+//                .distinct()
+//                .fetch();
+//
+//        resp.removeAll(excludedPolicyIds);
 
         return resp;
     }
