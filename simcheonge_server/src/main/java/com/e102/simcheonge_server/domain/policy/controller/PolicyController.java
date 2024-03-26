@@ -2,7 +2,6 @@ package com.e102.simcheonge_server.domain.policy.controller;
 
 import com.e102.simcheonge_server.common.util.ResponseUtil;
 import com.e102.simcheonge_server.domain.policy.service.PolicyService;
-import com.e102.simcheonge_server.domain.user.dto.SessionUser;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

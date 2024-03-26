@@ -25,30 +25,26 @@ import java.util.Optional;
 @Transactional(readOnly = true)
 public class AuthService {
 
-    private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
     private final JwtTokenProvider jwtTokenProvider;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
-    private final PasswordEncoder encoder;
 
     @Transactional
     public LoginResponse login(LoginRequest loginRequest) {
-//        String userLoginId = loginRequest.getUserLoginId();
-//        Optional<User> userOptional  = userRepository.findByUserLoginId(userLoginId);
-//        User user = userOptional.get();
-//
-//        // 1. username + password 를 기반으로 Authentication 객체 생성
-//        // 이때 authentication은 인증 여부를 확인하는 authenticated 값이 false
-//        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(user.getUserLoginId(), user.getUserPassword());
-//
-//        // 2. 실제 검증. authenticate() 메서드를 통해 요청된 Member 에 대한 검증 진행
-//        // authenticate 메서드가 실행될 때 CustomUserDetailsService 에서 만든 loadUserByUsername 메서드 실행
-//        Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
+        // 1. username + password 를 기반으로 Authentication 객체 생성
+        // 이때 authentication은 인증 여부를 확인하는 authenticated 값이 false
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(loginRequest.getUserLoginId(), loginRequest.getUserPassword());
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        // 2. 실제 검증. authenticate() 메서드를 통해 요청된 Member 에 대한 검증 진행
+        // authenticate 메서드가 실행될 때 CustomUserDetailsService 에서 만든 loadUserByUsername 메서드 실행
+        Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
 
         // 3. 인증 정보를 기반으로 JWT 토큰 생성
         JwtToken jwtToken = jwtTokenProvider.generateToken(authentication);
+
+        String userLoginId = loginRequest.getUserLoginId();
+        Optional<User> userOptional  = userRepository.findByUserLoginId(userLoginId);
+        User user = userOptional.get();
 
         return LoginResponse.builder()
                 .userID(user.getUserId())

@@ -1,10 +1,18 @@
 package com.e102.simcheonge_server.domain.auth.controller;
 
 
-import com.e102.simcheonge_server.domain.auth.dto.response.LoginResponse;
+import com.e102.simcheonge_server.common.util.ResponseUtil;
+import com.e102.simcheonge_server.domain.auth.dto.request.LogoutRequest;
+import com.e102.simcheonge_server.domain.auth.security.jwt.JwtUtil;
 import com.e102.simcheonge_server.domain.auth.service.AuthService;
 import com.e102.simcheonge_server.domain.auth.dto.request.LoginRequest;
+import com.e102.simcheonge_server.domain.user.entity.User;
+import com.e102.simcheonge_server.domain.user.utill.UserUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,9 +25,19 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final AuthService authService;
+    private JwtUtil jwtUtil;
 
     @PostMapping("/login")
-    public LoginResponse signIn(@RequestBody LoginRequest loginRequest) {
-        return authService.login(loginRequest);
+
+    public ResponseEntity<?> signIn(@RequestBody LoginRequest loginRequest)
+    {
+        return ResponseUtil.buildBasicResponse(HttpStatus.OK, authService.login(loginRequest));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> signOut(@RequestBody LogoutRequest logoutRequest, @AuthenticationPrincipal UserDetails userDetails) {
+        User user = UserUtil.getUserFromUserDetails(userDetails);
+        jwtUtil.invalidateRefreshToken(user.getUserLoginId());
+        return ResponseEntity.ok().body("로그아웃 되었습니다.");
     }
 }

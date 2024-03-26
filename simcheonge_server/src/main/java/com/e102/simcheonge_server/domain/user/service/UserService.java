@@ -2,6 +2,7 @@ package com.e102.simcheonge_server.domain.user.service;
 
 import com.e102.simcheonge_server.common.exception.DataNotFoundException;
 import com.e102.simcheonge_server.domain.user.dto.request.SignUpRequest;
+import com.e102.simcheonge_server.domain.user.dto.request.UpdatePasswordRequest;
 import com.e102.simcheonge_server.domain.user.entity.User;
 import com.e102.simcheonge_server.domain.user.repository.UserRepository;
 import jakarta.servlet.http.HttpSession;
@@ -18,7 +19,6 @@ import java.util.Optional;
 @AllArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
-    private final HttpSession httpSession;
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
@@ -68,10 +68,21 @@ public class UserService {
     }
 
     @Transactional
-    public void updatePassword(final String userPassword,final int userId) {
+    public void updatePassword(final UpdatePasswordRequest userPassword, final int userId) {
+
+        String currentPassword = userPassword.getCurrentPassword();
+        String newPassword = userPassword.getNewPassword();
+
         User user = userRepository.findByUserId(userId)
                 .orElseThrow(() -> new DataNotFoundException("해당 사용자가 존재하지 않습니다."));
-        user.updatePassword(userPassword);
+
+        if (!passwordEncoder.matches(currentPassword, user.getUserPassword())) {
+            throw new IllegalArgumentException("현재 비밀번호가 일치하지 않습니다.");
+        }
+
+        String encodedNewPassword = passwordEncoder.encode(newPassword);
+
+        user.updatePassword(encodedNewPassword);
         userRepository.save(user);
     }
 }
