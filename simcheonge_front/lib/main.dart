@@ -73,15 +73,15 @@ class _MyHomePageState extends State<MyHomePage> {
       case 4:
         return '정보게시판';
       case 5:
-        return '게시글';
+        return '내가 쓴 게시글';
       case 6:
-        return '게시글 댓글';
+        return '내가 쓴 댓글(게시글)';
       case 7:
-        return '정책 댓글';
+        return '내가 쓴 댓글(정책)';
       case 8:
-        return '정책';
+        return '정책 북마크';
       case 9:
-        return '게시글';
+        return '게시글 북마크';
       default:
         return '앱';
     }
