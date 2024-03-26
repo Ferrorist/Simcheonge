@@ -1,7 +1,5 @@
 package com.e102.simcheonge_server.domain.auth.security.jwt;
 
-
-
 import com.e102.simcheonge_server.domain.auth.dto.JwtToken;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
@@ -28,7 +26,6 @@ public class JwtTokenProvider {
     private final JwtUtil jwtUtil;
 
 
-
     // Member 정보를 가지고 AccessToken, RefreshToken을 생성하는 메서드
     public JwtToken generateToken(Authentication authentication) {
 
@@ -45,7 +42,7 @@ public class JwtTokenProvider {
         Date accessTokenExpiresIn = new Date(now + 86400000);
         String accessToken = Jwts.builder()
                 .setSubject(authentication.getName())
-                .claim("auth", authorities)
+                .claim("auth", authorities) // 유저 권한에 따른 기능 분류 프로젝트에 반영 시 토큰에도 권한 반영하기
                 .setExpiration(accessTokenExpiresIn)
                 .signWith(Keys.hmacShaKeyFor(signingKey), SignatureAlgorithm.HS256)
                 .compact();
@@ -65,8 +62,10 @@ public class JwtTokenProvider {
 
     // Jwt 토큰을 복호화하여 토큰에 들어있는 정보를 꺼내는 메서드
     public Authentication getAuthentication(String accessToken) {
+
         // Jwt 토큰 복호화
         Claims claims = parseClaims(accessToken);
+
 
         if (claims.get("auth") == null) {
             throw new RuntimeException("권한 정보가 없는 토큰입니다.");
@@ -87,6 +86,7 @@ public class JwtTokenProvider {
     public boolean validateToken(String token) {
         try {
             byte[] signingKey = jwtUtil.getSecretKey().getBytes();
+
             Jwts.parserBuilder()
                     .setSigningKey(Keys.hmacShaKeyFor(signingKey))
                     .build()
