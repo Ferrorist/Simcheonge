@@ -19,7 +19,8 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String userLoginId) throws UsernameNotFoundException {
         return userRepository.findByUserLoginId(userLoginId)
-                .map(this::createUserDetails)
+                .map
+                        (this::createUserDetails)
                 .orElseThrow(() -> new UsernameNotFoundException("해당하는 회원을 찾을 수 없습니다."));
     }
 
@@ -28,6 +29,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         return User.builder()
                 .username(user.getUserLoginId())
                 .password(passwordEncoder.encode(user.getUserPassword()))
+                .roles("USER") //명시적으로 모든 유저에게 "기본 ROLE_USER" 권한 부여 (프로젝트에서 권한의 쓰임이 없기 떄문)
 //                .roles(user.getRoles().toArray(new String[0]))
                 .build();
     }
