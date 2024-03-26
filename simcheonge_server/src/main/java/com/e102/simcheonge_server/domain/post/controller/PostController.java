@@ -54,4 +54,20 @@ public class PostController {
         List<PostResponse> postResponses = postService.findPostsByCategoryCodeAndNumberWithKeyword(categoryCode, categoryNumber, keyword); // 메서드 이름을 수정했습니다.
         return ResponseEntity.ok(Map.of("status", 200, "data", postResponses));
     }
+
+
+
+
+    // 게시글 삭제
+    @DeleteMapping("/{postId}")
+    public ResponseEntity<?> deletePost(@PathVariable("postId") int postId, @SessionAttribute(name = "user", required = false) SessionUser loginUser) {
+        if (loginUser == null) {
+            return ResponseUtil.buildBasicResponse(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다.");
+        }
+
+        postService.deletePost(postId, loginUser.getUserId());
+
+        return ResponseUtil.buildBasicResponse(HttpStatus.OK, "게시글 삭제에 성공했습니다.");
+    }
+
 }
