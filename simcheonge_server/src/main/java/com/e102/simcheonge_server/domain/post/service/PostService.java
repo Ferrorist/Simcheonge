@@ -14,8 +14,11 @@ import com.e102.simcheonge_server.domain.user.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -89,6 +92,26 @@ public class PostService {
                     categoryName
             );
         }).collect(Collectors.toList());
+    }
+
+
+
+
+
+
+
+
+    // 게시글 삭제
+    @Transactional
+    public void deletePost(int postId, int userId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new DataNotFoundException("해당 게시글을 찾을 수 없습니다."));
+
+        if (post.getUserId() != userId) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "게시글을 삭제할 권한이 없습니다.");
+        }
+
+        postRepository.deleteById(postId);
     }
 
 }
