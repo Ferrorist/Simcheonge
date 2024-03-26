@@ -12,6 +12,8 @@ import java.util.Optional;
 public interface CategoryDetailRepository extends JpaRepository<CategoryDetail, CategoryDetailId> {
 
     List<CategoryDetail> findAllByCode(String code);
+
+    Integer countByCode(String code);
+
     Optional<CategoryDetail> findByCodeAndNumber(String code, int number);
     Optional<CategoryDetail> findByCodeAndNumber(String code, Integer number);
-}
