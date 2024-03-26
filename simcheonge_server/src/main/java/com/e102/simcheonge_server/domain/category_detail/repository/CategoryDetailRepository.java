@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface CategoryDetailRepository extends JpaRepository<CategoryDetail, CategoryDetailId> {
@@ -13,4 +14,6 @@ public interface CategoryDetailRepository extends JpaRepository<CategoryDetail, 
     List<CategoryDetail> findAllByCode(String code);
 
     Integer countByCode(String code);
-}
+
+    Optional<CategoryDetail> findByCodeAndNumber(String code, int number);
+    Optional<CategoryDetail> findByCodeAndNumber(String code, Integer number);
