@@ -1,5 +1,6 @@
 package com.e102.simcheonge_server.domain.policy.entity;
 
+import com.e102.simcheonge_server.domain.policy.dto.request.PolicyUpdateRequest;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -115,4 +116,38 @@ public class Policy {
     @Column(name = "policy_created_at", columnDefinition = "DATETIME")
     private Date createdAt;
 
+    /** 관리자의 정책 수정 메서드 **/
+    public void updatePolicy(PolicyUpdateRequest policyUpdateRequest) {
+        this.code=policyUpdateRequest.getCode();
+        this.area=policyUpdateRequest.getArea();
+        this.name=policyUpdateRequest.getName();
+        this.intro=policyUpdateRequest.getIntro();
+        this.supportContent=policyUpdateRequest.getSupportContent();
+        this.supportScale=policyUpdateRequest.getSupportScale();
+        this.etc=policyUpdateRequest.getEtc();
+        this.field=policyUpdateRequest.getField();
+        this.businessPeriod=policyUpdateRequest.getBusinessPeriod();
+        this.periodTypeCode=policyUpdateRequest.getPeriodTypeCode();
+        this.startDate=policyUpdateRequest.getStartDate();
+        this.endDate=policyUpdateRequest.getEndDate();
+        this.ageInfo=policyUpdateRequest.getAgeInfo();
+        this.majorRequirements=policyUpdateRequest.getMajorRequirements();
+        this.employmentStatus=policyUpdateRequest.getEmploymentStatus();
+        this.specializedField=policyUpdateRequest.getSpecializedField();
+        this.educationRequirements=policyUpdateRequest.getEducationRequirements();
+        this.residenceIncome=policyUpdateRequest.getResidenceIncome();
+        this.additionalClues=policyUpdateRequest.getAdditionalClues();
+        this.entryLimit=policyUpdateRequest.getEntryLimit();
+        this.applicationProcedure=policyUpdateRequest.getApplicationProcedure();
+        this.requiredDocuments=policyUpdateRequest.getRequiredDocuments();
+        this.evaluationContent=policyUpdateRequest.getEvaluationContent();
+        this.siteAddress=policyUpdateRequest.getSiteAddress();
+        this.mainOrganization=policyUpdateRequest.getMainOrganization();
+        this.mainContact=policyUpdateRequest.getMainContact();
+        this.operationOrganization=policyUpdateRequest.getOperationOrganization();
+        this.operationOrganizationContact=policyUpdateRequest.getOperationOrganizationContact();
+
+        this.isProcessed = true;
+        this.processedAt = new Date();
+    }
 }
