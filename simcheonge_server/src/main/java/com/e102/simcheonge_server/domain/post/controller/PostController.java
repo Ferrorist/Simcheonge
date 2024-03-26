@@ -55,8 +55,17 @@ public class PostController {
         return ResponseEntity.ok(Map.of("status", 200, "data", postResponses));
     }
 
+    // 게시글 수정
+    @PatchMapping("/{postId}")
+    public ResponseEntity<?> updatePost(@PathVariable("postId") int postId, @RequestBody PostRequest postRequest, @SessionAttribute(name = "user", required = false) SessionUser loginUser) {
+        if (loginUser == null) {
+            return ResponseUtil.buildBasicResponse(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다.");
+        }
 
+        postService.updatePost(postId, postRequest, loginUser.getUserId());
 
+        return ResponseUtil.buildBasicResponse(HttpStatus.OK, Map.of("post_id", postId));
+    }
 
     // 게시글 삭제
     @DeleteMapping("/{postId}")

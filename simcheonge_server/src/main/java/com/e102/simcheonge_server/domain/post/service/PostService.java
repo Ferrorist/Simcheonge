@@ -80,8 +80,8 @@ public class PostService {
                     .getUserNickname();
 
             String categoryName = categoryDetailRepository.findByCodeAndNumber(categoryCode, categoryNumber)
-                    .orElseThrow(() -> new IllegalArgumentException("CategoryDetail not found"))
-                    .getName();
+                    .map(CategoryDetail::getName)
+                    .orElse("기타");
 
             return new PostResponse(
                     post.getPostId(),
@@ -94,12 +94,30 @@ public class PostService {
         }).collect(Collectors.toList());
     }
 
+    // 게시글 수정
+    @Transactional
+    public void updatePost(int postId, PostRequest postRequest, int userId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new DataNotFoundException("해당 게시글을 찾을 수 없습니다."));
 
+        if (post.getUserId() != userId) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "게시글을 수정할 권한이 없습니다.");
+        }
 
+        // 게시글 내용 업데이트
+        post.setPostName(postRequest.getPostName());
+        post.setPostContent(postRequest.getPostContent());
+        postRepository.save(post);
 
+        // 기존 게시글 카테고리 정보 삭제
+        PostCategory oldPostCategory = postCategoryRepository.findByPostId(postId)
+                .orElseThrow(() -> new DataNotFoundException("해당 게시글의 카테고리 정보를 찾을 수 없습니다."));
+        postCategoryRepository.delete(oldPostCategory);
 
-
-
+        // 새로운 게시글 카테고리 정보 생성 및 저장
+        PostCategory newPostCategory = new PostCategory(postRequest.getCategoryCode(), postRequest.getCategoryNumber(), postId);
+        postCategoryRepository.save(newPostCategory);
+    }
 
     // 게시글 삭제
     @Transactional
@@ -111,6 +129,11 @@ public class PostService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "게시글을 삭제할 권한이 없습니다.");
         }
 
+        // post_category 테이블에서 해당 게시글의 카테고리 정보 삭제
+        Optional<PostCategory> postCategory = postCategoryRepository.findByPostId(postId);
+        postCategory.ifPresent(postCategoryRepository::delete);
+
+        // post 테이블에서 해당 게시글 삭제
         postRepository.deleteById(postId);
     }
 
