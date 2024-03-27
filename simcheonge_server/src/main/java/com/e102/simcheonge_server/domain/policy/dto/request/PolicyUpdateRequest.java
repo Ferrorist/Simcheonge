@@ -36,4 +36,5 @@ public class PolicyUpdateRequest {
     private String mainContact;
     private String operationOrganization;
     private String operationOrganizationContact;
+    private String applicationPeriod;
 }
