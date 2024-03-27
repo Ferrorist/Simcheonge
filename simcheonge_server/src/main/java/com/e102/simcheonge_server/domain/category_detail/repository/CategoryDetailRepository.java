@@ -16,4 +16,4 @@ public interface CategoryDetailRepository extends JpaRepository<CategoryDetail, 
     Integer countByCode(String code);
 
     Optional<CategoryDetail> findByCodeAndNumber(String code, int number);
-    Optional<CategoryDetail> findByCodeAndNumber(String code, Integer number);
+}
