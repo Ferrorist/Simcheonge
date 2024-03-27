@@ -2,7 +2,9 @@ package com.e102.simcheonge_server.domain.auth.controller;
 
 
 import com.e102.simcheonge_server.common.util.ResponseUtil;
+import com.e102.simcheonge_server.domain.auth.dto.JwtToken;
 import com.e102.simcheonge_server.domain.auth.dto.request.LogoutRequest;
+import com.e102.simcheonge_server.domain.auth.security.jwt.JwtTokenProvider;
 import com.e102.simcheonge_server.domain.auth.security.jwt.JwtUtil;
 import com.e102.simcheonge_server.domain.auth.service.AuthService;
 import com.e102.simcheonge_server.domain.auth.dto.request.LoginRequest;
@@ -26,6 +28,7 @@ public class AuthController {
 
     private final AuthService authService;
     private final JwtUtil jwtUtil;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @PostMapping("/login")
 
@@ -39,5 +42,11 @@ public class AuthController {
         User user = UserUtil.getUserFromUserDetails(userDetails);
         jwtUtil.invalidateRefreshToken(user.getUserLoginId());
         return ResponseUtil.buildBasicResponse(HttpStatus.OK,"로그아웃 되었습니다.");
+    }
+
+    @PostMapping("/reissue")
+    public ResponseEntity<?> reissue(@RequestBody JwtToken jwtToken) {
+        JwtToken newToken = jwtTokenProvider.reissueToken(jwtToken.getAccessToken());
+        return ResponseUtil.buildBasicResponse(HttpStatus.OK, newToken);
     }
 }
