@@ -4,8 +4,9 @@ import 'package:simcheonge_front/models/filter_model.dart';
 
 class FilterApi {
   static Future<FilterModel> fetchFilters() async {
-    final response = await http
-        .get(Uri.parse('https://j10e102.p.ssafy.io/api/policy/categories'));
+    final response = await http.get(
+        Uri.parse('https://j10e102.p.ssafy.io/api/policy/categories'),
+        headers: {'Accept-Charset': 'utf-8'});
 
     if (response.statusCode == 200) {
       // JSON 문자열을 Map<String, dynamic>으로 디코딩
