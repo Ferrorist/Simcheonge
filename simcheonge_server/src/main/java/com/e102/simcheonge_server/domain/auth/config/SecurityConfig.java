@@ -5,6 +5,7 @@ import com.e102.simcheonge_server.domain.auth.security.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -31,6 +32,8 @@ public class SecurityConfig {
                 .sessionManagement(management ->
                         management.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 세션 정책을 STATELESS로 설정
                 .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers(HttpMethod.GET, "/posts")
+                        .permitAll()
                 // 해당 API에 대해서는 모든 요청을 허가
                 .requestMatchers("/users/signup", "/users/check-nickname", "/users/check-loginId", "/auth/login", "/policy/**", "/news/**", "/economicword").permitAll()
                 // USER 권한이 있어야 요청할 수 있음
