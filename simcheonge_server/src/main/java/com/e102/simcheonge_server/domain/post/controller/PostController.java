@@ -70,7 +70,7 @@ public class PostController {
 
     // 게시글 삭제
     @DeleteMapping("/{postId}")
-    public ResponseEntity<?> deletePost(@PathVariable("postId") int postId, @SessionAttribute(name = "user", required = false) @AuthenticationPrincipal UserDetails userDetails){
+    public ResponseEntity<?> deletePost(@PathVariable("postId") int postId, @AuthenticationPrincipal UserDetails userDetails){
         User user = UserUtil.getUserFromUserDetails(userDetails);
         if (user == null) {
             return ResponseUtil.buildBasicResponse(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다.");
