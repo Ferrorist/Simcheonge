@@ -1,18 +1,18 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:simcheonge_front/main.dart';
-import 'package:simcheonge_front/screens/board_screen.dart';
-import 'dart:convert';
 import 'package:simcheonge_front/screens/signup_screen.dart';
-import 'package:simcheonge_front/screens/home_screen.dart'; // 가정: 로그인 성공 후 이동할 화면
 
 class LoginScreen extends StatefulWidget {
-  final Function(bool) updateLoginStatus;
+  final Function(bool)? updateLoginStatus; // nullable 타입으로 변경
 
-  const LoginScreen({super.key, required this.updateLoginStatus});
+  const LoginScreen(
+      {super.key, this.updateLoginStatus}); // required를 제거하고 기본값을 null로 설정
 
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  State<LoginScreen> createState() => _LoginScreenState();
 }
 
 class _LoginScreenState extends State<LoginScreen> {
@@ -20,34 +20,66 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _passwordController = TextEditingController();
 
   Future<void> login() async {
-    final url = Uri.parse('https://j10e102.p.ssafy.io/api/user/login');
+    // 입력 필드가 비어 있는지 확인
+    if (_idController.text.isEmpty || _passwordController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('ID 혹은 비밀번호를 입력해주세요')),
+      );
+      return; // 함수 종료
+    }
+
+    final url = Uri.parse('https://j10e102.p.ssafy.io/api/auth/login'); // 주소 수정
+    final requestData = jsonEncode({
+      'userLoginId': _idController.text,
+      'userPassword': _passwordController.text,
+    });
+
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'userLoginId': _idController.text,
-        'userPassword': _passwordController.text,
-      }),
+      body: requestData,
     );
 
     if (response.statusCode == 200) {
       // 로그인 성공 처리
+      final data = jsonDecode(response.body);
+      print(data);
+      await _saveToken(
+          data['data']['accessToken'], data['data']['refreshToken']);
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('로그인에 성공했습니다.')),
       );
-      widget.updateLoginStatus(true);
+
+      widget.updateLoginStatus?.call(true);
+
       // 로그인 성공 시 홈 화면으로 이동
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(
-            builder: (context) => const MyHomePage()), // 가정: 로그인 성공 후 이동할 화면
+        MaterialPageRoute(builder: (context) => const MyHomePage()),
       );
     } else {
-      // 로그인 실패 처리
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('로그인에 실패했습니다: ${response.body}')),
-      );
+      // 응답 본문이 JSON 형식인지 확인 후, 적절한 에러 메시지 표시
+      try {
+        final responseData = jsonDecode(response.body);
+        final errorMessage = responseData['message'] ?? '로그인에 실패했습니다.';
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(errorMessage)),
+        );
+      } catch (e) {
+        print(e);
+        // JSON 형식이 아닌 경우 기본 에러 메시지 표시
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('ID 혹은 비밀번호가 잘못되었습니다.')),
+        );
+      }
     }
+  }
+
+  Future<void> _saveToken(String accessToken, String refreshToken) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('accessToken', accessToken);
+    await prefs.setString('refreshToken', refreshToken);
   }
 
   @override
@@ -79,7 +111,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: login, // 로그인 함수를 버튼 클릭 이벤트에 연결
+              onPressed: login,
               child: const Text('로그인'),
             ),
             const SizedBox(height: 10),
