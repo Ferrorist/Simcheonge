@@ -1,20 +1,24 @@
 package com.e102.simcheonge_server.domain.post_category.entity;
 
 import com.e102.simcheonge_server.domain.category_detail.entity.CategoryDetailId;
-import jakarta.persistence.*;
+//import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
+import jakarta.persistence.Table;
+import lombok.*;
+
+@Entity
+@Table(name = "post_category")
+@Getter
+@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
-@Entity
 @IdClass(PostCategoryId.class)
-@Table(name = "post_category")
 public class PostCategory {
     @Id
     @Column(name = "category_code", nullable = false)
