@@ -18,14 +18,14 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int activeIndex = 0; // 'activeIndex'를 상태 변수로 선언
+  int activeIndex = 0;
 
   Widget imageSlider(int index) => SizedBox(
         width: double.infinity,
-        height: 240,
+        height: 250,
         child: Image.asset(
-          'assets/home_screen/home_img${index + 1}.png', // 인덱스에 1을 더해 이미지 파일 이름을 맞춤
-          fit: BoxFit.cover, // 이미지가 컨테이너를 꽉 채우도록 설정
+          'assets/home_screen/home_img${index + 1}.png',
+          fit: BoxFit.cover,
         ),
       );
 
@@ -45,49 +45,50 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // 화면의 높이와 너비를 계산
+    // double screenHeight = MediaQuery.of(context).size.height;
+    // double screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       body: SafeArea(
-        child: Container(
-          margin: const EdgeInsets.only(top: 0, left: 0, right: 0),
-          child: ListView(
-            children: [
-              Container(
-                  margin: const EdgeInsets.only(bottom: 30),
-                  child: Stack(
-                      alignment: Alignment.bottomCenter,
-                      children: <Widget>[
-                        CarouselSlider.builder(
-                          options: CarouselOptions(
-                            onPageChanged: (index, reason) {
-                              setState(() {
-                                activeIndex = index;
-                              });
-                            },
-                            viewportFraction: 1,
-                            enlargeCenterPage: true,
-                          ),
-                          itemCount: 5, // 총 5개의 이미지를 사용
-                          itemBuilder: (context, index, realIndex) {
-                            return imageSlider(index); // 새로운 이미지 슬라이더 함수를 사용
-                          },
-                        ),
-                        Align(
-                            alignment: Alignment.bottomCenter,
-                            child: indicator()),
-                      ])),
-              GridView.count(
+        child: Column(
+          // ListView를 Column으로 변경
+          children: [
+            Container(
+                margin: const EdgeInsets.only(bottom: 30),
+                child:
+                    Stack(alignment: Alignment.bottomCenter, children: <Widget>[
+                  CarouselSlider.builder(
+                    options: CarouselOptions(
+                      onPageChanged: (index, reason) {
+                        setState(() {
+                          activeIndex = index;
+                        });
+                      },
+                      viewportFraction: 1,
+                      enlargeCenterPage: true,
+                    ),
+                    itemCount: 5,
+                    itemBuilder: (context, index, realIndex) {
+                      return imageSlider(index);
+                    },
+                  ),
+                  Align(alignment: Alignment.bottomCenter, child: indicator()),
+                ])),
+            Expanded(
+              // GridView를 감싸는 Expanded 추가
+              child: GridView.count(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(), // 스크롤 동작 비활성화
-                crossAxisCount: 1, // 2개의 열
-                childAspectRatio: (1 / 0.3), // 아이템 비율 조정
-                crossAxisSpacing: 15, // 가로 간격
-                mainAxisSpacing: 20, // 세로 간격
+                crossAxisCount: 2, // 2개의 열
+                childAspectRatio: 1 / 0.9, // 여기서는 예시로 1:0.8 비율을 사용했습니다.
+                crossAxisSpacing: 18, // 가로 간격
+                mainAxisSpacing: 18, // 세로 간격
                 padding: const EdgeInsets.all(15), // GridView 패딩
                 children: [
                   MainButton(
-                    name: '챗봇',
-                    descrip: '필요한 정책을 물어보세요!',
+                    name: 'AI 채팅',
                     icon: Icons.question_answer_rounded,
                     isInverted: true,
                     onPressed: () {
@@ -95,8 +96,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     },
                   ),
                   MainButton(
-                    name: '검색',
-                    descrip: '검색을 통해 정책을 찾아요!',
+                    name: '정책 검색',
                     icon: Icons.search,
                     isInverted: true,
                     onPressed: () {
@@ -104,8 +104,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     },
                   ),
                   MainButton(
-                    name: '뉴스',
-                    descrip: '오늘의 뉴스를 확인하세요!',
+                    name: '정책 뉴스',
                     icon: FontAwesomeIcons.newspaper,
                     isInverted: true,
                     onPressed: () {
@@ -114,7 +113,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   MainButton(
                     name: '게시판',
-                    descrip: '유용한 정보를 공유해요!',
                     icon: FontAwesomeIcons.chalkboard,
                     isInverted: true,
                     onPressed: () {
@@ -123,15 +121,15 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: 28),
-              const Center(
-                child: Text("ⓒ 2024. 9to6 all rights reserved."),
-              ),
-              const SizedBox(
-                height: 3,
-              )
-            ],
-          ),
+            ),
+            const SizedBox(height: 20),
+            const Center(
+              child: Text("ⓒ 2024. 9to6 all rights reserved."),
+            ),
+            const SizedBox(
+              height: 12,
+            )
+          ],
         ),
       ),
     );

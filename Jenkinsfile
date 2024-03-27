@@ -36,14 +36,19 @@ pipeline {
                 }
                 steps {
   
-                    withCredentials([file(credentialsId: 'Spring_Env', variable: 'properties')]) {
+                    withCredentials([
+                        file(credentialsId: 'Spring_Prod', variable: 'PROD_PROPERTIES'),
+                        file(credentialsId: 'Spring_Secret', variable: 'SECRET_PROPERTIES')
+                        ]) {
 
                     script{
                         // Jenkins가 EC2 내에서 특정 디렉토리를 수정할 수 있도록 권한 변경
                         sh 'chmod -R 755 simcheonge_server/src/main/resources/'
 
                         // Secret File Credential을 사용하여 설정 파일을 Spring 프로젝트의 resources 디렉토리로 복사
-                        sh 'cp "${properties}" simcheonge_server/src/main/resources/application-prod.properties'
+                        sh 'cp "${PROD_PROPERTIES}" simcheonge_server/src/main/resources/application-prod.properties'
+                        sh 'cp "${SECRET_PROPERTIES}" simcheonge_server/src/main/resources/application-secret.properties'
+
                     }
                 }   
             }
