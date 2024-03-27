@@ -28,6 +28,12 @@ public class JwtUtil {
         ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
         valueOperations.set("refreshToken:" + userLoginId, refreshToken, 12, TimeUnit.HOURS); // 1일 동안 유효
     }
+
+    public String findRefreshTokenInRedis(String userLoginId) {
+        ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
+        return valueOperations.get("refreshToken:" + userLoginId);
+    }
+
     public void invalidateRefreshToken(String userLoginId) {
         redisTemplate.delete("refreshToken:" + userLoginId);
     }
