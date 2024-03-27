@@ -7,15 +7,15 @@ import com.e102.simcheonge_server.domain.post.dto.request.PostRequest;
 import com.e102.simcheonge_server.domain.post.dto.response.PostResponse;
 import com.e102.simcheonge_server.domain.post.entity.Post;
 import com.e102.simcheonge_server.domain.post.service.PostService;
-import com.e102.simcheonge_server.domain.user.dto.SessionUser;
 import com.e102.simcheonge_server.domain.user.entity.User;
 import com.e102.simcheonge_server.domain.user.repository.UserRepository;
+import com.e102.simcheonge_server.domain.user.utill.UserUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-//import org.springframework.security.core.annotation.AuthenticationPrincipal;
-//import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -39,11 +39,11 @@ public class PostController {
 
     // 게시글 등록
     @PostMapping
-    public ResponseEntity<?> createPost(@RequestBody PostRequest postRequest, @SessionAttribute(name = "user", required = false)
-    SessionUser loginUser) {
+    public ResponseEntity<?> createPost(@RequestBody PostRequest postRequest, @AuthenticationPrincipal UserDetails userDetails){
+        User user = UserUtil.getUserFromUserDetails(userDetails);
         log.info("postRequest={}",postRequest.getPostContent());
 
-            Post savedPost = postService.createPost(postRequest, postRequest.getCategoryCode(), postRequest.getCategoryNumber(), loginUser.getUserId());
+            Post savedPost = postService.createPost(postRequest, postRequest.getCategoryCode(), postRequest.getCategoryNumber(), user.getUserId());
             Map<String, Object> responseBody = new HashMap<>();
             return ResponseUtil.buildBasicResponse(HttpStatus.OK, savedPost.getPostId());
     }
@@ -57,24 +57,26 @@ public class PostController {
 
     // 게시글 수정
     @PatchMapping("/{postId}")
-    public ResponseEntity<?> updatePost(@PathVariable("postId") int postId, @RequestBody PostRequest postRequest, @SessionAttribute(name = "user", required = false) SessionUser loginUser) {
-        if (loginUser == null) {
+    public ResponseEntity<?> updatePost(@PathVariable("postId") int postId, @RequestBody PostRequest postRequest, @AuthenticationPrincipal UserDetails userDetails){
+        User user = UserUtil.getUserFromUserDetails(userDetails);
+        if (user == null) {
             return ResponseUtil.buildBasicResponse(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다.");
         }
 
-        postService.updatePost(postId, postRequest, loginUser.getUserId());
+        postService.updatePost(postId, postRequest, user.getUserId());
 
         return ResponseUtil.buildBasicResponse(HttpStatus.OK, Map.of("post_id", postId));
     }
 
     // 게시글 삭제
     @DeleteMapping("/{postId}")
-    public ResponseEntity<?> deletePost(@PathVariable("postId") int postId, @SessionAttribute(name = "user", required = false) SessionUser loginUser) {
-        if (loginUser == null) {
+    public ResponseEntity<?> deletePost(@PathVariable("postId") int postId, @SessionAttribute(name = "user", required = false) @AuthenticationPrincipal UserDetails userDetails){
+        User user = UserUtil.getUserFromUserDetails(userDetails);
+        if (user == null) {
             return ResponseUtil.buildBasicResponse(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다.");
         }
 
-        postService.deletePost(postId, loginUser.getUserId());
+        postService.deletePost(postId, user.getUserId());
 
         return ResponseUtil.buildBasicResponse(HttpStatus.OK, "게시글 삭제에 성공했습니다.");
     }
