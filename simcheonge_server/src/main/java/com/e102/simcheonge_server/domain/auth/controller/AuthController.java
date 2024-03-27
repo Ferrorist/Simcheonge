@@ -46,7 +46,7 @@ public class AuthController {
 
     @PostMapping("/reissue")
     public ResponseEntity<?> reissue(@RequestBody JwtToken jwtToken) {
-        JwtToken newToken = jwtTokenProvider.reissueToken(jwtToken.getAccessToken());
+        JwtToken newToken = jwtTokenProvider.reissueToken(jwtToken.getRefreshToken());
         return ResponseUtil.buildBasicResponse(HttpStatus.OK, newToken);
     }
 }
