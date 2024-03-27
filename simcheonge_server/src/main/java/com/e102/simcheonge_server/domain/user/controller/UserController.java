@@ -50,6 +50,18 @@ public class UserController {
         return buildBasicResponse(HttpStatus.OK,"해당 아이디는 사용 가능합니다.");
     }
 
+    @GetMapping("update/check-nickname")
+    public ResponseEntity<?> updateCheckNickname(@RequestParam("userNickname") String userNickname) {
+        userService.isValidateNickname(userNickname);
+        return buildBasicResponse(HttpStatus.OK,"해당 닉네임은 사용 가능합니다.");
+    }
+
+    @GetMapping("/update/check-loginId")
+    public ResponseEntity<?> updateCheckLoginId(@RequestParam("userLoginId") String userLoginId) {
+        userService.isValidateLoginId(userLoginId);
+        return buildBasicResponse(HttpStatus.OK,"해당 아이디는 사용 가능합니다.");
+    }
+
     @PatchMapping("/nickname")
     public ResponseEntity<?> updateNickname(@RequestBody UpdateNicknameRequest userNickname, @AuthenticationPrincipal UserDetails userDetails) {
         User user = UserUtil.getUserFromUserDetails(userDetails);
