@@ -39,7 +39,7 @@ public class UserService {
     }
 
     private void isValidatePassword(String password, String passwordCheck) {
-        if (!password.equals(passwordCheck)) {
+        if (!password.equals(passwordCheck) || password.trim().isEmpty() || passwordCheck.trim().isEmpty()){
             throw new IllegalArgumentException("비밀번호와 비밀번호 확인이 일치하지 않습니다.");
         }
     }
