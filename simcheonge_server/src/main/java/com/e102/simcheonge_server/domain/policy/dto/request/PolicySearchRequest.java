@@ -5,9 +5,12 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 @Data @Builder
 public class PolicySearchRequest {
     String keyword;
     ArrayList<CategoryDetailSearchRequest> list;
+    Date startDate;
+    Date endDate;
 }
