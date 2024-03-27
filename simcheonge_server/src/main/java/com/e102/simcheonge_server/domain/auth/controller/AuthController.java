@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final AuthService authService;
-    private JwtUtil jwtUtil;
+    private final JwtUtil jwtUtil;
 
     @PostMapping("/login")
 
@@ -38,6 +38,6 @@ public class AuthController {
     public ResponseEntity<?> signOut(@RequestBody LogoutRequest logoutRequest, @AuthenticationPrincipal UserDetails userDetails) {
         User user = UserUtil.getUserFromUserDetails(userDetails);
         jwtUtil.invalidateRefreshToken(user.getUserLoginId());
-        return ResponseEntity.ok().body("로그아웃 되었습니다.");
+        return ResponseUtil.buildBasicResponse(HttpStatus.OK,"로그아웃 되었습니다.");
     }
 }
