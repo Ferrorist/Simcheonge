@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 import 'package:simcheonge_front/screens/search_filter.dart';
 import 'dart:ui';
-
-class Bird {
-  final String name;
-
-  Bird({required this.name});
-}
+import 'package:simcheonge_front/models/search_model.dart';
+import 'package:simcheonge_front/services/search_api.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -17,49 +15,79 @@ class SearchScreen extends StatefulWidget {
 
 class _SearchScreenState extends State<SearchScreen> {
   final TextEditingController _controller = TextEditingController();
-  List<Bird> _filteredBirds = [];
-  final List<Bird> _allBirds = [
-    Bird(name: "청년 월세 지원"),
-    Bird(name: "Eurasian Hoopoe"),
-    Bird(name: "Changeable Hawk-eagle"),
-    Bird(name: "Brahminy Starling"),
-    Bird(name: "Blue-tailed Bee-eater"),
-    Bird(name: "Indian Peafowl"),
-    Bird(name: "Common Kingfisher1"),
-    Bird(name: "Common Kingfishe2r"),
-    Bird(name: "Common Kingfishe4r"),
-    Bird(name: "Common Kingfishe5r"),
-    Bird(name: "Common Kingfishe3r"),
-    Bird(name: "Common Kingfisher6"),
-  ];
+  final ScrollController _scrollController = ScrollController();
+  final List<Content> _filteredPolices = [];
+  int _currentPage = 0;
+  bool _isFetching = false;
+  bool _hasMore = true; // 더 불러올 데이터가 있는지
 
   @override
   void initState() {
     super.initState();
     _controller.addListener(_searchListener);
-    _filteredBirds = _allBirds;
+    _scrollController.addListener(_scrollListener);
+    _fetchData(); // 초기 데이터 로드
   }
 
   @override
   void dispose() {
-    _controller.removeListener(_searchListener);
     _controller.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
+  void _scrollListener() {
+    if (_scrollController.position.pixels ==
+            _scrollController.position.maxScrollExtent &&
+        _hasMore) {
+      _fetchData();
+    }
+  }
+
   void _searchListener() {
-    final query = _controller.text;
-    if (query.isEmpty) {
+    _filteredPolices.clear();
+    _currentPage = 0;
+    _hasMore = true;
+    _fetchData();
+  }
+
+  Future<void> _fetchData() async {
+    if (_isFetching || !_hasMore) return;
+
+    _isFetching = true;
+
+    final prefs = await SharedPreferences.getInstance();
+    // SharedPreferences에서 필터 목록과 날짜 범위를 불러옵니다.
+    final String filtersString = prefs.getString('filters') ?? '[]';
+    List<Map<String, dynamic>> filters =
+        List<Map<String, dynamic>>.from(json.decode(filtersString));
+
+    final String startDate = prefs.getString('startDate') ?? '';
+    final String endDate = prefs.getString('endDate') ?? '';
+
+    try {
+      final SearchModel response = await SearchApi().searchPolicies(
+        _controller.text, // 검색어
+        filters, // 필터 목록
+        startDate: startDate, // 시작 날짜 (이름 있는 인자로 전달)
+        endDate: endDate, // 종료 날짜 (이름 있는 인자로 전달)
+      );
+
+      // API 응답에서 List<Content>를 올바르게 추출
+      final List<Content> newData = response.data?.content ?? [];
+
       setState(() {
-        _filteredBirds = _allBirds;
+        if (newData.isEmpty) {
+          _hasMore = false;
+        } else {
+          _currentPage++;
+          _filteredPolices.addAll(newData); // 올바른 타입의 데이터 추가
+        }
       });
-    } else {
-      setState(() {
-        _filteredBirds = _allBirds
-            .where(
-                (bird) => bird.name.toLowerCase().contains(query.toLowerCase()))
-            .toList();
-      });
+    } catch (e) {
+      print(e); // 에러 처리
+    } finally {
+      _isFetching = false;
     }
   }
 
@@ -84,7 +112,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 prefixIcon: IconButton(
                   icon: const Icon(Icons.mic),
                   onPressed: () {
-                    // TODO: 음성 검색 기능 구현
+                    // 음성 검색 기능 구현 필요
                   },
                 ),
                 suffixIcon: IconButton(
@@ -129,9 +157,10 @@ class _SearchScreenState extends State<SearchScreen> {
           const SizedBox(height: 10),
           Expanded(
             child: ListView.builder(
-              itemCount: _filteredBirds.length,
+              controller: _scrollController,
+              itemCount: _filteredPolices.length,
               itemBuilder: (BuildContext context, int index) {
-                final bird = _filteredBirds[index];
+                final policy = _filteredPolices[index];
                 return Card(
                   margin:
                       const EdgeInsets.symmetric(vertical: 5, horizontal: 20),
@@ -139,12 +168,12 @@ class _SearchScreenState extends State<SearchScreen> {
                     contentPadding: const EdgeInsets.symmetric(
                         vertical: 18, horizontal: 16),
                     title: Text(
-                      bird.name,
+                      policy.policyName ?? 'No name', // 'policyName'은 모델에 따라 다름
                       style: const TextStyle(fontSize: 19),
                     ),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () {
-                      // TODO: 아이템 클릭 시 수행할 작업
+                      // 아이템 클릭 시 수행할 작업
                     },
                   ),
                 );
@@ -156,7 +185,6 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
-  // 사용자 정의 화면 전환 애니메이션을 위한 함수
   Route _createRoute() {
     return PageRouteBuilder(
       pageBuilder: (context, animation, secondaryAnimation) =>
