@@ -56,6 +56,7 @@ public class JwtTokenProvider {
 
         // Refresh Token 생성
         String refreshToken = Jwts.builder()
+                .setSubject(authentication.getName())
                 .setExpiration(new Date(now + 43200000))
                 .claim("auth", authorities) // 유저 권한에 따른 기능 분류 프로젝트에 반영 시 토큰에도 권한 반영하기
                 .signWith(Keys.hmacShaKeyFor(signingKey), SignatureAlgorithm.HS256)
@@ -115,18 +116,17 @@ public class JwtTokenProvider {
     }
 
     public JwtToken reissueToken(String refreshToken) {
-        System.out.println(parseClaims(refreshToken));
+
+        validateToken(refreshToken);
+
         String userLoginId = parseClaims(refreshToken).getSubject();
+
         com.e102.simcheonge_server.domain.user.entity.User user = userRepository.findByUserLoginId(userLoginId)
                 .orElseThrow(() -> new DataNotFoundException("해당 사용자가 존재하지 않습니다."));
 
-        if (!validateToken(refreshToken)) {
-            throw new IllegalArgumentException("reissue: refresh token이 유효하지 않습니다");
-        }
-
         // 직렬화
-        redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(String.class));
-        String redisRefreshToken = (String) redisTemplate.opsForValue().get("refreshToken:" + userLoginId);
+
+        String redisRefreshToken = jwtUtil.findRefreshTokenInRedis(userLoginId);
 
 
         if (ObjectUtils.isEmpty(redisRefreshToken)) {
