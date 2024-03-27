@@ -4,6 +4,7 @@ import com.e102.simcheonge_server.common.util.ResponseUtil;
 import com.e102.simcheonge_server.domain.category.service.CategoryService;
 import com.e102.simcheonge_server.domain.category_detail.entity.CategoryDetail;
 import com.e102.simcheonge_server.domain.post.dto.request.PostRequest;
+import com.e102.simcheonge_server.domain.post.dto.response.PostDetailResponse;
 import com.e102.simcheonge_server.domain.post.dto.response.PostResponse;
 import com.e102.simcheonge_server.domain.post.entity.Post;
 import com.e102.simcheonge_server.domain.post.service.PostService;
@@ -79,6 +80,17 @@ public class PostController {
         postService.deletePost(postId, user.getUserId());
 
         return ResponseUtil.buildBasicResponse(HttpStatus.OK, "게시글 삭제에 성공했습니다.");
+    }
+
+    // 게시글 상세 조회
+    @GetMapping("/{postId}")
+    public ResponseEntity<?> getPostDetail(@PathVariable("postId") int postId, @AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
+        }
+
+        PostDetailResponse postDetail = postService.findPostDetailById(postId);
+        return ResponseEntity.ok(Map.of("status", 200, "data", postDetail));
     }
 
 }
