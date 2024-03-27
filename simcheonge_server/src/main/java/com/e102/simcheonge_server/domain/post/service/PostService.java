@@ -4,6 +4,7 @@ import com.e102.simcheonge_server.common.exception.DataNotFoundException;
 import com.e102.simcheonge_server.domain.category_detail.entity.CategoryDetail;
 import com.e102.simcheonge_server.domain.category_detail.repository.CategoryDetailRepository;
 import com.e102.simcheonge_server.domain.post.dto.request.PostRequest;
+import com.e102.simcheonge_server.domain.post.dto.response.PostDetailResponse;
 import com.e102.simcheonge_server.domain.post.dto.response.PostResponse;
 import com.e102.simcheonge_server.domain.post.entity.Post;
 import com.e102.simcheonge_server.domain.post.repository.PostRepository;
@@ -151,5 +152,27 @@ public class PostService {
 //
 //        return response;
 //    }
+
+    // 게시글 상세 조회
+    public PostDetailResponse findPostDetailById(int postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "게시글을 찾을 수 없습니다."));
+
+        User user = userRepository.findById(post.getUserId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."));
+
+        // 카테고리 이름 조회 로직 (가정)
+        String categoryName = "카테고리 예시"; // 실제로는 카테고리 관련 정보를 조회해야 합니다.
+
+        return new PostDetailResponse(
+                post.getPostId(),
+                post.getPostName(),
+                post.getPostContent(),
+                user.getUserNickname(),
+                post.getCreatedAt(),
+                categoryName
+        );
+    }
+
 
 }
