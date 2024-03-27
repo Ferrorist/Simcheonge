@@ -14,11 +14,13 @@ import com.e102.simcheonge_server.domain.user.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -136,5 +138,18 @@ public class PostService {
         // post 테이블에서 해당 게시글 삭제
         postRepository.deleteById(postId);
     }
+
+//    public ResponseEntity<String> get(String url){
+//        RestTemplate restTemplate=new RestTemplate();
+//        HttpHeaders headers=new HttpHeaders();
+//        headers.setContentType(MediaType.APPLICATION_JSON); //여기 json이어도 되나?
+//
+//        HttpEntity<HttpHeaders> entity=new HttpEntity<>(headers);
+//
+//        ResponseEntity<String> response=restTemplate.exchange(URI.create(url),
+//                HttpMethod.GET,entity,String.class);
+//
+//        return response;
+//    }
 
 }
