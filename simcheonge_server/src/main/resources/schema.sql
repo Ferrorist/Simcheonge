@@ -15,7 +15,7 @@ CREATE TABLE `user`
     `user_login_id` VARCHAR(16) NOT NULL,
     `user_password` VARCHAR(255) NOT NULL COMMENT 'bcrypt',
     `user_nickname` VARCHAR(33) NOT NULL,
-    `created_at`    DATETIME    NOT NULL DEFAULT CURRENT_DATE,
+    `created_at`    DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `is_deleted`    BIT         NOT NULL DEFAULT FALSE,
     `deleted_at`    DATETIME NULL DEFAULT NULL
 );
@@ -82,6 +82,7 @@ CREATE TABLE `policy`
     `policy_main_contact`                   TEXT NULL DEFAULT NULL COMMENT 'API의 주관부처담당자연락처',
     `policy_operation_organization`         TEXT NULL DEFAULT NULL COMMENT 'API의 운영기관명',
     `policy_operation_organization_contact` TEXT NULL DEFAULT NULL COMMENT 'API의 운영기관담당자연락처',
+    `policy_application_period`             TEXT NULL DEFAULT NULL COMMENT 'API의 사업신청기간-관리자가 startDate, endDate로 분리',
     `policy_is_processed`                   BIT         NOT NULL COMMENT '원본 데이터 가공 여부',
     `policy_processed_at`                   DATETIME NULL COMMENT '원본 데이터 가공 일자',
     `policy_created_at`                     DATETIME    NOT NULL DEFAULT (CURRENT_DATE) COMMENT '원본 데이터 반입 일자'
