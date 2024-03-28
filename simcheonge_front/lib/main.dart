@@ -8,7 +8,7 @@ import 'package:simcheonge_front/screens/my_post_comment_screen.dart';
 import 'package:simcheonge_front/screens/my_post_screen.dart';
 import 'package:simcheonge_front/widgets/bottom_nav_item.dart';
 import 'package:simcheonge_front/screens/chatbot_screen.dart';
-import 'package:simcheonge_front/screens/board_screen.dart';
+import 'package:simcheonge_front/screens/post_screen.dart';
 import 'package:simcheonge_front/screens/home_screen.dart';
 import 'package:simcheonge_front/screens/news_screen.dart';
 import 'package:simcheonge_front/screens/search_screen.dart';
@@ -179,7 +179,7 @@ class _MyHomePageState extends State<MyHomePage> {
             const SearchScreen(),
             const ChatbotScreen(),
             const NewsScreen(),
-            const BoardScreen(),
+            const PostScreen(),
             const MyPostScreen(),
             const MyPostCommentScreen(),
             const MyPolicyCommentScreen(),
