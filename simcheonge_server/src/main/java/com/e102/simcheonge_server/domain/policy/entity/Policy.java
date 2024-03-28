@@ -107,7 +107,11 @@ public class Policy {
     @Column(name = "policy_operation_organization_contact", columnDefinition = "TEXT")
     private String operationOrganizationContact;
 
+    @Column(name = "policy_application_period", columnDefinition = "TEXT")
+    private String applicationPeriod;
+
     @Column(name = "policy_is_processed", nullable = false)
+    @Builder.Default
     private boolean isProcessed = false;
 
     @Column(name = "policy_processed_at", columnDefinition = "DATETIME")
@@ -146,6 +150,7 @@ public class Policy {
         this.mainContact=policyUpdateRequest.getMainContact();
         this.operationOrganization=policyUpdateRequest.getOperationOrganization();
         this.operationOrganizationContact=policyUpdateRequest.getOperationOrganizationContact();
+        this.applicationPeriod=policyUpdateRequest.getApplicationPeriod();
 
         this.isProcessed = true;
         this.processedAt = new Date();

@@ -121,25 +121,19 @@ public class PolicyService {
 
     public PageImpl<PolicyThumbnailResponse> searchPolicies(PolicySearchRequest policySearchRequest, Pageable pageable) {
         checkCategoriesList(policySearchRequest);
-//        addAllSelect(policySearchRequest);
-        List<Category> categoryList = categoryRepository.findAllByCodeNot("POS");
-        ArrayList<String> categoryStringList = new ArrayList<>();
-        for (Category category : categoryList) {
-            categoryStringList.add(category.getCode());
-        }
+        addAllSelect(policySearchRequest);
+//        List<Category> categoryList = categoryRepository.findAllByCodeNot("POS");
+//        ArrayList<String> categoryStringList=new
 
-        List<Integer> policyList = policyRepository.searchPolicy(policySearchRequest.getKeyword(), policySearchRequest.getList(), categoryStringList);
+        PageImpl<Policy> policyList = policyRepository.searchPolicy(policySearchRequest.getKeyword(), policySearchRequest.getList(), pageable);
         List<PolicyThumbnailResponse> responseList = new ArrayList<>();
-        log.info("policyList.size()={}",policyList.size());
-        PageImpl<Policy> policies = policyRepository.findByPolicyIds(policyList, pageable);
-        policies.forEach(policy -> {
-            PolicyThumbnailResponse policyThumbnailResponse = PolicyThumbnailResponse.builder()
+        policyList.forEach(policy -> {
+            PolicyThumbnailResponse thumbnailResponse = PolicyThumbnailResponse.builder()
                     .policyId(policy.getPolicyId())
                     .policy_name(policy.getName())
                     .build();
-            responseList.add(policyThumbnailResponse);
+            responseList.add(thumbnailResponse);
         });
-
         return new PageImpl<>(responseList, pageable, responseList.size());
     }
 
@@ -147,7 +141,7 @@ public class PolicyService {
         for (String category : checkCategories) {
             if (categoryCheckMap.get(category) != null && categoryCheckMap.get(category) == 1) {
                 Integer codeCount = categoryDetailRepository.countByCode(category);
-                for (int number = 2; number <= codeCount; number++) {
+                for (int number = 2; number < codeCount; number++) {
                     CategoryDetailSearchRequest newCategoryDetail = CategoryDetailSearchRequest.builder()
                             .code(category)
                             .number(number)
@@ -167,8 +161,7 @@ public class PolicyService {
 
                 } else if (categoryDetail.getNumber() != 1 && categoryCheckMap.get(categoryDetail.getCode()) == null) {
                     categoryCheckMap.put(categoryDetail.getCode(), 2);
-                }
-//                else throw new IllegalArgumentException("제한 없음과 다른 조건은 동시에 선택할 수 없습니다.");
+                } else throw new IllegalArgumentException("제한 없음과 다른 조건은 동시에 선택할 수 없습니다.");
             }
         }
     }
