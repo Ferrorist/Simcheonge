@@ -125,7 +125,7 @@ public class PolicyService {
 
         validatePolicySearchRequest(policySearchRequest);
 
-        PageImpl<Object[]> policyObjectList = policyNativeRepository.searchPolicy(policySearchRequest.getKeyword(),policySearchRequest.getList(),policySearchRequest.getStartDate(),policySearchRequest.getEndDate(),pageable);
+        PageImpl<Object[]> policyObjectList = policyNativeRepository.searchPolicy(policySearchRequest.getKeyword(), policySearchRequest.getList(), policySearchRequest.getStartDate(), policySearchRequest.getEndDate(), pageable);
         List<PolicyThumbnailResponse> responseList = new ArrayList<>();
         for (Object[] policyObject : policyObjectList) {
             Integer policyId = (Integer) policyObject[0];
@@ -141,22 +141,32 @@ public class PolicyService {
     }
 
     private void validatePolicySearchRequest(PolicySearchRequest policySearchRequest) {
-        //{ADM,1}, {EPM,1}, {SPC, 1}가 있는지 확인
-        for (CategoryDetailSearchRequest category : policySearchRequest.getList()) {
-            if (Arrays.asList(checkCategories).contains(category.getCode()) && category.getNumber() == 1) {
-                throw new IllegalArgumentException("해당 카테고리는 '제한 없음'을 선택할 수 없습니다.");
-            }
+        if(policySearchRequest.getKeyword()==null){
+            throw new IllegalArgumentException("키워드는 null일 수 없습니다. keyword에 빈 값을 담아 요청해주세요.");
         }
 
         // {APC,3}일 경우 startDate, endDate null확인
+        int APCCount = 1;
+        boolean isAPC3exist = false;
         for (CategoryDetailSearchRequest category : policySearchRequest.getList()) {
-            if ("APC".equals(category.getCode()) && category.getNumber() == 3) {
-                if (policySearchRequest.getStartDate() == null || policySearchRequest.getEndDate() == null) {
-                    throw new IllegalArgumentException("특정 기간의 startDate, endDate가 없습니다.");
+            //{ADM,1}, {EPM,1}, {SPC, 1}가 있는지 확인
+            if (Arrays.asList(checkCategories).contains(category.getCode()) && category.getNumber() == 1) {
+                throw new IllegalArgumentException("해당 카테고리는 '제한 없음'을 선택할 수 없습니다.");
+            }
+            else if ("APC".equals(category.getCode())) {
+                if (category.getNumber() == 3) {
+                    if (policySearchRequest.getStartDate() == null || policySearchRequest.getEndDate() == null) {
+                        throw new IllegalArgumentException("특정 기간의 startDate, endDate가 없습니다.");
+                    }
+                    isAPC3exist = true;
                 }
-                break;
+                APCCount++;
             }
         }
+        if (isAPC3exist && APCCount > 1) {
+            throw new IllegalArgumentException("'특정 기간'은 '상시'나 '미정'과 함께 선택할 수 없습니다.");
+        }
+        log.info("체크5");
     }
 
 
