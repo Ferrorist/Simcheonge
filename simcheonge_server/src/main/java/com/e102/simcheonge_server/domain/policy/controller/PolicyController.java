@@ -28,7 +28,6 @@ public class PolicyController {
 
     @GetMapping("/{policyId}")
     public ResponseEntity<?> getPolicy(@PathVariable("policyId") int policyId) {
-
         return ResponseUtil.buildBasicResponse(HttpStatus.OK, policyService.getPolicy(policyId));
     }
 
