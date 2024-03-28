@@ -13,7 +13,7 @@ CREATE TABLE `user`
 (
     `user_id`       INT         NOT NULL AUTO_INCREMENT PRIMARY KEY,
     `user_login_id` VARCHAR(16) NOT NULL,
-    `user_password` VARCHAR(64) NOT NULL COMMENT 'SHA256',
+    `user_password` VARCHAR(255) NOT NULL COMMENT 'bcrypt',
     `user_nickname` VARCHAR(33) NOT NULL,
     `created_at`    DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `is_deleted`    BIT         NOT NULL DEFAULT FALSE,

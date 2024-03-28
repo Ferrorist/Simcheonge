@@ -4,7 +4,8 @@ import com.e102.simcheonge_server.common.util.ResponseUtil;
 import com.e102.simcheonge_server.domain.policy.dto.request.PolicySearchRequest;
 import com.e102.simcheonge_server.domain.policy.dto.request.PolicyUpdateRequest;
 import com.e102.simcheonge_server.domain.policy.service.PolicyService;
-import com.e102.simcheonge_server.domain.user.dto.SessionUser;
+import com.e102.simcheonge_server.domain.user.entity.User;
+import com.e102.simcheonge_server.domain.user.utill.UserUtil;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -12,6 +13,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -31,9 +34,9 @@ public class PolicyController {
     @PatchMapping("/{policyId}")
     public ResponseEntity<?> updatePolicy(@PathVariable("policyId") int policyId,
                                           @RequestBody PolicyUpdateRequest policyUpdateRequest,
-                                          @SessionAttribute(name = "user", required = false)
-                                          SessionUser loginUser) {
-        policyService.updatePolicy(policyId,policyUpdateRequest,loginUser.getUserId());
+                                          @AuthenticationPrincipal UserDetails userDetails){
+        User user = UserUtil.getUserFromUserDetails(userDetails);
+        policyService.updatePolicy(policyId,policyUpdateRequest,user.getUserId());
         return ResponseUtil.buildBasicResponse(HttpStatus.OK, "정책 수정에 성공했습니다.");
     }
 

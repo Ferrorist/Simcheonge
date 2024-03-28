@@ -1,3 +1,5 @@
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -34,6 +36,7 @@ class _FilterScreenState extends State<FilterScreen> {
     super.dispose();
   }
 
+  List<Map<String, dynamic>> filtersList = [];
   List<String> regionOptions = [];
   List<String> educationOptions = [];
   List<String> employmentStatusOptions = [];
@@ -347,18 +350,42 @@ class _FilterScreenState extends State<FilterScreen> {
 
   Future<void> _saveFilters() async {
     final prefs = await SharedPreferences.getInstance();
-// 필터 상태를 저장하는 로직...
-    setState(() {
-      startDate = tempStartDate;
-      endDate = tempEndDate;
-    });
 
-    if (_scrollController.hasClients) {
-      _scrollController.animateTo(
-        0.0,
-        duration: const Duration(milliseconds: 500),
-        curve: Curves.easeOut,
-      );
+    // 선택된 항목들을 기반으로 API 요청 본문 구성을 위한 filtersList를 먼저 선언 및 초기화합니다.
+    List<Map<String, dynamic>> filtersList = [];
+
+    // addToFiltersList 함수는 선택된 옵션을 filtersList에 추가합니다.
+    void addToFiltersList(Map<String, bool> selections, String code) {
+      selections.forEach((key, value) {
+        if (value) {
+          // 선택된 경우에만 추가
+          int index = selections.keys.toList().indexOf(key) + 1;
+          filtersList.add({"code": code, "number": index});
+        }
+      });
     }
+
+    // 각 선택 항목에 대해 addToFiltersList 함수를 호출하여 filtersList를 구성합니다.
+    addToFiltersList(regionSelections, "RGO");
+    addToFiltersList(educationSelections, "ADM");
+    addToFiltersList(employmentStatusSelections, "EPM");
+    addToFiltersList(specializationSelections, "SPC");
+    addToFiltersList(interestSelections, "PFD");
+
+    // 필터 목록을 SharedPreferences에 저장합니다.
+    await prefs.setString('filters', jsonEncode(filtersList));
+
+    // startDate와 endDate를 SharedPreferences에 저장합니다.
+    if (startDate != null) {
+      await prefs.setString(
+          'startDate', DateFormat('yyyy-MM-dd').format(startDate!));
+    }
+    if (endDate != null) {
+      await prefs.setString(
+          'endDate', DateFormat('yyyy-MM-dd').format(endDate!));
+    }
+
+    // 필터 화면을 닫습니다.
+    Navigator.of(context).pop();
   }
 }
