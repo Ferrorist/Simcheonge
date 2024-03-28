@@ -36,6 +36,7 @@ class ChatbotAPI {
     } else {
       // 에러 처리
       print('Failed to load chatbot response: ${response.statusCode}');
+      print('토큰은 $accessToken');
       return null;
     }
   }
