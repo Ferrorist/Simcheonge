@@ -76,6 +76,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       },
                       viewportFraction: 1,
                       enlargeCenterPage: true,
+                      autoPlay: true, // 자동 재생 활성화
+                      autoPlayInterval:
+                          const Duration(seconds: 5), // 3초마다 슬라이드 전환
                     ),
                     itemCount: 5,
                     itemBuilder: (context, index, realIndex) {

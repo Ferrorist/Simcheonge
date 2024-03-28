@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 
 class MainButton extends StatelessWidget {
@@ -50,6 +52,7 @@ class MainButton extends StatelessWidget {
                 height: imageHeight, // 이미지 세로 크기 조정
               ),
             ),
+            const SizedBox(height: 5),
             Padding(
               padding: const EdgeInsets.only(top: 8.0),
               child: Text(
@@ -57,7 +60,7 @@ class MainButton extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: isInverted ? _blackColor : Colors.white,
-                  fontSize: 24,
+                  fontSize: 18,
                   fontWeight: FontWeight.w600,
                 ),
               ),

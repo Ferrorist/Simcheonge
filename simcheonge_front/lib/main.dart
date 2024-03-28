@@ -196,7 +196,7 @@ class _MyHomePageState extends State<MyHomePage> {
               _selectedIndex >= 0 && _selectedIndex < bottomNavItems.length
                   ? _selectedIndex
                   : 0,
-          selectedItemColor: Colors.black,
+          selectedItemColor: const Color.fromARGB(255, 0, 0, 0),
           unselectedItemColor: Colors.black54,
           showSelectedLabels: false,
           showUnselectedLabels: false,
