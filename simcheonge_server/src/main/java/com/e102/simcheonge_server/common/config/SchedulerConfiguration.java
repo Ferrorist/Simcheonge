@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 public class SchedulerConfiguration {
     private final YouthPlcyService youthPlcyService;
 
-    @Scheduled(cron="0 3 4 ? * *")
+    @Scheduled(cron="0 24 9 ? * *") //초 분 시 일 월 요일: 매일 4시 0분 0초에 실행
     public void run(){
         youthPlcyService.insertUnprocessedPolicyData();
     }
