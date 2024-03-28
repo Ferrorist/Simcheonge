@@ -20,14 +20,22 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int activeIndex = 0;
 
-  Widget imageSlider(int index) => SizedBox(
-        width: double.infinity,
-        height: 250,
-        child: Image.asset(
-          'assets/home_screen/home_img${index + 1}.png',
-          fit: BoxFit.cover,
-        ),
-      );
+  Widget imageSlider(int index) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
+
+    // 이미지 슬라이더의 높이를 화면 높이의 일정 비율로 설정
+    double sliderHeight = screenHeight * 0.4; // 예시로 40%로 설정
+
+    return SizedBox(
+      width: screenWidth,
+      height: sliderHeight, // 수정된 부분: 이미지 슬라이더의 높이 조절
+      child: Image.asset(
+        'assets/home_screen/home_img${index + 1}.png',
+        fit: BoxFit.cover, // 이미지를 늘리거나 줄여서 영역을 채우도록 설정
+      ),
+    );
+  }
 
   Widget indicator() => Container(
         margin: const EdgeInsets.only(bottom: 5.0),
@@ -77,19 +85,19 @@ class _HomeScreenState extends State<HomeScreen> {
                   Align(alignment: Alignment.bottomCenter, child: indicator()),
                 ])),
             Expanded(
-              // GridView를 감싸는 Expanded 추가
               child: GridView.count(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(), // 스크롤 동작 비활성화
                 crossAxisCount: 2, // 2개의 열
-                childAspectRatio: 1 / 0.9, // 여기서는 예시로 1:0.8 비율을 사용했습니다.
+                childAspectRatio: 1 / 0.9, // 비율 조정
                 crossAxisSpacing: 18, // 가로 간격
                 mainAxisSpacing: 18, // 세로 간격
                 padding: const EdgeInsets.all(15), // GridView 패딩
                 children: [
                   MainButton(
                     name: 'AI 채팅',
-                    icon: Icons.question_answer_rounded,
+                    imagePath:
+                        'assets/home_screen/chat_icon.png', // icon 대신 imagePath 사용
                     isInverted: true,
                     onPressed: () {
                       widget.changePage(2);
@@ -97,7 +105,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   MainButton(
                     name: '정책 검색',
-                    icon: Icons.search,
+                    imagePath:
+                        'assets/home_screen/search_icon.png', // 이미지 경로 변경
                     isInverted: true,
                     onPressed: () {
                       widget.changePage(1);
@@ -105,7 +114,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   MainButton(
                     name: '정책 뉴스',
-                    icon: FontAwesomeIcons.newspaper,
+                    imagePath: 'assets/home_screen/news_icon.png', // 이미지 경로 변경
                     isInverted: true,
                     onPressed: () {
                       widget.changePage(3);
@@ -113,7 +122,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   MainButton(
                     name: '게시판',
-                    icon: FontAwesomeIcons.chalkboard,
+                    imagePath: 'assets/home_screen/board_icon.png', // 이미지 경로 변경
                     isInverted: true,
                     onPressed: () {
                       widget.changePage(4);

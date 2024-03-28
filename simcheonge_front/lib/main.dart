@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:simcheonge_front/screens/bookmark_policy_screen.dart';
 import 'package:simcheonge_front/screens/bookmark_post_screen.dart';
 import 'package:simcheonge_front/screens/login_screen.dart';
@@ -11,12 +12,17 @@ import 'package:simcheonge_front/screens/board_screen.dart';
 import 'package:simcheonge_front/screens/home_screen.dart';
 import 'package:simcheonge_front/screens/news_screen.dart';
 import 'package:simcheonge_front/screens/search_screen.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:simcheonge_front/widgets/side_app_bar.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() {
   runApp(const MyApp());
+}
+
+Future<bool> checkLoginStatus() async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  final String? accessToken = prefs.getString('accessToken');
+  return accessToken != null;
 }
 
 class MyApp extends StatelessWidget {
@@ -129,28 +135,39 @@ class _MyHomePageState extends State<MyHomePage> {
         key: _scaffoldKey,
         appBar: AppBar(
           title: Text(getAppBarTitle()),
-          centerTitle: true, // 중앙 정렬
+          centerTitle: true,
           elevation: 0.0,
           actions: <Widget>[
-            if (!isLoggedIn)
-              IconButton(
-                icon: const Icon(Icons.login),
-                onPressed: () {
-                  // 로그인 화면으로 이동
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => LoginScreen(
-                              updateLoginStatus: updateLoginStatus,
-                            )),
-                  );
-                },
-              ),
-            // if (isLoggedIn)
-            IconButton(
-              icon: const Icon(Icons.person),
-              onPressed: () =>
-                  _scaffoldKey.currentState?.openEndDrawer(), // 오른쪽 드로어를 엽니다.
+            FutureBuilder<bool>(
+              future: checkLoginStatus(),
+              builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Container(); // 로딩 중 표시. 필요에 따라 로딩 위젯으로 대체 가능
+                }
+                final isLoggedIn =
+                    snapshot.data ?? false; // isLoggedIn 상태를 snapshot에서 추출
+                return Row(
+                  children: [
+                    if (!isLoggedIn)
+                      IconButton(
+                        icon: const Icon(Icons.login),
+                        onPressed: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => LoginScreen(
+                                      updateLoginStatus: updateLoginStatus)));
+                        },
+                      ),
+                    if (isLoggedIn)
+                      IconButton(
+                        icon: const Icon(Icons.person),
+                        onPressed: () =>
+                            _scaffoldKey.currentState?.openEndDrawer(),
+                      ),
+                  ],
+                );
+              },
             ),
           ],
         ),

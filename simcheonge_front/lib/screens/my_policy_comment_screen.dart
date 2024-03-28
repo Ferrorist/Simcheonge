@@ -9,29 +9,63 @@ class MyPolicyCommentScreen extends StatefulWidget {
 }
 
 class _MyPolicyCommentScreenState extends State<MyPolicyCommentScreen> {
-  final GlobalKey<ScaffoldState> _scaffoldKey =
-      GlobalKey<ScaffoldState>(); // Scaffold key 추가
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final TextEditingController _controller = TextEditingController();
 
-  List<String> bookmarkedItems =
-      List<String>.generate(20, (i) => 'Item ${i + 1}'); // 더미 데이터 20개 생성
-  String searchQuery = ''; // 검색 쿼리를 저장하는 문자열
+  // 더미 데이터를 생성합니다.
+  final List<String> allItems =
+      List<String>.generate(20, (i) => 'Comment ${i + 1}');
+  List<String> filteredItems = [];
+
+  @override
+  void initState() {
+    super.initState();
+    // 초기 상태에서는 모든 아이템을 보여줍니다.
+    filteredItems = List.from(allItems);
+    // 텍스트 필드의 변화를 감지하여 검색 결과를 필터링합니다.
+    _controller.addListener(_filterItems);
+  }
+
+  void _filterItems() {
+    final query = _controller.text.toLowerCase();
+    final matchedItems = allItems.where((item) {
+      return item.toLowerCase().contains(query);
+    }).toList();
+
+    setState(() {
+      filteredItems = matchedItems;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: _scaffoldKey, // Scaffold에 key 할당
-
+      key: _scaffoldKey,
+      appBar: AppBar(
+        title: TextField(
+          controller: _controller,
+          decoration: InputDecoration(
+            hintText: '정책 댓글 검색...',
+            border: InputBorder.none,
+            prefixIcon: const Icon(Icons.search),
+            suffixIcon: _controller.text.isNotEmpty
+                ? IconButton(
+                    icon: const Icon(Icons.clear),
+                    onPressed: () => _controller.clear(),
+                  )
+                : null,
+          ),
+        ),
+      ),
       body: ListView.builder(
-        itemCount: bookmarkedItems.length,
+        itemCount: filteredItems.length,
         itemBuilder: (context, index) {
           return ListTile(
-            title: Text(bookmarkedItems[index]),
+            title: Text(filteredItems[index]),
             trailing: IconButton(
               icon: const Icon(Icons.bookmark),
               onPressed: () {
-                setState(() {
-                  bookmarkedItems.removeAt(index);
-                });
+                // 기능 구현 예시 (아이템 북마크 기능 등)
               },
             ),
           );
@@ -39,57 +73,10 @@ class _MyPolicyCommentScreenState extends State<MyPolicyCommentScreen> {
       ),
     );
   }
-}
-
-class DataSearch extends SearchDelegate<String> {
-  final List<String> items;
-
-  DataSearch(this.items);
 
   @override
-  List<Widget> buildActions(BuildContext context) {
-    return [
-      IconButton(
-        icon: const Icon(Icons.clear),
-        onPressed: () {
-          print('끔');
-          query = '';
-        },
-      ),
-    ];
-  }
-
-  @override
-  Widget buildLeading(BuildContext context) {
-    return IconButton(
-      icon: AnimatedIcon(
-        icon: AnimatedIcons.menu_arrow,
-        progress: transitionAnimation,
-      ),
-      onPressed: () {
-        print('끔');
-
-        close(context, '');
-      },
-    );
-  }
-
-  @override
-  Widget buildResults(BuildContext context) {
-    return Container();
-  }
-
-  @override
-  Widget buildSuggestions(BuildContext context) {
-    final suggestionList = query.isEmpty
-        ? items
-        : items.where((p) => p.startsWith(query)).toList();
-
-    return ListView.builder(
-      itemBuilder: (context, index) => ListTile(
-        title: Text(suggestionList[index]),
-      ),
-      itemCount: suggestionList.length,
-    );
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 }

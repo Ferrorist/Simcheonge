@@ -43,7 +43,7 @@ public class PolicyController {
     public ResponseEntity<?> searchPolicies(@RequestBody PolicySearchRequest policySearchRequest,
                                             @PageableDefault(size = DEFAULT_SIZE, page = 0, sort = "createdAt", direction = Sort.Direction.DESC) final Pageable pageable) {
 
-
+        log.info("Controller keyword={}",policySearchRequest.getKeyword());
         return ResponseUtil.buildBasicResponse(HttpStatus.OK, policyService.searchPolicies(policySearchRequest,pageable));
     }
 
