@@ -92,7 +92,8 @@ public class YouthPlcyService {
                         .processedAt(null)
                         .createdAt(new Date())
                         .build();
-                policyRepository.save(policy);
+                Policy saved = policyRepository.save(policy);
+                log.info("saved={}",saved);
             }
         }
     }

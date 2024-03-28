@@ -10,5 +10,5 @@ import java.util.ArrayList;
 import java.util.List;
 
 public interface PolicyCustomRepository {
-    public List<Integer> searchPolicy(String keyword, ArrayList<CategoryDetailSearchRequest> detailList, ArrayList<String> categoryList);
+    public PageImpl<Policy> searchPolicy(String keyword, List<CategoryDetailSearchRequest> detailList, Pageable pageable);
 }
