@@ -165,16 +165,12 @@ class _SearchScreenState extends State<SearchScreen> {
                   margin:
                       const EdgeInsets.symmetric(vertical: 5, horizontal: 20),
                   child: ListTile(
-                    contentPadding: const EdgeInsets.symmetric(
-                        vertical: 18, horizontal: 16),
                     title: Text(
-                      policy.policyName ?? 'No name', // 'policyName'은 모델에 따라 다름
-                      style: const TextStyle(fontSize: 19),
+                      policy.policyName ?? 'No name',
+                      softWrap: true,
+                      style: const TextStyle(fontSize: 16),
                     ),
                     trailing: const Icon(Icons.chevron_right),
-                    onTap: () {
-                      // 아이템 클릭 시 수행할 작업
-                    },
                   ),
                 );
               },
