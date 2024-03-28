@@ -1,9 +1,5 @@
 package com.e102.simcheonge_server.domain.post_category.entity;
 
-import com.e102.simcheonge_server.domain.category_detail.entity.CategoryDetailId;
-//import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;

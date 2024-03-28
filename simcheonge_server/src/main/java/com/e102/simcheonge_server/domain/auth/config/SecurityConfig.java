@@ -32,6 +32,8 @@ public class SecurityConfig {
                 .sessionManagement(management ->
                         management.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 세션 정책을 STATELESS로 설정
                 .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers(HttpMethod.GET, "/posts", "/posts/categories")
+                        .permitAll()
                 // 해당 API에 대해서는 모든 요청을 허가
                 .requestMatchers(HttpMethod.GET, "/posts")
                         .permitAll() // GET 메소드에 대한 /post 요청을 인증 없이 허용
