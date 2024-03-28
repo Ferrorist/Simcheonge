@@ -15,6 +15,7 @@ public interface PolicyRepository extends JpaRepository<Policy,Integer>, PolicyC
     Optional<Policy> findByPolicyId(int policyId);
     @Query("SELECT p FROM Policy p WHERE p.policyId IN :policyIds")
     PageImpl<Policy> findByPolicyIds(List<Integer> policyIds, Pageable pageable);
+    PageImpl<Policy> findAll(Pageable pageable);
 
-//    PageImpl<Policy> findAll(Pageable pageable);
+    boolean existsByCode(String code);
 }
