@@ -55,8 +55,8 @@ class SideAppBar extends StatelessWidget {
                                 style: TextStyle(
                                     fontSize: 22, fontWeight: FontWeight.w300),
                               ),
-                              decoration: BoxDecoration(
-                                color: Colors.red[200],
+                              decoration: const BoxDecoration(
+                                color: Color.fromRGBO(107, 127, 212, 1),
                               ),
                             ),
                           );
@@ -260,10 +260,14 @@ class SideAppBar extends StatelessWidget {
               ),
             ),
             Container(
-              color: Colors.red[200],
+              color: const Color.fromRGBO(107, 127, 212, 1),
               child: ListTile(
-                leading: Icon(Icons.logout, color: Colors.grey[850]),
-                title: const Text('로그아웃'),
+                leading: const Icon(Icons.logout, color: Colors.white),
+                title: const Text(
+                  '로그아웃',
+                  style: TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.w600),
+                ),
                 onTap: () {
                   // 로그아웃 기능 구현
                   logout(context);
