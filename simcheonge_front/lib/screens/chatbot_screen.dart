@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:simcheonge_front/services/chatbot_api.dart'; // ChatbotAPI 경로 확인 필요
 
 class ChatbotScreen extends StatefulWidget {
   const ChatbotScreen({super.key});
@@ -11,17 +12,49 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   final TextEditingController _controller = TextEditingController();
   final List<Map<String, String>> _messages = [];
   final ScrollController _scrollController = ScrollController();
+  bool _isLoading = false; // 로딩 상태 관리
+  String? _errorMessage; // 에러 메시지 관리
 
-  void _handleUserInput(String text) {
-    setState(() {
-      _messages.insert(0, {'text': text, 'sender': 'user'});
-      _messages.insert(0, {
-        'text':
-            '안녕하세요, 당신을 도와줄 챗봇입니다. 무엇을 도와드릴까요?안녕하세요, 당신을 도와줄 챗봇입니다. 무엇을 도와드릴까요?안녕하세요, 당신을 도와줄 챗봇입니다. 무엇을 도와드릴까요?안녕하세요, 당신을 도와줄 챗봇입니다. 무엇을 도와드릴까요?안녕하세요, 당신을 도와줄 챗봇입니다. 무엇을 도와드릴까요?안녕하세요, 당신을 도와줄 챗봇입니다. 무엇을 도와드릴까요?',
-        'sender': 'bot'
-      });
+  @override
+  void initState() {
+    super.initState();
+    _messages.insert(0, {
+      'text': '안녕하세요!\n채팅 AI 심청이 입니다.\n원하시는 서비스의 키워드를\n입력해보세요!',
+      'sender': 'bot'
     });
-    _controller.clear();
+  }
+
+  void _handleUserInput(String text) async {
+    setState(() {
+      _isLoading = true; // 로딩 시작
+      _errorMessage = null; // 에러 메시지 초기화
+    });
+
+    try {
+      final chatbotResponse = await ChatbotAPI.postUserInput(text);
+      if (chatbotResponse != null) {
+        setState(() {
+          _messages.insert(0, {
+            'text': chatbotResponse.data?.result ?? '응답을 받아오지 못했습니다.',
+            'sender': 'bot'
+          });
+        });
+      } else {
+        setState(() {
+          _errorMessage = '인터넷 연결을 확인하세요.';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _errorMessage = '에러가 발생했습니다: $e';
+      });
+    } finally {
+      setState(() {
+        _isLoading = false; // 로딩 종료
+      });
+    }
+
+    _controller.clear(); // 입력 필드를 비웁니다.
   }
 
   @override
@@ -105,6 +138,17 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                 },
               ),
             ),
+            if (_isLoading) // 로딩 인디케이터 표시
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 10),
+                child: CircularProgressIndicator(),
+              ),
+            if (_errorMessage != null) // 에러 메시지 표시
+              Padding(
+                padding: const EdgeInsets.all(10),
+                child: Text(_errorMessage!,
+                    style: const TextStyle(color: Colors.red)),
+              ),
             Padding(
               padding:
                   const EdgeInsets.only(bottom: 8.0, left: 16.0, right: 16.0),
