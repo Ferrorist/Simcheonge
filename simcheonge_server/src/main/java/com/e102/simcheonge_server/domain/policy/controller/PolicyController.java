@@ -1,6 +1,7 @@
 package com.e102.simcheonge_server.domain.policy.controller;
 
 import com.e102.simcheonge_server.common.util.ResponseUtil;
+import com.e102.simcheonge_server.domain.policy.dto.request.PolicyReadRequest;
 import com.e102.simcheonge_server.domain.policy.dto.request.PolicySearchRequest;
 import com.e102.simcheonge_server.domain.policy.dto.request.PolicyUpdateRequest;
 import com.e102.simcheonge_server.domain.policy.service.PolicyService;
@@ -51,6 +52,13 @@ public class PolicyController {
     @GetMapping("/categories")
     public ResponseEntity<?> getCategories(){
         return ResponseUtil.buildBasicResponse(HttpStatus.OK,policyService.getCategories());
+    }
+
+    @GetMapping("/admin")
+    public ResponseEntity<?> getAllPolicies(@RequestParam("isProcessed") boolean  isProcessed,
+                                            @AuthenticationPrincipal UserDetails userDetails){
+
+        return ResponseUtil.buildBasicResponse(HttpStatus.OK,policyService.getAllPolicies(isProcessed,userDetails.getUsername()));
     }
 
 }

@@ -11,10 +11,10 @@ import com.e102.simcheonge_server.domain.category_detail.entity.CategoryDetail;
 import com.e102.simcheonge_server.domain.category_detail.repository.CategoryDetailRepository;
 import com.e102.simcheonge_server.domain.policy.dto.request.PolicySearchRequest;
 import com.e102.simcheonge_server.domain.policy.dto.request.PolicyUpdateRequest;
+import com.e102.simcheonge_server.domain.policy.dto.response.PolicyAdminReadResponse;
 import com.e102.simcheonge_server.domain.policy.dto.response.PolicyDetailResponse;
 import com.e102.simcheonge_server.domain.policy.dto.response.PolicyThumbnailResponse;
 import com.e102.simcheonge_server.domain.policy.entity.Policy;
-import com.e102.simcheonge_server.domain.policy.repository.PolicyCustomRepository;
 import com.e102.simcheonge_server.domain.policy.repository.PolicyNativeRepository;
 import com.e102.simcheonge_server.domain.policy.repository.PolicyRepository;
 import com.e102.simcheonge_server.domain.user.entity.User;
@@ -170,4 +170,23 @@ public class PolicyService {
     }
 
 
+    public List<PolicyAdminReadResponse> getAllPolicies(boolean isProcessed,String userNickname) {
+        log.info("userNickname={}",userNickname);
+        //관리자 권한 필요함
+        if(!userNickname.equals("admin")){
+            throw new AuthenticationException("해당 유저는 미가공 데이터에 대한 권한이 없습니다.");
+        }
+
+        List<Policy> policyList = policyRepository.findAllByIsProcessed(isProcessed);
+        List<PolicyAdminReadResponse> responseList=new ArrayList<>();
+        policyList.forEach(policy -> {
+            PolicyAdminReadResponse resp=PolicyAdminReadResponse.builder()
+                    .policyId(policy.getPolicyId())
+                    .policy_name(policy.getName())
+                    .isProcessed(policy.isProcessed())
+                    .build();
+            responseList.add(resp);
+        });
+        return responseList;
+    }
 }
