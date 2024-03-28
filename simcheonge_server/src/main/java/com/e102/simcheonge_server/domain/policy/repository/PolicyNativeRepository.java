@@ -7,8 +7,11 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -20,7 +23,7 @@ public class PolicyNativeRepository {
     @PersistenceContext
     private EntityManager entityManager;
 
-    public List<Object[]> searchPolicy(String keyword, List<CategoryDetailSearchRequest> detailList, Date startDate, Date endDate) {
+    public PageImpl<Object[]> searchPolicy(String keyword, List<CategoryDetailSearchRequest> detailList, Date startDate, Date endDate, Pageable pageable) {
 
         log.info("Repository keyword={}", keyword);
         String subQuery = "";
@@ -45,22 +48,31 @@ public class PolicyNativeRepository {
                 .anyMatch(detail -> "APC".equals(detail.getCode()) && 3 == detail.getNumber());
 
         String sqlQuery = "SELECT * FROM policy WHERE policy_is_processed = true ";
+        String countQuery = "SELECT count(*) FROM policy WHERE policy_is_processed = true ";
         if (!keyword.isEmpty()) {
             sqlQuery += "and (policy_name like '%" + keyword + "%' " +
+                    "or policy_support_content like '%" + keyword + "%' ) ";
+            countQuery+="and (policy_name like '%" + keyword + "%' " +
                     "or policy_support_content like '%" + keyword + "%' ) ";
         }
         if (containsDetail) {
             Date currentDate = new Date();
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             sqlQuery +="and (policy_start_date >= '"+sdf.format(startDate)+"' and policy_end_date <= '"+sdf.format(endDate)+"' )";
+            countQuery+="and (policy_start_date >= '"+sdf.format(startDate)+"' and policy_end_date <= '"+sdf.format(endDate)+"' )";
         }
         sqlQuery += subQuery;
+        countQuery+=subQuery;
 
+        Query cquery = entityManager.createNativeQuery(countQuery);
+        Long count = (Long) cquery.getSingleResult();
+
+        sqlQuery += " LIMIT " + pageable.getPageSize() + " OFFSET " + pageable.getOffset();
         Query query = entityManager.createNativeQuery(sqlQuery);
         log.info("sqlQuery={}", sqlQuery);
 
         @SuppressWarnings("unchecked")
         List<Object[]> resultList = query.getResultList();
-        return resultList;
+        return new PageImpl<>(resultList, pageable, count);
     }
 }
