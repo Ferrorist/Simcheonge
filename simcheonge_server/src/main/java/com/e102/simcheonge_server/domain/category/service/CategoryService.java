@@ -15,7 +15,7 @@ public class CategoryService {
         this.categoryDetailRepository = categoryDetailRepository;
     }
 
-    public List<CategoryDetail> getCategoryDetails(String code) {
-        return categoryDetailRepository.findAllByCode(code);
+    public List<CategoryDetail> getAllCategoryDetails() {
+        return categoryDetailRepository.findAllOrderedByNumber();
     }
 }

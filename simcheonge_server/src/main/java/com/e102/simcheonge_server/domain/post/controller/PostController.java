@@ -19,7 +19,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -113,5 +112,35 @@ public class PostController {
         return ResponseEntity.ok(Map.of("status", HttpStatus.OK.value(), "data", myPosts));
     }
 
+    // 게시글 카테고리 종류 조회
+    @GetMapping("/categories")
+    public ResponseEntity<?> getCategories() {
+        List<CategoryDetail> categoryDetails = categoryService.getAllCategoryDetails();
+        // "POS" 태그만 필터링
+        List<CategoryDetail> filteredCategoryDetails = categoryDetails.stream()
+                .filter(detail -> "POS".equals(detail.getCategoryCode()))
+                .collect(Collectors.toList());
+
+        // 필터링된 카테고리 상세 정보를 기반으로 categoryList 생성
+        List<Map<String, Object>> categoryList = filteredCategoryDetails.stream()
+                .map(detail -> {
+                    Map<String, Object> categoryMap = new LinkedHashMap<>();
+                    categoryMap.put("code", detail.getCategoryNumber());
+                    categoryMap.put("name", detail.getCategoryName());
+                    return categoryMap;
+                })
+                .collect(Collectors.toList());
+
+        // 최종 응답 데이터 구성
+        Map<String, Object> data = new LinkedHashMap<>();
+        data.put("tag", "POS");
+        data.put("categoryList", categoryList);
+
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("status", HttpStatus.OK.value());
+        response.put("data", Collections.singletonList(data));
+
+        return ResponseEntity.ok(response);
+    }
 
 }
