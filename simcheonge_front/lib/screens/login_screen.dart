@@ -44,10 +44,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (response.statusCode == 200) {
       // 로그인 성공 처리
-      final data = jsonDecode(response.body);
+      final decodedBody = utf8.decode(response.bodyBytes);
+      final data = jsonDecode(decodedBody);
       print(data);
-      await _saveToken(
-          data['data']['accessToken'], data['data']['refreshToken']);
+      await _saveToken(data['data']['accessToken'],
+          data['data']['refreshToken'], data['data']['userNickname']);
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('로그인에 성공했습니다.')),
@@ -64,7 +65,8 @@ class _LoginScreenState extends State<LoginScreen> {
     } else {
       // 응답 본문이 JSON 형식인지 확인 후, 적절한 에러 메시지 표시
       try {
-        final responseData = jsonDecode(response.body);
+        final decodedBody = utf8.decode(response.bodyBytes);
+        final responseData = jsonDecode(decodedBody);
         final errorMessage = responseData['message'] ?? '로그인에 실패했습니다.';
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(errorMessage)),
@@ -79,11 +81,12 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  Future<void> _saveToken(String accessToken, String refreshToken) async {
+  Future<void> _saveToken(
+      String accessToken, String refreshToken, String userNickname) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('accessToken', accessToken);
     await prefs.setString('refreshToken', refreshToken);
-    await prefs.setString('userNickname', _nicknameController.text); // 닉네임 저장
+    await prefs.setString('userNickname', userNickname);
   }
 
   @override
