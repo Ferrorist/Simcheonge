@@ -44,17 +44,26 @@ public class PostController {
         User user = UserUtil.getUserFromUserDetails(userDetails);
         log.info("postRequest={}",postRequest.getPostContent());
 
-            Post savedPost = postService.createPost(postRequest, postRequest.getCategoryCode(), postRequest.getCategoryNumber(), user.getUserId());
-            Map<String, Object> responseBody = new HashMap<>();
-            return ResponseUtil.buildBasicResponse(HttpStatus.OK, Map.of("post_id",savedPost.getPostId()));
+        Post savedPost = postService.createPost(postRequest, postRequest.getCategoryCode(), postRequest.getCategoryNumber(), user.getUserId());
+
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("status", HttpStatus.OK.value());
+        response.put("data", Collections.singletonMap("post_id", savedPost.getPostId()));
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
 
     // 게시글 조회
     @GetMapping
     public ResponseEntity<?> getPosts(@RequestParam(value = "category_code", required = true) String categoryCode, @RequestParam(value = "category_number", required = true) Integer categoryNumber, @RequestParam(value = "keyword", required = false) String keyword) {
-        List<PostResponse> postResponses = postService.findPostsByCategoryCodeAndNumberWithKeyword(categoryCode, categoryNumber, keyword); // 메서드 이름을 수정했습니다.
-        return ResponseEntity.ok(Map.of("status", 200, "data", postResponses));
+        List<PostResponse> postResponses = postService.findPostsByCategoryCodeAndNumberWithKeyword(categoryCode, categoryNumber, keyword);
+
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("status", HttpStatus.OK.value());
+        response.put("data", postResponses);
+        return ResponseEntity.ok(response);
     }
+
 
     // 게시글 수정
     @PatchMapping("/{postId}")
@@ -66,8 +75,12 @@ public class PostController {
 
         postService.updatePost(postId, postRequest, user.getUserId());
 
-        return ResponseUtil.buildBasicResponse(HttpStatus.OK, Map.of("post_id", postId));
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("status", HttpStatus.OK.value());
+        response.put("data", Collections.singletonMap("post_id", postId));
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
 
     // 게시글 삭제
     @DeleteMapping("/{postId}")
@@ -79,8 +92,12 @@ public class PostController {
 
         postService.deletePost(postId, user.getUserId());
 
-        return ResponseUtil.buildBasicResponse(HttpStatus.OK, "게시글 삭제에 성공했습니다.");
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("status", HttpStatus.OK.value());
+        response.put("data", "게시글 삭제에 성공했습니다.");
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
 
     // 게시글 상세 조회
     @GetMapping("/{postId}")
@@ -90,8 +107,13 @@ public class PostController {
         }
 
         PostDetailResponse postDetail = postService.findPostDetailById(postId);
-        return ResponseEntity.ok(Map.of("status", 200, "data", postDetail));
+
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("status", HttpStatus.OK.value());
+        response.put("data", postDetail);
+        return ResponseEntity.ok(response);
     }
+
 
     // 내가 쓴 게시글 조회
     @GetMapping("/my")
@@ -109,8 +131,12 @@ public class PostController {
         // 게시글 조회 서비스 호출
         List<MyPostResponse> myPosts = postService.findMyPostsByCategoryCodeAndNumber(user.getUserId(), categoryCode, categoryNumber);
 
-        return ResponseEntity.ok(Map.of("status", HttpStatus.OK.value(), "data", myPosts));
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("status", HttpStatus.OK.value());
+        response.put("data", myPosts);
+        return ResponseEntity.ok(response);
     }
+
 
     // 게시글 카테고리 종류 조회
     @GetMapping("/categories")
@@ -142,5 +168,4 @@ public class PostController {
 
         return ResponseEntity.ok(response);
     }
-
 }

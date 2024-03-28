@@ -15,19 +15,14 @@ import com.e102.simcheonge_server.domain.user.entity.User;
 import com.e102.simcheonge_server.domain.user.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 
 @Service
 @Slf4j
@@ -59,6 +54,7 @@ public class PostService {
 
         return savedPost;
     }
+
 
     // 게시글 조회
     public List<PostResponse> findPostsByCategoryCodeAndNumberWithKeyword(String categoryCode, Integer categoryNumber, String keyword) {
@@ -98,6 +94,7 @@ public class PostService {
         }).collect(Collectors.toList());
     }
 
+
     // 게시글 수정
     @Transactional
     public void updatePost(int postId, PostRequest postRequest, int userId) {
@@ -122,6 +119,7 @@ public class PostService {
         PostCategory newPostCategory = new PostCategory(postRequest.getCategoryCode(), postRequest.getCategoryNumber(), postId);
         postCategoryRepository.save(newPostCategory);
     }
+
 
     // 게시글 삭제
     @Transactional
@@ -173,6 +171,7 @@ public class PostService {
         );
     }
 
+
     // 내가 쓴 게시글 조회
     public List<MyPostResponse> findMyPostsByCategoryCodeAndNumber(int userId, String categoryCode, Integer categoryNumber) {
         List<Post> posts;
@@ -203,6 +202,4 @@ public class PostService {
             );
         }).collect(Collectors.toList());
     }
-
-
 }
