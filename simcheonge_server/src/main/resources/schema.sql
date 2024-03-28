@@ -8,6 +8,7 @@ DROP TABLE IF EXISTS `category`;
 DROP TABLE IF EXISTS `category_detail`;
 DROP TABLE IF EXISTS `user`;
 DROP TABLE IF EXISTS `policy_category_detail`;
+DROP TABLE IF EXISTS `economic_word`;
 
 CREATE TABLE `user`
 (
@@ -128,6 +129,14 @@ CREATE TABLE `policy_category_detail`
     `category_code`   VARCHAR(21) NOT NULL COMMENT '코드',
     `category_number` INT     NOT NULL COMMENT '번호',
     `policy_id`       INT         NOT NULL,
+    PRIMARY KEY (`category_code`, `category_number`, `policy_id`)
+);
+
+CREATE TABLE `economic_word`
+(
+    `economic_word_id` VARCHAR(255) NOT NULL COMMENT ,
+    `economic_word` INT NOT NULL COMMENT '번호',
+    `economic_word_description` INT NOT NULL,
     PRIMARY KEY (`category_code`, `category_number`, `policy_id`)
 );
 
