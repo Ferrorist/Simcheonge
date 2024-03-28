@@ -4,6 +4,7 @@ import com.e102.simcheonge_server.common.util.ResponseUtil;
 import com.e102.simcheonge_server.domain.category.service.CategoryService;
 import com.e102.simcheonge_server.domain.category_detail.entity.CategoryDetail;
 import com.e102.simcheonge_server.domain.post.dto.request.PostRequest;
+import com.e102.simcheonge_server.domain.post.dto.response.MyPostResponse;
 import com.e102.simcheonge_server.domain.post.dto.response.PostDetailResponse;
 import com.e102.simcheonge_server.domain.post.dto.response.PostResponse;
 import com.e102.simcheonge_server.domain.post.entity.Post;
@@ -46,7 +47,7 @@ public class PostController {
 
             Post savedPost = postService.createPost(postRequest, postRequest.getCategoryCode(), postRequest.getCategoryNumber(), user.getUserId());
             Map<String, Object> responseBody = new HashMap<>();
-            return ResponseUtil.buildBasicResponse(HttpStatus.OK, savedPost.getPostId());
+            return ResponseUtil.buildBasicResponse(HttpStatus.OK, Map.of("post_id",savedPost.getPostId()));
     }
 
     // 게시글 조회
@@ -92,5 +93,25 @@ public class PostController {
         PostDetailResponse postDetail = postService.findPostDetailById(postId);
         return ResponseEntity.ok(Map.of("status", 200, "data", postDetail));
     }
+
+    // 내가 쓴 게시글 조회
+    @GetMapping("/my")
+    public ResponseEntity<?> getMyPosts(
+            @RequestParam("category_code") String categoryCode,
+            @RequestParam("category_number") Integer categoryNumber,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        // UserDetails에서 유저 아이디 추출
+        User user = UserUtil.getUserFromUserDetails(userDetails);
+        if (user == null) {
+            return ResponseUtil.buildBasicResponse(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다.");
+        }
+
+        // 게시글 조회 서비스 호출
+        List<MyPostResponse> myPosts = postService.findMyPostsByCategoryCodeAndNumber(user.getUserId(), categoryCode, categoryNumber);
+
+        return ResponseEntity.ok(Map.of("status", HttpStatus.OK.value(), "data", myPosts));
+    }
+
 
 }
