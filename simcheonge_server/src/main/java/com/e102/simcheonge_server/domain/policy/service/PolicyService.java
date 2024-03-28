@@ -15,6 +15,7 @@ import com.e102.simcheonge_server.domain.policy.dto.response.PolicyDetailRespons
 import com.e102.simcheonge_server.domain.policy.dto.response.PolicyThumbnailResponse;
 import com.e102.simcheonge_server.domain.policy.entity.Policy;
 import com.e102.simcheonge_server.domain.policy.repository.PolicyCustomRepository;
+import com.e102.simcheonge_server.domain.policy.repository.PolicyNativeRepository;
 import com.e102.simcheonge_server.domain.policy.repository.PolicyRepository;
 import com.e102.simcheonge_server.domain.user.entity.User;
 import com.e102.simcheonge_server.domain.user.repository.UserRepository;
@@ -34,6 +35,7 @@ public class PolicyService {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final CategoryDetailRepository categoryDetailRepository;
+    private final PolicyNativeRepository policyNativeRepository;
     private final HashMap<String, Integer> categoryCheckMap = new HashMap<>();
     private final String[] checkCategories = {"ADM", "SPC", "EPM"};
 
@@ -125,15 +127,28 @@ public class PolicyService {
 //        List<Category> categoryList = categoryRepository.findAllByCodeNot("POS");
 //        ArrayList<String> categoryStringList=new
 
-        PageImpl<Policy> policyList = policyRepository.searchPolicy(policySearchRequest.getKeyword(), policySearchRequest.getList(), pageable);
+        List<Object[]> policyObjectList = policyNativeRepository.searchPolicy(policySearchRequest.getKeyword(),policySearchRequest.getList(),policySearchRequest.getStartDate(),policySearchRequest.getEndDate());
         List<PolicyThumbnailResponse> responseList = new ArrayList<>();
-        policyList.forEach(policy -> {
+        for (Object[] policyObject : policyObjectList) {
+            log.info("policyObject[0]={}",policyObject[0]);
+            log.info("policyObject[3]={}",policyObject[3]);
+            Integer policyId = (Integer) policyObject[0];
+            String policyName = (String) policyObject[3];
+
             PolicyThumbnailResponse thumbnailResponse = PolicyThumbnailResponse.builder()
-                    .policyId(policy.getPolicyId())
-                    .policy_name(policy.getName())
+                    .policyId(policyId)
+                    .policy_name(policyName)
                     .build();
+
             responseList.add(thumbnailResponse);
-        });
+        }
+//        policyList.forEach(policy -> {
+//            PolicyThumbnailResponse thumbnailResponse = PolicyThumbnailResponse.builder()
+//                    .policyId(policy.getPolicyId())
+//                    .policy_name(policy.getName())
+//                    .build();
+//            responseList.add(thumbnailResponse);
+//        });
         return new PageImpl<>(responseList, pageable, responseList.size());
     }
 
