@@ -15,6 +15,7 @@ import com.e102.simcheonge_server.domain.policy.dto.response.PolicyDetailRespons
 import com.e102.simcheonge_server.domain.policy.dto.response.PolicyThumbnailResponse;
 import com.e102.simcheonge_server.domain.policy.entity.Policy;
 import com.e102.simcheonge_server.domain.policy.repository.PolicyCustomRepository;
+import com.e102.simcheonge_server.domain.policy.repository.PolicyNativeRepository;
 import com.e102.simcheonge_server.domain.policy.repository.PolicyRepository;
 import com.e102.simcheonge_server.domain.user.entity.User;
 import com.e102.simcheonge_server.domain.user.repository.UserRepository;
@@ -34,6 +35,7 @@ public class PolicyService {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final CategoryDetailRepository categoryDetailRepository;
+    private final PolicyNativeRepository policyNativeRepository;
     private final HashMap<String, Integer> categoryCheckMap = new HashMap<>();
     private final String[] checkCategories = {"ADM", "SPC", "EPM"};
 
@@ -120,59 +122,41 @@ public class PolicyService {
     }
 
     public PageImpl<PolicyThumbnailResponse> searchPolicies(PolicySearchRequest policySearchRequest, Pageable pageable) {
-        checkCategoriesList(policySearchRequest);
-        addAllSelect(policySearchRequest);
-//        List<Category> categoryList = categoryRepository.findAllByCodeNot("POS");
-//        ArrayList<String> categoryStringList=new
 
-        PageImpl<Policy> policyList = policyRepository.searchPolicy(policySearchRequest.getKeyword(), policySearchRequest.getList(), pageable);
+        validatePolicySearchRequest(policySearchRequest);
+
+        PageImpl<Object[]> policyObjectList = policyNativeRepository.searchPolicy(policySearchRequest.getKeyword(),policySearchRequest.getList(),policySearchRequest.getStartDate(),policySearchRequest.getEndDate(),pageable);
         List<PolicyThumbnailResponse> responseList = new ArrayList<>();
-        policyList.forEach(policy -> {
+        for (Object[] policyObject : policyObjectList) {
+            Integer policyId = (Integer) policyObject[0];
+            String policyName = (String) policyObject[3];
+
             PolicyThumbnailResponse thumbnailResponse = PolicyThumbnailResponse.builder()
-                    .policyId(policy.getPolicyId())
-                    .policy_name(policy.getName())
+                    .policyId(policyId)
+                    .policy_name(policyName)
                     .build();
             responseList.add(thumbnailResponse);
-        });
-        return new PageImpl<>(responseList, pageable, responseList.size());
+        }
+        return new PageImpl<>(responseList, pageable, policyObjectList.getTotalElements());
     }
 
-    private void addAllSelect(PolicySearchRequest policySearchRequest) {
-        for (String category : checkCategories) {
-            if (categoryCheckMap.get(category) != null && categoryCheckMap.get(category) == 1) {
-                Integer codeCount = categoryDetailRepository.countByCode(category);
-                for (int number = 2; number < codeCount; number++) {
-                    CategoryDetailSearchRequest newCategoryDetail = CategoryDetailSearchRequest.builder()
-                            .code(category)
-                            .number(number)
-                            .build();
-                    policySearchRequest.getList().add(newCategoryDetail);
+    private void validatePolicySearchRequest(PolicySearchRequest policySearchRequest) {
+        //{ADM,1}, {EPM,1}, {SPC, 1}가 있는지 확인
+        for (CategoryDetailSearchRequest category : policySearchRequest.getList()) {
+            if (Arrays.asList(checkCategories).contains(category.getCode()) && category.getNumber() == 1) {
+                throw new IllegalArgumentException("해당 카테고리는 '제한 없음'을 선택할 수 없습니다.");
+            }
+        }
+
+        // {APC,3}일 경우 startDate, endDate null확인
+        for (CategoryDetailSearchRequest category : policySearchRequest.getList()) {
+            if ("APC".equals(category.getCode()) && category.getNumber() == 3) {
+                if (policySearchRequest.getStartDate() == null || policySearchRequest.getEndDate() == null) {
+                    throw new IllegalArgumentException("특정 기간의 startDate, endDate가 없습니다.");
                 }
+                break;
             }
         }
-    }
-
-    private void checkCategoriesList(PolicySearchRequest policySearchRequest) {
-        categoryCheckMap.clear();
-        for (CategoryDetailSearchRequest categoryDetail : policySearchRequest.getList()) {
-            if (isValidCategory(categoryDetail.getCode())) {
-                if (categoryDetail.getNumber() == 1 && categoryCheckMap.get(categoryDetail.getCode()) == null) {
-                    categoryCheckMap.put(categoryDetail.getCode(), 1);
-
-                } else if (categoryDetail.getNumber() != 1 && categoryCheckMap.get(categoryDetail.getCode()) == null) {
-                    categoryCheckMap.put(categoryDetail.getCode(), 2);
-                } else throw new IllegalArgumentException("제한 없음과 다른 조건은 동시에 선택할 수 없습니다.");
-            }
-        }
-    }
-
-    public boolean isValidCategory(String code) {
-        for (String category : checkCategories) {
-            if (category.equals(code)) {
-                return true;
-            }
-        }
-        return false;
     }
 
 
