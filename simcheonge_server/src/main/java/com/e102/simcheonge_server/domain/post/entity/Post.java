@@ -1,12 +1,8 @@
 package com.e102.simcheonge_server.domain.post.entity;
 
 import com.e102.simcheonge_server.common.BaseEntity;
-import com.e102.simcheonge_server.domain.category_detail.entity.CategoryDetail;
-import com.e102.simcheonge_server.domain.user.entity.User;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
 
 import java.util.Date;
 
