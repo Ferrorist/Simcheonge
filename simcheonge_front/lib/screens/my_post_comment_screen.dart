@@ -9,107 +9,80 @@ class MyPostCommentScreen extends StatefulWidget {
 }
 
 class _MyPostCommentScreenState extends State<MyPostCommentScreen> {
-  final GlobalKey<ScaffoldState> _scaffoldKey =
-      GlobalKey<ScaffoldState>(); // Scaffold key 추가
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final TextEditingController _controller = TextEditingController();
 
-  List<String> bookmarkedItems =
-      List<String>.generate(20, (i) => 'Item ${i + 1}'); // 더미 데이터 20개 생성
-  String searchQuery = ''; // 검색 쿼리를 저장하는 문자열
+  List<String> allItems = [];
+  List<String> displayedItems = [];
+
+  @override
+  void initState() {
+    super.initState();
+    displayedItems = allItems;
+    _controller.addListener(() {
+      updateSearchQuery(_controller.text);
+    });
+  }
+
+  void updateSearchQuery(String newQuery) {
+    setState(() {
+      displayedItems = allItems
+          .where((item) => item.toLowerCase().contains(newQuery.toLowerCase()))
+          .toList();
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: _scaffoldKey, // Scaffold에 key 할당
-
+      key: _scaffoldKey,
       appBar: AppBar(
-        title: const Text('내가 쓴 게시글 댓글'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () async {
-              showSearch(
-                context: context,
-                delegate: DataSearch(bookmarkedItems),
-              );
-            },
+        automaticallyImplyLeading: false,
+        title: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
           ),
-          IconButton(
-            icon: const Icon(Icons.person),
-            onPressed: () =>
-                _scaffoldKey.currentState?.openEndDrawer(), // 오른쪽 드로어를 여는 기능 추가
+          child: TextField(
+            controller: _controller,
+            decoration: InputDecoration(
+              hintText: '검색...',
+              border: InputBorder.none,
+              prefixIcon: const Icon(Icons.search),
+              suffixIcon: _controller.text.isNotEmpty
+                  ? IconButton(
+                      icon: const Icon(Icons.clear),
+                      onPressed: () => _controller.clear(),
+                    )
+                  : null,
+            ),
           ),
-        ],
+        ),
       ),
-
       body: ListView.builder(
-        itemCount: bookmarkedItems.length,
+        itemCount: displayedItems.length,
         itemBuilder: (context, index) {
           return ListTile(
-            title: Text(bookmarkedItems[index]),
+            title: Text(displayedItems[index]),
             trailing: IconButton(
               icon: const Icon(Icons.bookmark),
               onPressed: () {
                 setState(() {
-                  bookmarkedItems.removeAt(index);
+                  allItems.remove(displayedItems[index]);
+                  displayedItems.removeAt(index);
                 });
               },
             ),
           );
         },
       ),
-    );
-  }
-}
-
-class DataSearch extends SearchDelegate<String> {
-  final List<String> items;
-
-  DataSearch(this.items);
-
-  @override
-  List<Widget> buildActions(BuildContext context) {
-    return [
-      IconButton(
-        icon: const Icon(Icons.clear),
-        onPressed: () {
-          print('끔');
-          query = '';
-        },
-      ),
-    ];
-  }
-
-  @override
-  Widget buildLeading(BuildContext context) {
-    return IconButton(
-      icon: AnimatedIcon(
-        icon: AnimatedIcons.menu_arrow,
-        progress: transitionAnimation,
-      ),
-      onPressed: () {
-        print('끔');
-
-        close(context, '');
-      },
-    );
-  }
-
-  @override
-  Widget buildResults(BuildContext context) {
-    return Container();
-  }
-
-  @override
-  Widget buildSuggestions(BuildContext context) {
-    final suggestionList = query.isEmpty
-        ? items
-        : items.where((p) => p.startsWith(query)).toList();
-
-    return ListView.builder(
-      itemBuilder: (context, index) => ListTile(
-        title: Text(suggestionList[index]),
-      ),
-      itemCount: suggestionList.length,
     );
   }
 }
