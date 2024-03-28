@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:simcheonge_front/screens/bookmark_policy_screen.dart';
 import 'package:simcheonge_front/screens/bookmark_post_screen.dart';
 import 'package:simcheonge_front/screens/my_policy_comment_screen.dart';
 import 'package:simcheonge_front/screens/my_post_comment_screen.dart';
 import 'package:simcheonge_front/screens/my_post_screen.dart';
+import 'package:simcheonge_front/services/auth_service.dart';
 
 class SideAppBar extends StatelessWidget {
   final Function(int) changePage; // 페이지 변경 함수를 위한 변수 추가
@@ -13,39 +15,61 @@ class SideAppBar extends StatelessWidget {
     required this.changePage, // 생성자를 통해 changePage 함수를 받음
   });
 
+  Future<String> _getNickname() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('userNickname') ?? '사용자';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Drawer(
       child: Theme(
         data: Theme.of(context).copyWith(
-            dividerColor:
-                Colors.transparent), // ExpansionTile의 divider 색상을 투명하게 설정
+          dividerColor:
+              Colors.transparent, // ExpansionTile의 divider 색상을 투명하게 설정
+        ),
         child: Column(
           children: <Widget>[
             Expanded(
               child: SingleChildScrollView(
                 child: Column(
                   children: <Widget>[
-                    ClipRRect(
-                      borderRadius: const BorderRadius.only(
-                        bottomLeft: Radius.circular(30.0),
-                        bottomRight: Radius.circular(30.0),
-                      ),
-                      child: UserAccountsDrawerHeader(
-                        accountName: const Text(
-                          '김싸피님',
-                          style: TextStyle(
-                              fontSize: 40, fontWeight: FontWeight.w600),
-                        ),
-                        accountEmail: const Text(
-                          '환영합니다',
-                          style: TextStyle(
-                              fontSize: 22, fontWeight: FontWeight.w300),
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.red[200],
-                        ),
-                      ),
+                    FutureBuilder<String>(
+                      future: _getNickname(),
+                      builder: (BuildContext context,
+                          AsyncSnapshot<String> snapshot) {
+                        if (snapshot.connectionState == ConnectionState.done) {
+                          return ClipRRect(
+                            borderRadius: const BorderRadius.only(
+                              bottomLeft: Radius.circular(30.0),
+                              bottomRight: Radius.circular(30.0),
+                            ),
+                            child: UserAccountsDrawerHeader(
+                              accountName: Text(
+                                snapshot.data!, // Future에서 가져온 닉네임 사용
+                                style: const TextStyle(
+                                    fontSize: 40, fontWeight: FontWeight.w600),
+                              ),
+                              accountEmail: const Text(
+                                '환영합니다',
+                                style: TextStyle(
+                                    fontSize: 22, fontWeight: FontWeight.w300),
+                              ),
+                              decoration: const BoxDecoration(
+                                color: Color.fromRGBO(107, 127, 212, 1),
+                              ),
+                            ),
+                          );
+                        } else {
+                          // 데이터를 불러오는 동안 표시할 위젯
+                          return const SizedBox(
+                            height: 200.0,
+                            child: Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                          );
+                        }
+                      },
                     ),
                     ExpansionTile(
                       leading: Icon(
@@ -236,12 +260,17 @@ class SideAppBar extends StatelessWidget {
               ),
             ),
             Container(
-              color: Colors.red[200],
+              color: const Color.fromRGBO(107, 127, 212, 1),
               child: ListTile(
-                leading: Icon(Icons.logout, color: Colors.grey[850]),
-                title: const Text('로그아웃'),
+                leading: const Icon(Icons.logout, color: Colors.white),
+                title: const Text(
+                  '로그아웃',
+                  style: TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.w600),
+                ),
                 onTap: () {
                   // 로그아웃 기능 구현
+                  logout(context);
                   print('로그아웃');
                 },
               ),
