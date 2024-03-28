@@ -26,5 +26,14 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
     List<Post> findByCategoryDetailsAndKeyword(@Param("categoryCode") String categoryCode, @Param("categoryNumber") Integer categoryNumber, @Param("keyword") String keyword);
 
 
+    // 내가 쓴 게시글 조회
+
+    @Query("SELECT p FROM Post p WHERE p.userId = :userId")
+    List<Post> findAllPostsByUserId(@Param("userId") int userId);
+
+    @Query("SELECT p FROM Post p JOIN PostCategory pc ON p.postId = pc.postId " +
+            "WHERE p.userId = :userId AND pc.categoryCode = :categoryCode AND pc.categoryNumber = :categoryNumber")
+    List<Post> findPostsByUserIdAndCategory(@Param("userId") int userId, @Param("categoryCode") String categoryCode, @Param("categoryNumber") Integer categoryNumber);
+
 
 }

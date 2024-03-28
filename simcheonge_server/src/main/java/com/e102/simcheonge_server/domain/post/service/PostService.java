@@ -4,6 +4,7 @@ import com.e102.simcheonge_server.common.exception.DataNotFoundException;
 import com.e102.simcheonge_server.domain.category_detail.entity.CategoryDetail;
 import com.e102.simcheonge_server.domain.category_detail.repository.CategoryDetailRepository;
 import com.e102.simcheonge_server.domain.post.dto.request.PostRequest;
+import com.e102.simcheonge_server.domain.post.dto.response.MyPostResponse;
 import com.e102.simcheonge_server.domain.post.dto.response.PostDetailResponse;
 import com.e102.simcheonge_server.domain.post.dto.response.PostResponse;
 import com.e102.simcheonge_server.domain.post.entity.Post;
@@ -140,19 +141,6 @@ public class PostService {
         postRepository.deleteById(postId);
     }
 
-//    public ResponseEntity<String> get(String url){
-//        RestTemplate restTemplate=new RestTemplate();
-//        HttpHeaders headers=new HttpHeaders();
-//        headers.setContentType(MediaType.APPLICATION_JSON); //여기 json이어도 되나?
-//
-//        HttpEntity<HttpHeaders> entity=new HttpEntity<>(headers);
-//
-//        ResponseEntity<String> response=restTemplate.exchange(URI.create(url),
-//                HttpMethod.GET,entity,String.class);
-//
-//        return response;
-//    }
-
     // 게시글 상세 조회
     public PostDetailResponse findPostDetailById(int postId) {
         Post post = postRepository.findById(postId)
@@ -161,8 +149,19 @@ public class PostService {
         User user = userRepository.findById(post.getUserId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."));
 
-        // 카테고리 이름 조회 로직 (가정)
-        String categoryName = "카테고리 예시"; // 실제로는 카테고리 관련 정보를 조회해야 합니다.
+        // 게시글에 연결된 카테고리 정보 조회
+        Optional<PostCategory> postCategoryOptional = postCategoryRepository.findByPostId(postId);
+        if (!postCategoryOptional.isPresent()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "게시글의 카테고리 정보를 찾을 수 없습니다.");
+        }
+        PostCategory postCategory = postCategoryOptional.get();
+
+        // 카테고리 상세 정보 조회
+        Optional<CategoryDetail> categoryDetailOptional = categoryDetailRepository.findByCodeAndNumber(postCategory.getCategoryCode(), postCategory.getCategoryNumber());
+        if (!categoryDetailOptional.isPresent()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "카테고리 상세 정보를 찾을 수 없습니다.");
+        }
+        String categoryName = categoryDetailOptional.get().getName();
 
         return new PostDetailResponse(
                 post.getPostId(),
@@ -172,6 +171,37 @@ public class PostService {
                 post.getCreatedAt(),
                 categoryName
         );
+    }
+
+    // 내가 쓴 게시글 조회
+    public List<MyPostResponse> findMyPostsByCategoryCodeAndNumber(int userId, String categoryCode, Integer categoryNumber) {
+        List<Post> posts;
+        if (categoryNumber == 1) {
+            // 카테고리 번호가 1일 때는 모든 게시글 조회
+            posts = postRepository.findAllPostsByUserId(userId);
+        } else {
+            // 특정 카테고리에 해당하는 게시글 조회
+            posts = postRepository.findPostsByUserIdAndCategory(userId, categoryCode, categoryNumber);
+        }
+
+        // Post 엔티티 리스트를 MyPostResponse 리스트로 변환
+        return posts.stream().map(post -> {
+            String categoryName = categoryDetailRepository.findByCodeAndNumber(categoryCode, categoryNumber)
+                    .map(CategoryDetail::getName)
+                    .orElse("기타");
+
+            return new MyPostResponse(
+                    post.getUserId(),
+                    post.getPostId(),
+                    post.getPostName(),
+                    post.getPostContent(),
+                    userRepository.findById(post.getUserId())
+                            .orElseThrow(() -> new RuntimeException("User not found"))
+                            .getUserNickname(),
+                    post.getCreatedAt(),
+                    categoryName
+            );
+        }).collect(Collectors.toList());
     }
 
 
