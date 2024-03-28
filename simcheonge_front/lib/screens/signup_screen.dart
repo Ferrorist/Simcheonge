@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:developer' as developer;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:simcheonge_front/main.dart';
+import 'package:simcheonge_front/screens/login_screen.dart'; // 필요에 따라 경로를 수정해 주세요.
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -19,7 +20,19 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController _passwordConfirmController =
       TextEditingController();
 
+  bool _nicknameValidated = false;
+  bool _idValidated = false;
+
   Future<void> signUp() async {
+    // 중복 검사를 확인합니다.
+    if (!_nicknameValidated || !_idValidated) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('중복 확인을 해주세요.')),
+      );
+      return;
+    }
+
+    // 비밀번호 일치 여부를 확인합니다.
     if (_passwordController.text != _passwordConfirmController.text) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('비밀번호가 일치하지 않습니다.')),
@@ -42,40 +55,63 @@ class _SignUpScreenState extends State<SignUpScreen> {
         body: requestData,
       );
 
+      print(response.body);
       if (response.statusCode == 200) {
-        // 회원가입 성공 시 로그인 상태 저장 및 홈 화면으로 이동
-        final SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setBool('isLoggedIn', true);
+        final responseData = json.decode(response.body);
+        // if (responseData['data'] != null &&
+        //     responseData['data']['accessToken'] != null &&
+        //     responseData['data']['refreshToken'] != null) {
+        //   await _saveToken(responseData['data']['accessToken'],
+        //       responseData['data']['refreshToken']);
 
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(responseData['data'])),
+        );
+        Navigator.pop(context);
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(
-              builder: (context) => const MyHomePage()), // 가정: 로그인 성공 후 이동할 화면
+          MaterialPageRoute(builder: (context) => const LoginScreen()),
         );
       } else {
+        print(response.statusCode);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text('회원가입에 실패했습니다: ${json.decode(response.body)}')),
+          const SnackBar(content: Text('비밀번호를 입력해주세요.')),
         );
       }
     } catch (e) {
+      print(e);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('회원가입에 실패했습니다: $e')),
       );
     }
   }
 
+  Future<void> _saveToken(String accessToken, String refreshToken) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('accessToken', accessToken);
+    await prefs.setString('refreshToken', refreshToken);
+    await prefs.setBool('isLoggedIn', true);
+  }
+
   Future<void> checkNickname() async {
     final url = Uri.parse(
-        'https://j10e102.p.ssafy.io/api/users/check-nickname/${_nicknameController.text}');
+        'https://j10e102.p.ssafy.io/api/users/check-nickname?userNickname=${_nicknameController.text}');
     try {
       final response = await http.get(url);
+      print(response.body);
+      print('닉네임');
       if (response.statusCode == 200) {
+        setState(() {
+          _nicknameValidated = true;
+        });
         ScaffoldMessenger.of(context)
             .showSnackBar(const SnackBar(content: Text("사용 가능한 닉네임입니다.")));
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("이미 사용중인 닉네임이거나 조회에 실패했습니다.")));
+        setState(() {
+          _nicknameValidated = false;
+        });
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text("이미 사용중인 닉네임입니다.")));
       }
     } catch (e) {
       developer.log('닉네임 중복 검사 중 오류 발생', error: e.toString());
@@ -86,20 +122,28 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   Future<void> checkLoginId() async {
     final url = Uri.parse(
-        'https://j10e102.p.ssafy.io/api/users/check-loginId/${_idController.text}');
+        'https://j10e102.p.ssafy.io/api/users/check-loginId?userLoginId=${_idController.text}');
     try {
       final response = await http.get(url);
+      print(response.body);
+      print('로그인');
       if (response.statusCode == 200) {
+        setState(() {
+          _idValidated = true;
+        });
         ScaffoldMessenger.of(context)
             .showSnackBar(const SnackBar(content: Text("사용 가능한 ID입니다.")));
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("이미 사용중인 ID이거나 조회에 실패했습니다.")));
+        setState(() {
+          _idValidated = false;
+        });
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text("이미 사용중인 ID입니다.")));
       }
     } catch (e) {
       developer.log('ID 중복 검사 중 오류 발생', error: e.toString());
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("ID 중복 검사 중 오류가 발생했습니다: ${e.toString()}")));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text("ID 중복 검사 중 오류가 발생했습니다: $e")));
     }
   }
 
@@ -115,8 +159,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             buildTextField(_nicknameController, '닉네임',
-                '2~8자 한글/영문/한글+숫자/영문+숫자/한글+영문', checkNickname),
-            buildTextField(_idController, 'ID', '6~10자 영문/영문+숫자', checkLoginId),
+                '2~8자 한글/영문/한글+숫자/영문+숫자/한글+영문', () => checkNickname()),
+            buildTextField(
+                _idController, 'ID', '6~10자 영문/영문+숫자', () => checkLoginId()),
             TextField(
               controller: _passwordController,
               decoration: const InputDecoration(
@@ -136,7 +181,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
             ),
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: signUp,
+              onPressed: () {
+                if (!_nicknameValidated || !_idValidated) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('중복 확인을 해주세요.')),
+                  );
+                } else {
+                  signUp();
+                }
+              },
               child: const Text('가입 완료'),
             ),
           ],
@@ -146,7 +199,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   Widget buildTextField(TextEditingController controller, String label,
-      String hint, Function() onTap) {
+      String hint, VoidCallback onTap) {
     return Row(
       children: [
         Expanded(

@@ -18,6 +18,7 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _idController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _nicknameController = TextEditingController();
 
   Future<void> login() async {
     // 입력 필드가 비어 있는지 확인
@@ -32,6 +33,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final requestData = jsonEncode({
       'userLoginId': _idController.text,
       'userPassword': _passwordController.text,
+      'userNickname': _nicknameController.text,
     });
 
     final response = await http.post(
@@ -54,9 +56,10 @@ class _LoginScreenState extends State<LoginScreen> {
       widget.updateLoginStatus?.call(true);
 
       // 로그인 성공 시 홈 화면으로 이동
-      Navigator.pushReplacement(
+      Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => const MyHomePage()),
+        (Route<dynamic> route) => false,
       );
     } else {
       // 응답 본문이 JSON 형식인지 확인 후, 적절한 에러 메시지 표시
@@ -80,6 +83,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('accessToken', accessToken);
     await prefs.setString('refreshToken', refreshToken);
+    await prefs.setString('userNickname', _nicknameController.text); // 닉네임 저장
   }
 
   @override
