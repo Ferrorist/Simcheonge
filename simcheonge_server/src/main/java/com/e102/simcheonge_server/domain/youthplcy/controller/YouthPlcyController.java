@@ -17,10 +17,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class YouthPlcyController {
     private final YouthPlcyService youthPlcyService;
 
-//    @GetMapping
-//    public ResponseEntity<?> requestOpenApi(){
-//        log.info("requestOpenApi 요청 들어옴");
-//        youthPlcyService.insertUnprocessedPolicyData();
-//        return ResponseUtil.buildBasicResponse(HttpStatus.OK,"미가공 정책 데이터 추가");
-//    }
+    @GetMapping
+    public ResponseEntity<?> requestOpenApi(){
+        log.info("requestOpenApi 요청 들어옴");
+        youthPlcyService.insertUnprocessedPolicyData();
+        return ResponseUtil.buildBasicResponse(HttpStatus.OK,"미가공 정책 데이터 추가");
+    }
 }
