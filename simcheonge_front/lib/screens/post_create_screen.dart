@@ -21,6 +21,7 @@ class _PostCreateScreenState extends State<PostCreateScreen> {
   ]; // 카테고리 옵션 예시
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _contentController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
 
   Future<void> _createPost() async {
     if (_selectedCategoryNumber == null) {
@@ -39,14 +40,13 @@ class _PostCreateScreenState extends State<PostCreateScreen> {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $accessToken', // JWT 토큰을 여기에 삽입
-        "Cache-Control": "no-cache",
       },
       body: jsonEncode({
         'postName': _titleController.text,
         'postContent': _contentController.text,
         'categoryCode': 'POS',
         'categoryNumber': int.parse(_selectedCategoryNumber!),
-        'userNickname': '사용자 닉네임', // 실제 사용자 닉네임을 여기에 삽입
+        'userNickname': _usernameController.text, // 실제 사용자 닉네임을 여기에 삽입
       }),
     );
     print(accessToken);
