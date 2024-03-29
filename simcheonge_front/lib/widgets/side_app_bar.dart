@@ -6,7 +6,7 @@ import 'package:simcheonge_front/screens/bookmark_post_screen.dart';
 import 'package:simcheonge_front/screens/my_policy_comment_screen.dart';
 import 'package:simcheonge_front/screens/my_post_comment_screen.dart';
 import 'package:simcheonge_front/screens/my_post_screen.dart';
-import 'package:simcheonge_front/services/auth_service.dart';
+import 'package:simcheonge_front/auth/auth_service.dart';
 
 class SideAppBar extends StatelessWidget {
   final Function(int) changePage; // 페이지 변경 함수를 위한 변수 추가
