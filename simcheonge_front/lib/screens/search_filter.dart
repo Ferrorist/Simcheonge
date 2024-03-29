@@ -21,6 +21,7 @@ class _FilterScreenState extends State<FilterScreen> {
   Map<String, bool> employmentStatusSelections = {};
   Map<String, bool> specializationSelections = {};
   Map<String, bool> interestSelections = {};
+  Map<String, List<CategoryList>> fullCategoryLists = {};
   DateTime? startDate;
   DateTime? endDate;
 
@@ -64,6 +65,10 @@ class _FilterScreenState extends State<FilterScreen> {
             _initializeSelections(employmentStatusOptions);
         specializationSelections = _initializeSelections(specializationOptions);
         interestSelections = _initializeSelections(interestOptions);
+        fullCategoryLists = {
+          for (var item in filterModel.data ?? [])
+            item.tag: item.categoryList ?? []
+        };
       });
     } catch (e) {
       debugPrint("Failed to load filter options: $e");
@@ -355,14 +360,14 @@ class _FilterScreenState extends State<FilterScreen> {
     List<Map<String, dynamic>> filtersList = [];
 
     // addToFiltersList 함수는 선택된 옵션을 filtersList에 추가합니다.
-    void addToFiltersList(Map<String, bool> selections, String code) {
-      selections.forEach((key, value) {
-        if (value) {
-          // 선택된 경우에만 추가
-          int index = selections.keys.toList().indexOf(key) + 1;
-          filtersList.add({"code": code, "number": index});
+    void addToFiltersList(Map<String, bool> selections, String tag) {
+      final categoryList = fullCategoryLists[tag] ?? [];
+      for (var category in categoryList) {
+        if (selections[category.name] == true) {
+          // 선택된 옵션의 실제 'code' 값을 사용하여 filtersList에 추가
+          filtersList.add({"code": tag, "number": category.code});
         }
-      });
+      }
     }
 
     // 각 선택 항목에 대해 addToFiltersList 함수를 호출하여 filtersList를 구성합니다.

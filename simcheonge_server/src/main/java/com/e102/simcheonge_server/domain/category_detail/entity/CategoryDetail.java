@@ -23,4 +23,16 @@ public class CategoryDetail {
 
     @Column(name = "category_name", length = 100)
     private String name;
+
+    public String getCategoryCode() {
+        return code;
+    }
+
+    public int getCategoryNumber() {
+        return number;
+    }
+
+    public String getCategoryName() {
+        return name;
+    }
 }
