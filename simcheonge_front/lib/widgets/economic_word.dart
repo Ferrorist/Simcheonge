@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:simcheonge_front/services/e_word_api.dart';
-import 'package:simcheonge_front/models/e_word_model.dart';
+import 'package:provider/provider.dart';
+import 'package:simcheonge_front/providers/economicWordProvider.dart'; // 경로 확인 필요
 
 class EconomicWordWidget extends StatefulWidget {
   const EconomicWordWidget({super.key});
@@ -11,36 +11,21 @@ class EconomicWordWidget extends StatefulWidget {
 
 class _EconomicWordWidgetState extends State<EconomicWordWidget> {
   bool isExpanded = false;
-  EWord? economicWord; // API로부터 받은 데이터를 저장할 변수
-
-  @override
-  void initState() {
-    super.initState();
-    _loadEconomicWord(); // 위젯 로드 시 경제 단어 데이터를 불러옵니다.
-  }
-
-  _loadEconomicWord() async {
-    final api = EWordAPI();
-    final wordData = await api.fetchEconomicWord();
-    setState(() {
-      economicWord = wordData;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
+    final provider = Provider.of<EconomicWordProvider>(context);
+    final data = provider.economicWord?.data;
+
     final theme = Theme.of(context);
     final titleStyle =
         theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold);
     final contentStyle = theme.textTheme.bodyMedium;
-
     final maxHeight = MediaQuery.of(context).size.height * 0.35;
 
     return Card(
       margin: const EdgeInsets.all(16.0),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
         child: Material(
@@ -51,17 +36,14 @@ class _EconomicWordWidgetState extends State<EconomicWordWidget> {
             children: [
               ListTile(
                 leading: Icon(
-                  isExpanded
-                      ? Icons.tips_and_updates
-                      : Icons.tips_and_updates_outlined,
-                  color: Colors.blue[300],
-                ),
-                title: Text(economicWord?.data?.word ?? '로딩 중...',
-                    style: titleStyle),
+                    isExpanded
+                        ? Icons.tips_and_updates
+                        : Icons.tips_and_updates_outlined,
+                    color: Colors.blue[300]),
+                title: Text(data?.word ?? '로딩 중...', style: titleStyle),
                 trailing: Icon(
-                  isExpanded ? Icons.expand_less : Icons.expand_more,
-                  color: Colors.blue[300],
-                ),
+                    isExpanded ? Icons.expand_less : Icons.expand_more,
+                    color: Colors.blue[300]),
                 onTap: () {
                   setState(() {
                     isExpanded = !isExpanded;
@@ -78,10 +60,8 @@ class _EconomicWordWidgetState extends State<EconomicWordWidget> {
                     child: SingleChildScrollView(
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 13),
-                        child: Text(
-                          economicWord?.data?.description ?? '상세 설명을 불러오는 중...',
-                          style: contentStyle,
-                        ),
+                        child: Text(data?.description ?? '상세 설명을 불러오는 중...',
+                            style: contentStyle),
                       ),
                     ),
                   ),
