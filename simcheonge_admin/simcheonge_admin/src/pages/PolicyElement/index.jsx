@@ -44,13 +44,21 @@ function PolicyModify() {
   const [processed, setProcessed] = useState("");
   const [show, setShow] = useState(false);
 
+  const token = sessionStorage.getItem("token");
+
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`, // 헤더에 accessToken 추가
+    },
+  };
+
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(API_DOMAIN + "/policy/admin/" + policyId);
+        const response = await axios.get(API_DOMAIN + "/policy/admin/" + policyId, config);
         if (response.status === 200) {
           setData(response.data.data); // 응답 데이터를 상태에 저장
         } else {
@@ -100,8 +108,6 @@ function PolicyModify() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    console.log("name: " + name);
-    console.log("value: " + value);
 
     switch (name) {
       case "code":
@@ -236,7 +242,7 @@ function PolicyModify() {
         processed,
       };
 
-      const response = await axios.patch(`${API_DOMAIN}/policy/${policyId}`, updatedData);
+      const response = await axios.patch(`${API_DOMAIN}/policy/${policyId}`, updatedData, config);
 
       if (response.status === 200) {
         console.log("Policy data updated successfully");
