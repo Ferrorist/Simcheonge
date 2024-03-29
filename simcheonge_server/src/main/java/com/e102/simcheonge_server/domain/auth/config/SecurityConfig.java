@@ -36,7 +36,7 @@ public class SecurityConfig {
                             .permitAll()
                         .requestMatchers(HttpMethod.DELETE, "/users")
                             .authenticated()
-                        .requestMatchers("/users/**", "/auth/login", "/auth/reissue", "/news/**", "/policy/**", "/economicword/**")
+                        .requestMatchers("/users", "/users/check-nickname", "/users/check-loginId", "/auth/login", "/auth/reissue", "/news/**", "/policy/**", "/economicword/**")
                             .permitAll()
                         // USER 권한이 있어야 요청할 수 있음
         //                .requestMatchers("/members/test").hasRole("USER")
