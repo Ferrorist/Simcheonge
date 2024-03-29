@@ -11,7 +11,6 @@ class EWordAPI {
       // UTF-8 인코딩을 사용하여 디코드합니다.
       final responseBody = utf8.decode(response.bodyBytes);
       final jsonResponse = jsonDecode(responseBody);
-      print(jsonResponse);
       // 여기서 EWord 객체를 생성하여 반환합니다.
       return EWord.fromJson(jsonResponse);
     } else {

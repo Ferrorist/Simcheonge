@@ -1,9 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:simcheonge_front/widgets/economic_word.dart';
 import 'package:simcheonge_front/screens/news_detail.dart';
+import 'package:simcheonge_front/providers/economicWordProvider.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:simcheonge_front/widgets/pulldown.dart';
+import 'package:provider/provider.dart';
 
-class NewsScreen extends StatelessWidget {
+class NewsScreen extends StatefulWidget {
   const NewsScreen({super.key});
+
+  @override
+  _NewsScreenState createState() => _NewsScreenState();
+}
+
+class _NewsScreenState extends State<NewsScreen> {
+  final RefreshController _refreshController =
+      RefreshController(initialRefresh: false);
+
+  @override
+  void initState() {
+    super.initState();
+    // 최초 데이터 로딩
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<EconomicWordProvider>(context, listen: false)
+          .fetchEconomicWord();
+    });
+  }
+
+  void _onRefresh(BuildContext context) async {
+    // 경제 단어 데이터를 새로고침합니다.
+    await Provider.of<EconomicWordProvider>(context, listen: false)
+        .fetchEconomicWord();
+    _refreshController.refreshCompleted();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,17 +57,17 @@ class NewsScreen extends StatelessWidget {
     ];
 
     return Scaffold(
-      body: Column(
-        children: <Widget>[
-          const EconomicWordWidget(),
-          const Padding(
-            padding: EdgeInsets.all(10.0),
-            child: Text(
-              '오늘의 주요 뉴스',
-              style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-            ),
-          ),
-          Expanded(
+      body: Column(children: <Widget>[
+        const EconomicWordWidget(),
+        const Padding(
+          padding: EdgeInsets.all(10.0),
+          child: Text('오늘의 주요 뉴스',
+              style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
+        ),
+        Expanded(
+          child: SmartRefresher(
+            controller: _refreshController,
+            onRefresh: () => _onRefresh(context),
             child: ListView.separated(
               itemCount: newsData.length,
               separatorBuilder: (context, index) => const Divider(),
@@ -113,8 +142,8 @@ class NewsScreen extends StatelessWidget {
               },
             ),
           ),
-        ],
-      ),
+        ),
+      ]),
     );
   }
 }
