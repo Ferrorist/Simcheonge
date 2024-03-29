@@ -46,25 +46,25 @@ public class PolicyController {
 
     /* 관리자 페이지 */
     @GetMapping("/admin")
-    public ResponseEntity<?> getAllPolicies(@RequestParam("isProcessed") boolean  isProcessed/*,
-                                            @AuthenticationPrincipal UserDetails userDetails*/){
+    public ResponseEntity<?> getAllPolicies(@RequestParam("isProcessed") boolean  isProcessed,
+                                            @AuthenticationPrincipal UserDetails userDetails){
 
-        return ResponseUtil.buildBasicResponse(HttpStatus.OK,policyService.getAllPolicies(isProcessed/*,userDetails.getUsername()*/));
+        return ResponseUtil.buildBasicResponse(HttpStatus.OK,policyService.getAllPolicies(isProcessed,userDetails.getUsername()));
     }
 
     @GetMapping("/admin/{policyId}")
-    public ResponseEntity<?> getPolicyforAdmin(@PathVariable("policyId") int policyId/*,
-                                            @AuthenticationPrincipal UserDetails userDetails*/){
+    public ResponseEntity<?> getPolicyforAdmin(@PathVariable("policyId") int policyId,
+                                            @AuthenticationPrincipal UserDetails userDetails){
 
-        return ResponseUtil.buildBasicResponse(HttpStatus.OK,policyService.getPolicyforAdmin(policyId/*,userDetails.getUsername()*/));
+        return ResponseUtil.buildBasicResponse(HttpStatus.OK,policyService.getPolicyforAdmin(policyId,userDetails.getUsername()));
     }
 
     @PatchMapping("/{policyId}")
     public ResponseEntity<?> updatePolicy(@PathVariable("policyId") int policyId,
-                                          @RequestBody PolicyUpdateRequest policyUpdateRequest/*,
-                                          @AuthenticationPrincipal UserDetails userDetails*/){
-//        User user = UserUtil.getUserFromUserDetails(userDetails);
-        policyService.updatePolicy(policyId,policyUpdateRequest/*,user.getUserId()*/);
+                                          @RequestBody PolicyUpdateRequest policyUpdateRequest,
+                                          @AuthenticationPrincipal UserDetails userDetails){
+        User user = UserUtil.getUserFromUserDetails(userDetails);
+        policyService.updatePolicy(policyId,policyUpdateRequest,user.getUserId());
         return ResponseUtil.buildBasicResponse(HttpStatus.OK, "정책 수정에 성공했습니다.");
     }
 

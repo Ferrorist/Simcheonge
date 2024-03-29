@@ -110,12 +110,12 @@ public class PolicyService {
         return categoryResponses;
     }
 
-    public void updatePolicy(int policyId, PolicyUpdateRequest policyUpdateRequest/*, int userId*/) {
-        /*User user = userRepository.findById(userId)
+    public void updatePolicy(int policyId, PolicyUpdateRequest policyUpdateRequest, int userId) {
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new DataNotFoundException("해당 사용자가 존재하지 않습니다."));
         if (!"admin".equals(user.getUserLoginId())) {
             throw new AuthenticationException("관리자 권한이 필요합니다.");
-        }*/
+        }
         Policy policy = policyRepository.findByPolicyId(policyId)
                 .orElseThrow(() -> new DataNotFoundException("해당 정책이 존재하지 않습니다."));
         policy.updatePolicy(policyUpdateRequest);
@@ -171,12 +171,12 @@ public class PolicyService {
     }
 
 
-    public List<PolicyAdminReadResponse> getAllPolicies(boolean isProcessed/*,String userNickname*/) {
-      /*  log.info("userNickname={}",userNickname);
+    public List<PolicyAdminReadResponse> getAllPolicies(boolean isProcessed,String userNickname) {
+        log.info("userNickname={}",userNickname);
         //관리자 권한 필요함
         if(!userNickname.equals("admin")){
             throw new AuthenticationException("해당 유저는 미가공 데이터에 대한 권한이 없습니다.");
-        }*/
+        }
 
         List<Policy> policyList = policyRepository.findAllByIsProcessed(isProcessed);
         List<PolicyAdminReadResponse> responseList=new ArrayList<>();
@@ -191,8 +191,10 @@ public class PolicyService {
         return responseList;
     }
 
-    public PolicyDetailAdminReadResponse getPolicyforAdmin(int policyId) {
-
+    public PolicyDetailAdminReadResponse getPolicyforAdmin(int policyId, String userLoginId) {
+        if(!userLoginId.equals("admin")){
+            throw new AuthenticationException("해당 유저는 권한이 없습니다.");
+        }
         Policy policy = policyRepository.findByPolicyId(policyId)
                 .orElseThrow(() -> new DataNotFoundException("해당 정책이 존재하지 않습니다."));
 

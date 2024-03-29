@@ -6,11 +6,18 @@ import { API_DOMAIN } from "../../env.config";
 
 function PolicyList() {
   const [data, setData] = useState([]);
+  const token = sessionStorage.getItem("token");
+
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`, // 헤더에 accessToken 추가
+    },
+  };
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(API_DOMAIN + "/policy/admin?isProcessed=false");
+        const response = await axios.get(API_DOMAIN + "/policy/admin?isProcessed=false", config);
         if (response.status === 200) {
           setData(response.data.data); // 응답 데이터를 상태에 저장
         } else {
