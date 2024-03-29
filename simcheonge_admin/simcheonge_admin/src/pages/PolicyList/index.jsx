@@ -2,6 +2,7 @@ import Table from "react-bootstrap/Table";
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import { API_DOMAIN } from "../../env.config";
 
 function PolicyList() {
   const [data, setData] = useState([]);
@@ -9,9 +10,7 @@ function PolicyList() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(
-          "http://localhost:8090/api/policy/admin?isProcessed=false"
-        );
+        const response = await axios.get(API_DOMAIN + "/policy/admin?isProcessed=false");
         if (response.status === 200) {
           setData(response.data.data); // 응답 데이터를 상태에 저장
         } else {

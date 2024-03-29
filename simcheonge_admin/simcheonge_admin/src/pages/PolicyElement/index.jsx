@@ -7,6 +7,7 @@ import Modal from "react-bootstrap/Modal";
 import TopBar from "../Header";
 import Form from "react-bootstrap/Form";
 import axios from "axios";
+import { API_DOMAIN } from "../../env.config";
 
 function PolicyModify() {
   const [data, setData] = useState([]);
@@ -49,7 +50,7 @@ function PolicyModify() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get("http://localhost:8090/api/policy/admin/" + policyId);
+        const response = await axios.get(API_DOMAIN + "/policy/admin/" + policyId);
         if (response.status === 200) {
           setData(response.data.data); // 응답 데이터를 상태에 저장
         } else {
@@ -235,10 +236,7 @@ function PolicyModify() {
         processed,
       };
 
-      const response = await axios.patch(
-        `http://localhost:8090/api/policy/${policyId}`,
-        updatedData
-      );
+      const response = await axios.patch(`${API_DOMAIN}/policy/${policyId}`, updatedData);
 
       if (response.status === 200) {
         console.log("Policy data updated successfully");
