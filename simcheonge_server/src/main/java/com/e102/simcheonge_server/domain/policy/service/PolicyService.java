@@ -170,12 +170,12 @@ public class PolicyService {
     }
 
 
-    public List<PolicyAdminReadResponse> getAllPolicies(boolean isProcessed,String userNickname) {
-        log.info("userNickname={}",userNickname);
+    public List<PolicyAdminReadResponse> getAllPolicies(boolean isProcessed/*,String userNickname*/) {
+      /*  log.info("userNickname={}",userNickname);
         //관리자 권한 필요함
         if(!userNickname.equals("admin")){
             throw new AuthenticationException("해당 유저는 미가공 데이터에 대한 권한이 없습니다.");
-        }
+        }*/
 
         List<Policy> policyList = policyRepository.findAllByIsProcessed(isProcessed);
         List<PolicyAdminReadResponse> responseList=new ArrayList<>();
