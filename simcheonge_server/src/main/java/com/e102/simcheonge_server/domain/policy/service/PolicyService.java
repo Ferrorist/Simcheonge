@@ -9,9 +9,10 @@ import com.e102.simcheonge_server.domain.category.repository.CategoryRepository;
 import com.e102.simcheonge_server.domain.category_detail.dto.request.CategoryDetailSearchRequest;
 import com.e102.simcheonge_server.domain.category_detail.entity.CategoryDetail;
 import com.e102.simcheonge_server.domain.category_detail.repository.CategoryDetailRepository;
+import com.e102.simcheonge_server.domain.policy.dto.admin.PolicyDetailAdminReadResponse;
 import com.e102.simcheonge_server.domain.policy.dto.request.PolicySearchRequest;
 import com.e102.simcheonge_server.domain.policy.dto.request.PolicyUpdateRequest;
-import com.e102.simcheonge_server.domain.policy.dto.response.PolicyAdminReadResponse;
+import com.e102.simcheonge_server.domain.policy.dto.admin.PolicyAdminReadResponse;
 import com.e102.simcheonge_server.domain.policy.dto.response.PolicyDetailResponse;
 import com.e102.simcheonge_server.domain.policy.dto.response.PolicyThumbnailResponse;
 import com.e102.simcheonge_server.domain.policy.entity.Policy;
@@ -109,12 +110,12 @@ public class PolicyService {
         return categoryResponses;
     }
 
-    public void updatePolicy(int policyId, PolicyUpdateRequest policyUpdateRequest, int userId) {
-        User user = userRepository.findById(userId)
+    public void updatePolicy(int policyId, PolicyUpdateRequest policyUpdateRequest/*, int userId*/) {
+        /*User user = userRepository.findById(userId)
                 .orElseThrow(() -> new DataNotFoundException("해당 사용자가 존재하지 않습니다."));
         if (!"admin".equals(user.getUserLoginId())) {
             throw new AuthenticationException("관리자 권한이 필요합니다.");
-        }
+        }*/
         Policy policy = policyRepository.findByPolicyId(policyId)
                 .orElseThrow(() -> new DataNotFoundException("해당 정책이 존재하지 않습니다."));
         policy.updatePolicy(policyUpdateRequest);
@@ -188,5 +189,46 @@ public class PolicyService {
             responseList.add(resp);
         });
         return responseList;
+    }
+
+    public PolicyDetailAdminReadResponse getPolicyforAdmin(int policyId) {
+
+        Policy policy = policyRepository.findByPolicyId(policyId)
+                .orElseThrow(() -> new DataNotFoundException("해당 정책이 존재하지 않습니다."));
+
+        PolicyDetailAdminReadResponse resp = PolicyDetailAdminReadResponse.builder()
+                .code(policy.getCode())
+                .area(policy.getArea())
+                .name(Optional.ofNullable(policy.getName()).orElse(""))
+                .intro(Optional.ofNullable(policy.getIntro()).orElse(""))
+                .supportContent(policy.getSupportContent())
+                .supportScale(Optional.ofNullable(policy.getSupportScale()).orElse(""))
+                .field(policy.getField())
+                .businessPeriod(policy.getBusinessPeriod())
+                .periodTypeCode(policy.getPeriodTypeCode())
+                .startDate(policy.getStartDate())
+                .endDate(policy.getEndDate())
+                .specializedField(policy.getSpecializedField())
+                .residenceIncome(policy.getResidenceIncome())
+                .additionalClues(policy.getAdditionalClues())
+                .entryLimit(policy.getEntryLimit())
+                .applicationProcedure(policy.getApplicationProcedure())
+                .requiredDocuments(policy.getRequiredDocuments())
+                .evaluationContent(policy.getEvaluationContent())
+                .siteAddress(policy.getSiteAddress())
+                .mainOrganization(policy.getMainOrganization())
+                .mainContact(policy.getMainContact())
+                .operationOrganization(policy.getOperationOrganization())
+                .operationOrganizationContact(policy.getOperationOrganizationContact())
+                .applicationPeriod(policy.getApplicationPeriod())
+                .ageInfo(Optional.ofNullable(policy.getAgeInfo()).orElse(""))
+                .educationRequirements(Optional.ofNullable(policy.getEducationRequirements()).orElse(""))
+                .majorRequirements(Optional.ofNullable(policy.getMajorRequirements()).orElse(""))
+                .employmentStatus(Optional.ofNullable(policy.getEmploymentStatus()).orElse(""))
+                .etc(Optional.ofNullable(policy.getEtc()).orElse(""))
+                .isProcessed(policy.isProcessed())
+                .build();
+
+        return resp;
     }
 }

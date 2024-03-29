@@ -1,4 +1,4 @@
-package com.e102.simcheonge_server.domain.policy.dto.response;
+package com.e102.simcheonge_server.domain.policy.dto.admin;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
