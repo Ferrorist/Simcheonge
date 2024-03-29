@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:simcheonge_front/auth/authentication_manager.dart';
 import 'package:simcheonge_front/screens/bookmark_policy_screen.dart';
 import 'package:simcheonge_front/screens/bookmark_post_screen.dart';
 import 'package:simcheonge_front/screens/login_screen.dart';
@@ -30,13 +31,24 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: MyHomePage(),
-      locale: Locale('ko', 'KR'), // 앱의 로케일을 한국어로 설정
-      supportedLocales: [
+    return MaterialApp(
+      home: FutureBuilder<bool>(
+        future: AuthenticationManager.checkAndRefreshTokenIfNeeded(),
+        builder: (context, snapshot) {
+          // 토큰 유효성 검사가 완료되기 전 로딩 화면 표시
+          if (snapshot.connectionState != ConnectionState.done) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          // 토큰이 유효하면 메인 화면(MyHomePage)으로, 그렇지 않으면 로그인 화면(LoginScreen)으로 이동
+
+          return const MyHomePage();
+        },
+      ),
+      locale: const Locale('ko', 'KR'), // 앱의 로케일을 한국어로 설정
+      supportedLocales: const [
         Locale('ko', 'KR'), // 지원하는 로케일 목록에 한국어 추가
       ],
-      localizationsDelegates: [
+      localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
