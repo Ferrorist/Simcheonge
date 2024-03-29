@@ -54,10 +54,10 @@ public class PolicyController {
     }
 
     @GetMapping("/admin")
-    public ResponseEntity<?> getAllPolicies(@RequestParam("isProcessed") boolean  isProcessed,
-                                            @AuthenticationPrincipal UserDetails userDetails){
+    public ResponseEntity<?> getAllPolicies(@RequestParam("isProcessed") boolean  isProcessed/*,
+                                            @AuthenticationPrincipal UserDetails userDetails*/){
 
-        return ResponseUtil.buildBasicResponse(HttpStatus.OK,policyService.getAllPolicies(isProcessed,userDetails.getUsername()));
+        return ResponseUtil.buildBasicResponse(HttpStatus.OK,policyService.getAllPolicies(isProcessed/*,userDetails.getUsername()*/));
     }
 
 }
