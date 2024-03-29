@@ -62,14 +62,14 @@ public class UserController {
         return buildBasicResponse(HttpStatus.OK,"해당 아이디는 사용 가능합니다.");
     }
 
-    @PatchMapping("/nickname")
+    @PatchMapping("/update/nickname")
     public ResponseEntity<?> updateNickname(@RequestBody UpdateNicknameRequest userNickname, @AuthenticationPrincipal UserDetails userDetails) {
         User user = UserUtil.getUserFromUserDetails(userDetails);
         userService.updateNickname(userNickname.getUserNickname(),user.getUserId());
         return buildBasicResponse(HttpStatus.OK,"닉네임 변경에 성공했습니다.");
     }
 
-    @PatchMapping("/password")
+    @PatchMapping("/update/password")
     public ResponseEntity<?> updatePassword(@RequestBody UpdatePasswordRequest userPassword, @AuthenticationPrincipal UserDetails userDetails) {
         User user = UserUtil.getUserFromUserDetails(userDetails);
         userService.updatePassword(userPassword,user.getUserId());
