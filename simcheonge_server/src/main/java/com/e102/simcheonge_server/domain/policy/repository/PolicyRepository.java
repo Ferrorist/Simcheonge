@@ -18,4 +18,6 @@ public interface PolicyRepository extends JpaRepository<Policy,Integer>, PolicyC
     PageImpl<Policy> findAll(Pageable pageable);
 
     boolean existsByCode(String code);
+
+    List<Policy> findAllByIsProcessed(boolean isProcessed);
 }

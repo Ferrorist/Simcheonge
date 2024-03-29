@@ -9,12 +9,13 @@ import com.e102.simcheonge_server.domain.category.repository.CategoryRepository;
 import com.e102.simcheonge_server.domain.category_detail.dto.request.CategoryDetailSearchRequest;
 import com.e102.simcheonge_server.domain.category_detail.entity.CategoryDetail;
 import com.e102.simcheonge_server.domain.category_detail.repository.CategoryDetailRepository;
+import com.e102.simcheonge_server.domain.policy.dto.admin.PolicyDetailAdminReadResponse;
 import com.e102.simcheonge_server.domain.policy.dto.request.PolicySearchRequest;
 import com.e102.simcheonge_server.domain.policy.dto.request.PolicyUpdateRequest;
+import com.e102.simcheonge_server.domain.policy.dto.admin.PolicyAdminReadResponse;
 import com.e102.simcheonge_server.domain.policy.dto.response.PolicyDetailResponse;
 import com.e102.simcheonge_server.domain.policy.dto.response.PolicyThumbnailResponse;
 import com.e102.simcheonge_server.domain.policy.entity.Policy;
-import com.e102.simcheonge_server.domain.policy.repository.PolicyCustomRepository;
 import com.e102.simcheonge_server.domain.policy.repository.PolicyNativeRepository;
 import com.e102.simcheonge_server.domain.policy.repository.PolicyRepository;
 import com.e102.simcheonge_server.domain.user.entity.User;
@@ -109,12 +110,12 @@ public class PolicyService {
         return categoryResponses;
     }
 
-    public void updatePolicy(int policyId, PolicyUpdateRequest policyUpdateRequest, int userId) {
-        User user = userRepository.findById(userId)
+    public void updatePolicy(int policyId, PolicyUpdateRequest policyUpdateRequest/*, int userId*/) {
+        /*User user = userRepository.findById(userId)
                 .orElseThrow(() -> new DataNotFoundException("해당 사용자가 존재하지 않습니다."));
         if (!"admin".equals(user.getUserLoginId())) {
             throw new AuthenticationException("관리자 권한이 필요합니다.");
-        }
+        }*/
         Policy policy = policyRepository.findByPolicyId(policyId)
                 .orElseThrow(() -> new DataNotFoundException("해당 정책이 존재하지 않습니다."));
         policy.updatePolicy(policyUpdateRequest);
@@ -170,4 +171,64 @@ public class PolicyService {
     }
 
 
+    public List<PolicyAdminReadResponse> getAllPolicies(boolean isProcessed/*,String userNickname*/) {
+      /*  log.info("userNickname={}",userNickname);
+        //관리자 권한 필요함
+        if(!userNickname.equals("admin")){
+            throw new AuthenticationException("해당 유저는 미가공 데이터에 대한 권한이 없습니다.");
+        }*/
+
+        List<Policy> policyList = policyRepository.findAllByIsProcessed(isProcessed);
+        List<PolicyAdminReadResponse> responseList=new ArrayList<>();
+        policyList.forEach(policy -> {
+            PolicyAdminReadResponse resp=PolicyAdminReadResponse.builder()
+                    .policyId(policy.getPolicyId())
+                    .policy_name(policy.getName())
+                    .isProcessed(policy.isProcessed())
+                    .build();
+            responseList.add(resp);
+        });
+        return responseList;
+    }
+
+    public PolicyDetailAdminReadResponse getPolicyforAdmin(int policyId) {
+
+        Policy policy = policyRepository.findByPolicyId(policyId)
+                .orElseThrow(() -> new DataNotFoundException("해당 정책이 존재하지 않습니다."));
+
+        PolicyDetailAdminReadResponse resp = PolicyDetailAdminReadResponse.builder()
+                .code(policy.getCode())
+                .area(policy.getArea())
+                .name(Optional.ofNullable(policy.getName()).orElse(""))
+                .intro(Optional.ofNullable(policy.getIntro()).orElse(""))
+                .supportContent(policy.getSupportContent())
+                .supportScale(Optional.ofNullable(policy.getSupportScale()).orElse(""))
+                .field(policy.getField())
+                .businessPeriod(policy.getBusinessPeriod())
+                .periodTypeCode(policy.getPeriodTypeCode())
+                .startDate(policy.getStartDate())
+                .endDate(policy.getEndDate())
+                .specializedField(policy.getSpecializedField())
+                .residenceIncome(policy.getResidenceIncome())
+                .additionalClues(policy.getAdditionalClues())
+                .entryLimit(policy.getEntryLimit())
+                .applicationProcedure(policy.getApplicationProcedure())
+                .requiredDocuments(policy.getRequiredDocuments())
+                .evaluationContent(policy.getEvaluationContent())
+                .siteAddress(policy.getSiteAddress())
+                .mainOrganization(policy.getMainOrganization())
+                .mainContact(policy.getMainContact())
+                .operationOrganization(policy.getOperationOrganization())
+                .operationOrganizationContact(policy.getOperationOrganizationContact())
+                .applicationPeriod(policy.getApplicationPeriod())
+                .ageInfo(Optional.ofNullable(policy.getAgeInfo()).orElse(""))
+                .educationRequirements(Optional.ofNullable(policy.getEducationRequirements()).orElse(""))
+                .majorRequirements(Optional.ofNullable(policy.getMajorRequirements()).orElse(""))
+                .employmentStatus(Optional.ofNullable(policy.getEmploymentStatus()).orElse(""))
+                .etc(Optional.ofNullable(policy.getEtc()).orElse(""))
+                .isProcessed(policy.isProcessed())
+                .build();
+
+        return resp;
+    }
 }

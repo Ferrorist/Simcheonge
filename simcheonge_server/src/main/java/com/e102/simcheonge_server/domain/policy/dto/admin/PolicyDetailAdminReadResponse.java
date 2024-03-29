@@ -1,4 +1,4 @@
-package com.e102.simcheonge_server.domain.policy.dto.request;
+package com.e102.simcheonge_server.domain.policy.dto.admin;
 
 import lombok.Builder;
 import lombok.Data;
@@ -7,7 +7,7 @@ import java.util.Date;
 
 @Data
 @Builder
-public class PolicyUpdateRequest {
+public class PolicyDetailAdminReadResponse {
     private String code;
     private String area;
     private String name;
