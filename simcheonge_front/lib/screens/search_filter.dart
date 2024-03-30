@@ -417,19 +417,25 @@ class _FilterScreenState extends State<FilterScreen> {
     final prefs = await SharedPreferences.getInstance();
     List<Map<String, dynamic>> filtersList = [];
     bool isAPCSelectedForPeriod = false;
+
     void addToFiltersList(Map<String, bool> selections, String tag) {
       final categoryList = fullCategoryLists[tag] ?? [];
       for (var category in categoryList) {
         if (selections[category.name] == true) {
-          filtersList.add({"code": tag, "number": category.code});
-          if (tag == "APC" && category.code == 3) {
-            isAPCSelectedForPeriod = true; // APC가 3인 경우 true로 설정
+          // 여기에 name도 추가
+          filtersList.add({
+            "code": tag,
+            "number": category.code,
+            "name": category.name, // 이름을 추가
+          });
+          if (tag == "APC" && category.code == "3") {
+            isAPCSelectedForPeriod = true;
           }
         }
       }
     }
 
-    // 각 선택 항목에 대해 addToFiltersList 함수를 호출하여 filtersList를 구성합니다.
+    // 각 선택 항목에 대해 addToFiltersList 함수를 호출
     addToFiltersList(regionSelections, "RGO");
     addToFiltersList(educationSelections, "ADM");
     addToFiltersList(employmentStatusSelections, "EPM");
@@ -437,20 +443,14 @@ class _FilterScreenState extends State<FilterScreen> {
     addToFiltersList(interestSelections, "PFD");
     addToFiltersList(periodSelections, "APC");
 
+    // APC가 3으로 선택되었고, startDate와 endDate가 유효한 경우에만 추가
+    if (isAPCSelectedForPeriod && startDate != null && endDate != null) {
+      prefs.setString('startDate', DateFormat("yyyy-MM-dd").format(startDate!));
+      prefs.setString('endDate', DateFormat("yyyy-MM-dd").format(endDate!));
+    }
+
     // 필터 목록을 SharedPreferences에 저장합니다.
     await prefs.setString('filters', jsonEncode(filtersList));
-
-    // startDate와 endDate를 SharedPreferences에 저장합니다.
-    if (isAPCSelectedForPeriod && startDate != null && endDate != null) {
-      await prefs.setString(
-          'startDate', DateFormat("yyyy-MM-dd").format(startDate!));
-      await prefs.setString(
-          'endDate', DateFormat("yyyy-MM-dd").format(endDate!));
-    } else {
-      // 조건에 맞지 않는 경우 날짜 정보 삭제
-      prefs.remove('startDate');
-      prefs.remove('endDate');
-    }
 
     // 선택된 필터들을 저장합니다. 각 선택된 항목을 CategoryList 객체의 리스트로 변환하여 저장합니다.
     List<CategoryList> selectedFilters = [];
