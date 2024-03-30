@@ -7,6 +7,6 @@ import lombok.Setter;
 @Setter
 public class BookmarkCreateRequest {
     private String bookmarkType; // "POL" 또는 "POS"
-    private Integer policyId; // Optional, 정책 ID
-    private Integer postId; // Optional, 게시글 ID
+    private Integer policyId;
+    private Integer postId;
 }

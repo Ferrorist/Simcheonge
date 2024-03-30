@@ -9,7 +9,6 @@ import com.e102.simcheonge_server.domain.policy.repository.PolicyRepository;
 import com.e102.simcheonge_server.domain.post.entity.Post;
 import com.e102.simcheonge_server.domain.post.repository.PostRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -121,5 +120,18 @@ public class BookmarkService {
         response.put("status", 200);
         response.put("data", data);
         return response;
+    }
+
+
+    // 북마크 삭제
+    public void deleteBookmark(int bookmarkId, int userId) {
+        Bookmark bookmark = bookmarkRepository.findById(bookmarkId)
+                .orElseThrow(() -> new RuntimeException("북마크를 찾을 수 없습니다."));
+
+        if (bookmark.getUserId() != userId) {
+            throw new IllegalArgumentException("북마크를 삭제할 권한이 없습니다.");
+        }
+
+        bookmarkRepository.delete(bookmark);
     }
 }
