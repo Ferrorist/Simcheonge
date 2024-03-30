@@ -7,7 +7,6 @@ import Modal from "react-bootstrap/Modal";
 import TopBar from "../Header";
 import Form from "react-bootstrap/Form";
 import axios from "axios";
-import API_DOMAIN from "../../env.config";
 
 function PolicyModify() {
   const [data, setData] = useState([]);
@@ -55,6 +54,7 @@ function PolicyModify() {
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
+  const API_DOMAIN = process.env.REACT_APP_API_URL;
 
   useEffect(() => {
     const fetchData = async () => {
