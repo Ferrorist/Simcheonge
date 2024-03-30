@@ -147,7 +147,7 @@ public class PolicyService {
         }
 
         // {APC,3}일 경우 startDate, endDate null확인
-        int APCCount = 1;
+        int APCCount = 0;
         boolean isAPC3exist = false;
         for (CategoryDetailSearchRequest category : policySearchRequest.getList()) {
             //{ADM,1}, {EPM,1}, {SPC, 1}가 있는지 확인
