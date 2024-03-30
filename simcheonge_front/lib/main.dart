@@ -18,7 +18,14 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:simcheonge_front/providers/economicWordProvider.dart';
 import 'package:provider/provider.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.remove('filters');
+  await prefs.remove('selectedFilters');
+  await prefs.remove('startDate');
+  await prefs.remove('endDate');
+  await clearFilters(); // 필터 정보 초기화
   runApp(
     MultiProvider(
       providers: [
@@ -27,6 +34,14 @@ void main() {
       child: const MyApp(),
     ),
   );
+}
+
+Future<void> clearFilters() async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  await prefs.remove('filters');
+  await prefs.remove('startDate');
+  await prefs.remove('endDate');
+  // 기타 초기화가 필요한 항목들도 이곳에 추가
 }
 
 Future<bool> checkLoginStatus() async {
