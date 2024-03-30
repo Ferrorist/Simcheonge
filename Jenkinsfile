@@ -162,7 +162,7 @@ pipeline {
 
                     script{
                         // Jenkins가 EC2 내에서 특정 디렉토리를 수정할 수 있도록 권한 변경
-                        sh 'chmod -R 755 simcheonge_admin'
+                        sh 'chmod -R 755 simcheonge_admin/src/'
 
                         // Secret File Credential을 사용하여 설정 파일을 React 프로젝트의 simcheonge_admin 디렉토리로 복사
                         sh 'cp "${ENV_CONFIG}" simcheonge_admin/src/env.config'
@@ -182,7 +182,7 @@ pipeline {
                         // 그래서 node 이미지를 기반으로 한 임시 컨테이너에서 npm build 작업을 수행함
                         // stage가 끝나면 컨테이너는 자동으로 삭제됨 (stage가 끝나도 이미지는 로컬(여기서는 EC2)에 남아있음)
                         // 로컬(EC2)에 이미지가 없으면 자동으로 docker hub에서 다운받아서 작업을 수행함
-                        docker.image('node:latest').inside {
+                        docker.image('node:20.10.0').inside {
                         
                         // Node.js를 사용하여 React 프로젝트 빌드
                         sh "rm -rf node_modules package-lock.json"
