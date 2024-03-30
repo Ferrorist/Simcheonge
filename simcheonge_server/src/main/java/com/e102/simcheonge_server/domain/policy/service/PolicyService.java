@@ -37,7 +37,7 @@ public class PolicyService {
     private final CategoryRepository categoryRepository;
     private final CategoryDetailRepository categoryDetailRepository;
     private final PolicyNativeRepository policyNativeRepository;
-    private final HashMap<String, Integer> categoryCheckMap = new HashMap<>();
+    private final HashMap<String, Integer> codeCheckMap = new HashMap<>();
     private final String[] checkCategories = {"ADM", "SPC", "EPM"};
 
     public PolicyDetailResponse getPolicy(int policyId) {
@@ -124,9 +124,9 @@ public class PolicyService {
 
     public PageImpl<PolicyThumbnailResponse> searchPolicies(PolicySearchRequest policySearchRequest, Pageable pageable) {
 
-        validatePolicySearchRequest(policySearchRequest);
+        List<String> codeList = validatePolicySearchRequest(policySearchRequest);
 
-        PageImpl<Object[]> policyObjectList = policyNativeRepository.searchPolicy(policySearchRequest.getKeyword(), policySearchRequest.getList(), policySearchRequest.getStartDate(), policySearchRequest.getEndDate(), pageable);
+        PageImpl<Object[]> policyObjectList = policyNativeRepository.searchPolicy(policySearchRequest.getKeyword(), policySearchRequest.getList(), policySearchRequest.getStartDate(), policySearchRequest.getEndDate(), codeList,pageable);
         List<PolicyThumbnailResponse> responseList = new ArrayList<>();
         for (Object[] policyObject : policyObjectList) {
             Integer policyId = (Integer) policyObject[0];
@@ -141,7 +141,7 @@ public class PolicyService {
         return new PageImpl<>(responseList, pageable, policyObjectList.getTotalElements());
     }
 
-    private void validatePolicySearchRequest(PolicySearchRequest policySearchRequest) {
+    private List<String> validatePolicySearchRequest(PolicySearchRequest policySearchRequest) {
         if(policySearchRequest.getKeyword()==null){
             throw new IllegalArgumentException("키워드는 null일 수 없습니다. keyword에 빈 값을 담아 요청해주세요.");
         }
@@ -149,7 +149,11 @@ public class PolicyService {
         // {APC,3}일 경우 startDate, endDate null확인
         int APCCount = 0;
         boolean isAPC3exist = false;
+        List<String> codeList=new ArrayList<>();
         for (CategoryDetailSearchRequest category : policySearchRequest.getList()) {
+            if(!codeList.contains(category.getCode())){
+                codeList.add(category.getCode());
+            }
             //{ADM,1}, {EPM,1}, {SPC, 1}가 있는지 확인
             if (Arrays.asList(checkCategories).contains(category.getCode()) && category.getNumber() == 1) {
                 throw new IllegalArgumentException("해당 카테고리는 '제한 없음'을 선택할 수 없습니다.");
@@ -167,7 +171,7 @@ public class PolicyService {
         if (isAPC3exist && APCCount > 1) {
             throw new IllegalArgumentException("'특정 기간'은 '상시'나 '미정'과 함께 선택할 수 없습니다.");
         }
-        log.info("체크5");
+        return codeList;
     }
 
 
