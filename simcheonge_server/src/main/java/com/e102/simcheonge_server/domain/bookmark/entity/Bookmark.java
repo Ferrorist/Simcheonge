@@ -25,11 +25,11 @@ public class Bookmark {
 
     @Column(name = "user_id")
     @NotNull
-    private int user;
+    private int userId;
 
-    @Column(name = "reference_id")
+    @Column(name = "referenced_id")
     @NotNull
-    private int reference;
+    private int referencedId;
 
     @Column(name = "bookmark_type", length = 3)
     @Builder.Default

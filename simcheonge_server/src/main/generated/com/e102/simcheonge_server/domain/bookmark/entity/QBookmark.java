@@ -23,9 +23,9 @@ public class QBookmark extends EntityPathBase<Bookmark> {
 
     public final StringPath bookmarkType = createString("bookmarkType");
 
-    public final NumberPath<Integer> reference = createNumber("reference", Integer.class);
+    public final NumberPath<Integer> referencedId = createNumber("referencedId", Integer.class);
 
-    public final NumberPath<Integer> user = createNumber("user", Integer.class);
+    public final NumberPath<Integer> userId = createNumber("userId", Integer.class);
 
     public QBookmark(String variable) {
         super(Bookmark.class, forVariable(variable));
