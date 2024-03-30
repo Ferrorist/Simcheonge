@@ -7,7 +7,7 @@ import Modal from "react-bootstrap/Modal";
 import TopBar from "../Header";
 import Form from "react-bootstrap/Form";
 import axios from "axios";
-import { API_DOMAIN } from "../../env.config.js";
+import API_DOMAIN from "../../env.config";
 
 function PolicyModify() {
   const [data, setData] = useState([]);
