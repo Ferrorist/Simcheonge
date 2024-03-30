@@ -9,6 +9,8 @@ import com.e102.simcheonge_server.domain.post.repository.PostRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class BookmarkService {
     private final BookmarkRepository bookmarkRepository;
@@ -43,12 +45,18 @@ public class BookmarkService {
             throw new IllegalArgumentException("Invalid bookmark type.");
         }
 
-        // 요청받은 policyId 또는 postId를 referencedId에 저장
+        // 요청받은 policyId 또는 postId를 referencedId에 할당
         int referencedId = 0;
         if ("POL".equals(request.getBookmarkType()) && request.getPolicyId() != null) {
             referencedId = request.getPolicyId();
         } else if ("POS".equals(request.getBookmarkType()) && request.getPostId() != null) {
             referencedId = request.getPostId();
+        }
+
+        // 같은 userId, referencedId, bookmarkType을 가진 북마크가 이미 존재하는지 확인(중복 검사)
+        Optional<Bookmark> existingBookmark = bookmarkRepository.findByUserIdAndReferencedIdAndBookmarkType(userId, referencedId, request.getBookmarkType());
+        if (existingBookmark.isPresent()) {
+            throw new IllegalArgumentException("이미 등록된 북마크입니다.");
         }
 
         // Bookmark 엔티티 생성 및 저장
