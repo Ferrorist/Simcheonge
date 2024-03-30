@@ -23,8 +23,9 @@ class _SearchScreenState extends State<SearchScreen> {
   int _currentPage = 0;
   bool _isFetching = false;
   bool _hasMore = true; // 더 불러올 데이터가 있는지
-  final List<CategoryList> _selectedFilters = [];
+  List<CategoryList> _selectedFilters = [];
   final int _totalPages = 0;
+  bool _isLoading = false;
 
   late SpeechToText _speech;
 
@@ -72,27 +73,64 @@ class _SearchScreenState extends State<SearchScreen> {
     super.dispose();
   }
 
-  void _searchListener() {
-    _loadSelectedFilters(); // 필터 정보를 업데이트합니다.
+  void _searchListener() async {
+    // 검색 조건 업데이트와 검색 결과 갱신만 수행합니다.
+    await _loadSelectedFilters();
+    _updateSearchConditions();
     _filteredPolices.clear();
     _currentPage = 0;
     _hasMore = true;
     _fetchData();
   }
 
+  void _updateSearchConditions() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    // 'selectedFilters' 정보를 불러옵니다.
+    String selectedFiltersString = prefs.getString('selectedFilters') ?? '[]';
+    List<dynamic> selectedFiltersJson = jsonDecode(selectedFiltersString);
+
+    // SharedPreferences에서 'filters' 정보를 불러옵니다.
+    String filtersString = prefs.getString('filters') ?? '[]';
+    List<dynamic> filtersJson = jsonDecode(filtersString);
+
+    // 'selectedFilters'를 CategoryList 객체 리스트로 변환합니다.
+    List<CategoryList> loadedSelectedFilters =
+        selectedFiltersJson.map((e) => CategoryList.fromJson(e)).toList();
+
+    setState(() {
+      // '_selectedFilters' 상태를 업데이트합니다.
+      _selectedFilters.clear();
+      // 이게 필터 항목 보여주고있음
+      // _selectedFilters.addAll(loadedSelectedFilters);
+
+      // 이게 검색 결과에서 필터 지우는 기능
+      for (var filterJson in filtersJson) {
+        _selectedFilters.add(CategoryList.fromJson(filterJson));
+      }
+    });
+  }
+
   void _openFilterScreen() async {
+    // 필터 화면에서 필터를 선택하고 돌아올 때마다 검색을 다시 실행하도록 수정
     final returnedFilters = await Navigator.push<List<CategoryList>>(
       context,
       MaterialPageRoute(builder: (context) => const FilterScreen()),
     );
 
     if (returnedFilters != null) {
-      _updateFilters(returnedFilters);
-      _searchListener();
+      // 필터가 변경되었을 때만 필터를 업데이트하고 검색을 실행
+
+      await saveSelectedFilters(returnedFilters);
+      _loadSelectedFilters(); // 변경된 필터를 UI에 반영
+      _searchListener(); // 필터를 적용하고 검색 실행
     }
   }
 
   Future<void> saveSelectedFilters(List<CategoryList> selectedFilters) async {
+    setState(() {
+      _isLoading = true;
+    });
     final prefs = await SharedPreferences.getInstance();
     // 선택된 필터들을 JSON 문자열로 변환
     String selectedFiltersJson =
@@ -100,6 +138,9 @@ class _SearchScreenState extends State<SearchScreen> {
     // 'selectedFilters' 키를 사용하여 저장
     await prefs.setString('selectedFilters', selectedFiltersJson);
     // 저장된 데이터 로그로 확인
+    setState(() {
+      _isLoading = false;
+    });
     print("Saved filters: $selectedFiltersJson");
   }
 
@@ -121,34 +162,46 @@ class _SearchScreenState extends State<SearchScreen> {
     _isFetching = true;
     final SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    // SharedPreferences에서 최신 필터 정보 불러오기
     final String filtersString = prefs.getString('filters') ?? '[]';
     List<dynamic> filtersJson = jsonDecode(filtersString);
     List<Map<String, dynamic>> filters = filtersJson.map((filter) {
-      return {"code": filter['code'], "number": filter['number']};
+      return {
+        "code": filter['code'],
+        "number": int.tryParse(filter['number'].toString())
+      };
     }).toList();
 
-    final String startDate = prefs.getString('startDate') ?? '';
-    final String endDate = prefs.getString('endDate') ?? '';
+    // SharedPreferences에서 날짜 정보 불러오기
+    final String? startDateStr = prefs.getString('startDate');
+    final String? endDateStr = prefs.getString('endDate');
+    // 요청 본문 구성
+    Map<String, dynamic> requestBody = {
+      "keyword": _controller.text,
+      "list": filters,
+    };
+
+    if (startDateStr != null && endDateStr != null) {
+      requestBody.addAll({
+        "startDate": startDateStr,
+        "endDate": endDateStr,
+      });
+    }
+
+    // 최종 요청 본문 확인
+    print("Final request body being sent: ${jsonEncode(requestBody)}");
 
     try {
       final SearchModel response = await SearchApi().searchPolicies(
-        {
-          "keyword": _controller.text,
-          "list": filters,
-          if (startDate.isNotEmpty) "startDate": startDate,
-          if (endDate.isNotEmpty) "endDate": endDate,
-        },
-        _currentPage, // 페이지 번호 추가
+        requestBody, // 수정된 부분
+        _currentPage,
       );
 
       setState(() {
         if (response.data?.content?.isEmpty ?? true) {
           _hasMore = false;
         } else {
-          _currentPage++; // 다음 페이지 번호로 증가합니다.
-          _filteredPolices
-              .addAll(response.data!.content!); // 현재 페이지의 데이터를 추가합니다.
+          _currentPage++;
+          _filteredPolices.addAll(response.data!.content!);
         }
       });
     } catch (e) {
@@ -178,7 +231,7 @@ class _SearchScreenState extends State<SearchScreen> {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(12.0),
+            padding: const EdgeInsets.fromLTRB(12, 12, 12, 2),
             child: TextField(
               controller: _controller,
               decoration: InputDecoration(
@@ -201,25 +254,31 @@ class _SearchScreenState extends State<SearchScreen> {
               ),
             ),
           ),
-          Visibility(
-            visible: _selectedFilters.isNotEmpty,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Wrap(
-                spacing: 6.0,
-                children: _selectedFilters
-                    .map((filter) => Chip(
-                          label: Text(filter.name ?? ''),
-                          onDeleted: () {
-                            _removeFilter(filter);
-                          },
-                        ))
-                    .toList(),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15), // 좌우 여백 설정
+            child: Visibility(
+              visible: hasFilters,
+              child: SizedBox(
+                height: 40, // 필터 목록의 높이 설정
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: _selectedFilters.length,
+                  itemBuilder: (context, index) {
+                    final filter = _selectedFilters[index];
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 5),
+                      child: Chip(
+                        label: Text(filter.name ?? '로딩중..'),
+                        onDeleted: () => removeFilter(filter),
+                      ),
+                    );
+                  },
+                ),
               ),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.only(left: 15.0, right: 15.0),
+            padding: const EdgeInsets.fromLTRB(15.0, 5, 15.0, 0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -312,31 +371,43 @@ class _SearchScreenState extends State<SearchScreen> {
     }
   }
 
-  void _removeFilter(CategoryList filter) async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
+  void removeFilter(CategoryList filterToRemove) async {
+    final prefs = await SharedPreferences.getInstance();
 
-    // 'filters' 목록에서 해당 필터 제거
-    List<dynamic> filters = jsonDecode(prefs.getString('filters') ?? '[]');
-    // 필터를 제대로 식별하기 위해 'code'와 'number' 모두 확인
-    filters.removeWhere((item) =>
-        item['code'] == filter.code &&
-        item['number'].toString() == filter.number);
-    await prefs.setString('filters', jsonEncode(filters));
+    // 'selectedFilters'에서 제거
+    String selectedFiltersString = prefs.getString('selectedFilters') ?? '[]';
+    List<dynamic> selectedFiltersJson = jsonDecode(selectedFiltersString);
+    List<CategoryList> loadedSelectedFilters =
+        selectedFiltersJson.map((e) => CategoryList.fromJson(e)).toList();
 
-    // 'selectedFilters' 목록에서 해당 필터 제거
-    List<dynamic> selectedFilters =
-        jsonDecode(prefs.getString('selectedFilters') ?? '[]');
-    selectedFilters.removeWhere((item) =>
-        item['code'] == filter.code &&
-        item['number'].toString() == filter.number);
-    await prefs.setString('selectedFilters', jsonEncode(selectedFilters));
+    loadedSelectedFilters.removeWhere((filter) =>
+        filter.code == filterToRemove.code &&
+        filter.number == filterToRemove.number);
 
-    // UI 업데이트
+    // 'filters'에서 제거
+    String filtersString = prefs.getString('filters') ?? '[]';
+    List<dynamic> filtersJson = jsonDecode(filtersString);
+    filtersJson.removeWhere((filter) =>
+        filter['code'] == filterToRemove.code &&
+        filter['number'].toString() == filterToRemove.number);
+
+    // SharedPreferences에 변경사항 저장
+    await prefs.setString('selectedFilters',
+        jsonEncode(loadedSelectedFilters.map((e) => e.toJson()).toList()));
+    await prefs.setString('filters', jsonEncode(filtersJson));
+    _searchListener();
+    // 상태 업데이트
     setState(() {
-      _selectedFilters.removeWhere((selectedFilter) =>
-          selectedFilter.code == filter.code &&
-          selectedFilter.number == filter.number);
+      _selectedFilters = loadedSelectedFilters;
     });
+    _fetchData(); // 필터를 제거한 후 검색 결과를 새로고침
+    _searchListener(); // 검색 조건이 변경되었으므로 검색 리스너를 다시 호출
+  }
+
+  Future<void> _fetchAndUpdateData() async {
+    // 이 메서드는 필터 업데이트 후 새로운 검색 결과를 불러오는 데 사용됩니다.
+    _updateSearchConditions(); // 검색 조건을 업데이트하는 데 필요한 로직을 여기에 포함시키세요.
+    _fetchData(); // 새로운 검색 결과를 불러옵니다.
   }
 
   void _clearAll() async {
@@ -384,6 +455,7 @@ class _SearchScreenState extends State<SearchScreen> {
       );
     }
 
+    _fetchData();
     _searchListener();
   }
 }
