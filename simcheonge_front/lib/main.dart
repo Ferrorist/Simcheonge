@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:simcheonge_front/auth/authentication_manager.dart';
 import 'package:simcheonge_front/screens/bookmark_policy_screen.dart';
 import 'package:simcheonge_front/screens/bookmark_post_screen.dart';
 import 'package:simcheonge_front/screens/login_screen.dart';
@@ -14,9 +15,33 @@ import 'package:simcheonge_front/screens/news_screen.dart';
 import 'package:simcheonge_front/screens/search_screen.dart';
 import 'package:simcheonge_front/widgets/side_app_bar.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:simcheonge_front/providers/economicWordProvider.dart';
+import 'package:provider/provider.dart';
 
-void main() {
-  runApp(const MyApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.remove('filters');
+  await prefs.remove('selectedFilters');
+  await prefs.remove('startDate');
+  await prefs.remove('endDate');
+  await clearFilters(); // 필터 정보 초기화
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => EconomicWordProvider()),
+      ],
+      child: const MyApp(),
+    ),
+  );
+}
+
+Future<void> clearFilters() async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  await prefs.remove('filters');
+  await prefs.remove('startDate');
+  await prefs.remove('endDate');
+  // 기타 초기화가 필요한 항목들도 이곳에 추가
 }
 
 Future<bool> checkLoginStatus() async {
@@ -30,13 +55,24 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: MyHomePage(),
-      locale: Locale('ko', 'KR'), // 앱의 로케일을 한국어로 설정
-      supportedLocales: [
+    return MaterialApp(
+      home: FutureBuilder<bool>(
+        future: AuthenticationManager.checkAndRefreshTokenIfNeeded(),
+        builder: (context, snapshot) {
+          // 토큰 유효성 검사가 완료되기 전 로딩 화면 표시
+          if (snapshot.connectionState != ConnectionState.done) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          // 토큰이 유효하면 메인 화면(MyHomePage)으로, 그렇지 않으면 로그인 화면(LoginScreen)으로 이동
+
+          return const MyHomePage();
+        },
+      ),
+      locale: const Locale('ko', 'KR'), // 앱의 로케일을 한국어로 설정
+      supportedLocales: const [
         Locale('ko', 'KR'), // 지원하는 로케일 목록에 한국어 추가
       ],
-      localizationsDelegates: [
+      localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
@@ -96,11 +132,12 @@ class _MyHomePageState extends State<MyHomePage> {
   // 페이지 변경 함수 수정
   void changePage(int index, {bool isSideBar = false}) {
     setState(() {
-      // 사이드바에서 호출되면 _selectedIndex를 업데이트하고, 바텀 네비게이션 항목이 아니면 -1로 설정
       _selectedIndex =
           isSideBar && (index < 0 || index > bottomNavItems.length - 1)
               ? -1
               : index;
+      // 디버그 콘솔에 현재 인덱스 출력
+      print('Current index is now: $_selectedIndex');
     });
   }
 
@@ -108,28 +145,33 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        final now = DateTime.now();
-        if (_scaffoldKey.currentState!.isEndDrawerOpen) {
-          // endDrawer가 열려 있다면 닫습니다.
-          Navigator.of(context).pop();
-          return false; // 이벤트를 더 이상 전파하지 않음
-        } else if (_selectedIndex != 0) {
+        if (_selectedIndex != 0) {
+          // 인덱스가 0이 아닌 경우, 인덱스를 0으로 변경
           setState(() {
             _selectedIndex = 0;
           });
-          return false; // 홈 화면으로 돌아갑니다.
-        } else if (lastPressed == null ||
-            now.difference(lastPressed!) > const Duration(seconds: 2)) {
-          lastPressed = now;
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('한 번 더 누르면 앱이 종료됩니다'),
-              duration: Duration(seconds: 2),
-            ),
-          );
-          return false; // 시스템 레벨의 뒤로가기 동작 방지
+          return Future.value(false); // 이벤트 소비, 시스템에 의한 뒤로 가기 처리 방지
+        } else {
+          // 인덱스가 0인 경우, 두 번 눌러 앱 종료 처리
+          final currentTime = DateTime.now();
+          final bool backButtonHasNotBeenPressedOrSnackbarHasBeenClosed =
+              lastPressed == null ||
+                  currentTime.difference(lastPressed!) >
+                      const Duration(seconds: 2);
+
+          if (backButtonHasNotBeenPressedOrSnackbarHasBeenClosed) {
+            lastPressed = currentTime;
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('한 번 더 누르면 앱이 종료됩니다.'),
+                duration: Duration(seconds: 2),
+              ),
+            );
+            return Future.value(false); // 이벤트 소비
+          }
+
+          return Future.value(true); // 시스템이 뒤로 가기 이벤트를 처리하도록 허용 (앱 종료)
         }
-        return true; // 시스템 레벨의 뒤로가기 동작을 허용 (앱 종료)
       },
       child: Scaffold(
         key: _scaffoldKey,
@@ -204,7 +246,7 @@ class _MyHomePageState extends State<MyHomePage> {
           iconSize: 32.0,
           onTap: (index) {
             setState(() {
-              _selectedIndex = index;
+              changePage(index);
             });
           },
           items: bottomNavItems
