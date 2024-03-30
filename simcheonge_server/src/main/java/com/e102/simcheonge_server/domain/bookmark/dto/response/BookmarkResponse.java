@@ -6,11 +6,6 @@ public class BookmarkResponse {
     private int referencedId;
     private String bookmarkType;
 
-    // 기본 생성자
-    public BookmarkResponse() {
-    }
-
-    // 모든 필드를 초기화하는 생성자
     public BookmarkResponse(int bookmarkId, int userId, int referencedId, String bookmarkType) {
         this.bookmarkId = bookmarkId;
         this.userId = userId;

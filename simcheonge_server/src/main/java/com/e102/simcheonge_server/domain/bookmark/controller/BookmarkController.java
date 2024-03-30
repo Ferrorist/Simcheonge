@@ -43,6 +43,7 @@ public class BookmarkController {
         return new ResponseEntity<>(responseBody, HttpStatus.OK);
     }
 
+
     // 북마크 조회
     @GetMapping
     public ResponseEntity<?> getBookmarks(@RequestParam("bookmarkType") String bookmarkType, @AuthenticationPrincipal UserDetails userDetails) {
@@ -54,5 +55,23 @@ public class BookmarkController {
         LinkedHashMap<String, Object> bookmarks = bookmarkService.getBookmarksByType(user.getUserId(), bookmarkType);
 
         return ResponseEntity.ok(bookmarks);
+    }
+
+
+    // 북마크 삭제
+    @DeleteMapping("/{bookmarkId}")
+    public ResponseEntity<?> deleteBookmark(@PathVariable("bookmarkId") int bookmarkId, @AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "로그인이 필요합니다."));
+        }
+
+        User user = UserUtil.getUserFromUserDetails(userDetails);
+        bookmarkService.deleteBookmark(bookmarkId, user.getUserId());
+
+        LinkedHashMap<String, Object> response = new LinkedHashMap<>();
+        response.put("status", HttpStatus.OK.value());
+        response.put("data", "북마크가 삭제되었습니다.");
+
+        return ResponseEntity.ok(response);
     }
 }
