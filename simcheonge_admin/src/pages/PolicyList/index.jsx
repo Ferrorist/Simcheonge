@@ -21,12 +21,15 @@ function PolicyList() {
           config
         );
         if (response.status === 200) {
-          setData(response.data.data); // 응답 데이터를 상태에 저장
+          const fetchedData = response.data.data ? response.data.data : []; //response가 null일 경우 빈배열로 만들어 아래 map 함수에서 에러 발생 막음
+          setData(fetchedData); // 응답 데이터를 상태에 저장
         } else {
           console.error("Failed to fetch policy data");
+          setData([]); // 오류 발생 시 빈 배열로 설정하여 안정성 보장
         }
       } catch (error) {
         console.error("Error fetching policy data:", error);
+        setData([]); // 예외 처리 시 빈 배열로 설정
       }
     };
 
