@@ -2,7 +2,7 @@ import Table from "react-bootstrap/Table";
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
-import { API_DOMAIN } from "../../env.config.js";
+import API_DOMAIN from "../../env.config";
 
 function PolicyList() {
   const [data, setData] = useState([]);
