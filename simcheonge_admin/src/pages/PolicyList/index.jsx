@@ -2,11 +2,11 @@ import Table from "react-bootstrap/Table";
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
-import API_DOMAIN from "../../env.config";
 
 function PolicyList() {
   const [data, setData] = useState([]);
   const token = sessionStorage.getItem("token");
+  const API_DOMAIN = process.env.REACT_APP_API_URL;
   const config = {
     headers: {
       Authorization: `Bearer ${token}`, // 헤더에 accessToken 추가
