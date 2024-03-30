@@ -203,7 +203,7 @@ pipeline {
                 script {
                 dir('simcheonge_admin') {
                     // 클라이언트 다운로드 용 React build 파일 복사
-                    sh "cp -rf build/ /var/www/react/build"
+                    sh "cp -rf build/ /var/www/react/"
                     
                     }
                 }
