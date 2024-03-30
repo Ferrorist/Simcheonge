@@ -29,7 +29,7 @@ public class BookmarkController {
     @PostMapping
     public ResponseEntity<?> createBookmark(@RequestBody BookmarkCreateRequest request, @AuthenticationPrincipal UserDetails userDetails) {
         if (userDetails == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("인증이 필요합니다.");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
         }
 
         User user = UserUtil.getUserFromUserDetails(userDetails);
@@ -41,5 +41,18 @@ public class BookmarkController {
         responseBody.put("bookmark_id", response.getBookmarkId());
 
         return new ResponseEntity<>(responseBody, HttpStatus.OK);
+    }
+
+    // 북마크 조회
+    @GetMapping
+    public ResponseEntity<?> getBookmarks(@RequestParam("bookmarkType") String bookmarkType, @AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
+        }
+
+        User user = UserUtil.getUserFromUserDetails(userDetails);
+        LinkedHashMap<String, Object> bookmarks = bookmarkService.getBookmarksByType(user.getUserId(), bookmarkType);
+
+        return ResponseEntity.ok(bookmarks);
     }
 }
