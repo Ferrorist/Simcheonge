@@ -21,6 +21,7 @@ class _FilterScreenState extends State<FilterScreen> {
   Map<String, bool> employmentStatusSelections = {};
   Map<String, bool> specializationSelections = {};
   Map<String, bool> interestSelections = {};
+  Map<String, bool> periodSelections = {};
   Map<String, List<CategoryList>> fullCategoryLists = {};
   DateTime? startDate;
   DateTime? endDate;
@@ -43,6 +44,7 @@ class _FilterScreenState extends State<FilterScreen> {
   List<String> employmentStatusOptions = [];
   List<String> specializationOptions = [];
   List<String> interestOptions = [];
+  List<String> periodOptions = [];
 
   @override
   void initState() {
@@ -59,12 +61,14 @@ class _FilterScreenState extends State<FilterScreen> {
         employmentStatusOptions = _extractNames(filterModel, 'EPM');
         specializationOptions = _extractNames(filterModel, 'SPC');
         interestOptions = _extractNames(filterModel, 'PFD');
+        periodOptions = _extractNames(filterModel, 'APC');
         regionSelections = _initializeSelections(regionOptions);
         educationSelections = _initializeSelections(educationOptions);
         employmentStatusSelections =
             _initializeSelections(employmentStatusOptions);
         specializationSelections = _initializeSelections(specializationOptions);
         interestSelections = _initializeSelections(interestOptions);
+        periodSelections = _initializeSelections(periodOptions);
         fullCategoryLists = {
           for (var item in filterModel.data ?? [])
             item.tag: item.categoryList ?? []
@@ -106,13 +110,8 @@ class _FilterScreenState extends State<FilterScreen> {
             _buildToggleButtons(
                 '특화 분야', specializationOptions, specializationSelections),
             _buildToggleButtons('관심 분야', interestOptions, interestSelections),
-            const Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Text('신청 기간',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-            ),
+            _buildToggleButtons('신청 기간', periodOptions, periodSelections),
             buildDateSelectionContent(),
-            buildDateSelection(),
           ],
         ),
       ),
@@ -126,8 +125,11 @@ class _FilterScreenState extends State<FilterScreen> {
                 child: ElevatedButton.icon(
                   icon: const Icon(Icons.replay_outlined),
                   label: const Text('초기화'),
-                  onPressed: _resetFilters,
+                  onPressed: _filtersSelected() ? _resetFilters : null,
                 ),
+              ),
+              const SizedBox(
+                width: 40,
               ),
               Expanded(
                 child: ElevatedButton(
@@ -214,6 +216,10 @@ class _FilterScreenState extends State<FilterScreen> {
 
   Widget _buildToggleButtons(
       String title, List<String> options, Map<String, bool> selections) {
+    bool isSingleChoice = title == '신청 기간';
+    bool isFirstOptionExclusive =
+        title == '학력' || title == '취업 상태' || title == '특화 분야';
+
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(
@@ -224,19 +230,36 @@ class _FilterScreenState extends State<FilterScreen> {
                   const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
           Wrap(
             spacing: 8.0,
-            children: options.map((option) {
+            children: List<Widget>.generate(options.length, (index) {
               return ChoiceChip(
-                label: Text(option),
-                selected: selections[option] ?? false,
-                selectedColor: Colors.blue.shade200,
                 showCheckmark: false,
+                label: Text(options[index]),
+                selected: selections[options[index]] ?? false,
                 onSelected: (bool selected) {
                   setState(() {
-                    selections[option] = selected;
+                    if (isSingleChoice ||
+                        (isFirstOptionExclusive && index == 0)) {
+                      // 모든 선택 해제 후 현재 선택만 활성화
+                      selections.forEach((key, _) => selections[key] = false);
+                      selections[options[index]] = selected;
+                    } else if (isFirstOptionExclusive) {
+                      // 첫 번째 항목이 이미 선택된 상태에서 다른 항목을 선택하면 첫 번째 항목 해제
+                      if (selections[options[0]] == true) {
+                        selections[options[0]] = false;
+                      }
+                      selections[options[index]] = selected;
+                    } else {
+                      selections[options[index]] = selected;
+                    }
+
+                    // '신청 기간' 선택이고, 3번째 항목('기간 선택')이 선택된 경우 날짜 선택기를 실행합니다.
+                    if (title == '신청 기간' && index == 2 && selected) {
+                      _showDateRangePickerModal();
+                    }
                   });
                 },
               );
-            }).toList(),
+            }),
           ),
         ],
       ),
@@ -325,6 +348,7 @@ class _FilterScreenState extends State<FilterScreen> {
                         tempEndDate = endDate;
                       });
                       Navigator.of(context).pop(); // 모달 닫기
+                      _scrollToDateSelectionContent();
                     }
                   },
                 ),
@@ -339,14 +363,50 @@ class _FilterScreenState extends State<FilterScreen> {
     });
   }
 
+  bool _filtersSelected() {
+    return regionSelections.containsValue(true) ||
+        educationSelections.containsValue(true) ||
+        employmentStatusSelections.containsValue(true) ||
+        specializationSelections.containsValue(true) ||
+        interestSelections.containsValue(true) ||
+        periodSelections.containsValue(true);
+  }
+
+  void _scrollToDateSelectionContent() {
+    // buildDateSelectionContent가 화면에 표시된 후에 호출되어야 합니다.
+    // 따라서, postFrameCallback을 사용하여 위젯 트리가 완전히 빌드된 후에 스크롤 조정이 이루어지도록 합니다.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        // 스크롤 컨트롤러를 사용하여 원하는 위치로 스크롤합니다.
+        // 예: 스크롤 컨트롤러의 최대 스크롤 가능 위치로 이동
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.easeInOut,
+        );
+      }
+    });
+  }
+
   void _resetFilters() {
     setState(() {
+      regionSelections.forEach((key, value) => regionSelections[key] = false);
+      educationSelections
+          .forEach((key, value) => educationSelections[key] = false);
+      employmentStatusSelections
+          .forEach((key, value) => employmentStatusSelections[key] = false);
+      specializationSelections
+          .forEach((key, value) => specializationSelections[key] = false);
+      interestSelections
+          .forEach((key, value) => interestSelections[key] = false);
+      periodSelections.forEach((key, value) => periodSelections[key] = false);
       regionSelections = _initializeSelections(regionOptions);
       educationSelections = _initializeSelections(educationOptions);
       employmentStatusSelections =
           _initializeSelections(employmentStatusOptions);
       specializationSelections = _initializeSelections(specializationOptions);
       interestSelections = _initializeSelections(interestOptions);
+      periodSelections = _initializeSelections(periodOptions);
       dateSelection = DateSelection.always;
       tempStartDate = null;
       tempEndDate = null;
@@ -355,17 +415,16 @@ class _FilterScreenState extends State<FilterScreen> {
 
   Future<void> _saveFilters() async {
     final prefs = await SharedPreferences.getInstance();
-
-    // 선택된 항목들을 기반으로 API 요청 본문 구성을 위한 filtersList를 먼저 선언 및 초기화합니다.
     List<Map<String, dynamic>> filtersList = [];
-
-    // addToFiltersList 함수는 선택된 옵션을 filtersList에 추가합니다.
+    bool isAPCSelectedForPeriod = false;
     void addToFiltersList(Map<String, bool> selections, String tag) {
       final categoryList = fullCategoryLists[tag] ?? [];
       for (var category in categoryList) {
         if (selections[category.name] == true) {
-          // 선택된 옵션의 실제 'code' 값을 사용하여 filtersList에 추가
           filtersList.add({"code": tag, "number": category.code});
+          if (tag == "APC" && category.code == 3) {
+            isAPCSelectedForPeriod = true; // APC가 3인 경우 true로 설정
+          }
         }
       }
     }
@@ -376,21 +435,55 @@ class _FilterScreenState extends State<FilterScreen> {
     addToFiltersList(employmentStatusSelections, "EPM");
     addToFiltersList(specializationSelections, "SPC");
     addToFiltersList(interestSelections, "PFD");
+    addToFiltersList(periodSelections, "APC");
 
     // 필터 목록을 SharedPreferences에 저장합니다.
     await prefs.setString('filters', jsonEncode(filtersList));
 
     // startDate와 endDate를 SharedPreferences에 저장합니다.
-    if (startDate != null) {
+    if (isAPCSelectedForPeriod && startDate != null && endDate != null) {
       await prefs.setString(
-          'startDate', DateFormat('yyyy-MM-dd').format(startDate!));
-    }
-    if (endDate != null) {
+          'startDate', DateFormat("yyyy-MM-dd").format(startDate!));
       await prefs.setString(
-          'endDate', DateFormat('yyyy-MM-dd').format(endDate!));
+          'endDate', DateFormat("yyyy-MM-dd").format(endDate!));
+    } else {
+      // 조건에 맞지 않는 경우 날짜 정보 삭제
+      prefs.remove('startDate');
+      prefs.remove('endDate');
     }
 
-    // 필터 화면을 닫습니다.
-    Navigator.of(context).pop();
+    // 선택된 필터들을 저장합니다. 각 선택된 항목을 CategoryList 객체의 리스트로 변환하여 저장합니다.
+    List<CategoryList> selectedFilters = [];
+    for (var selection in [
+      regionSelections,
+      educationSelections,
+      employmentStatusSelections,
+      specializationSelections,
+      interestSelections,
+      periodSelections,
+    ]) {
+      selection.forEach((key, value) {
+        if (value) {
+          // 선택된 경우
+          var category = fullCategoryLists.entries
+              .firstWhere(
+                  (element) => element.value.any((item) => item.name == key),
+                  orElse: () => const MapEntry("", []))
+              .value
+              .firstWhere((item) => item.name == key,
+                  orElse: () => CategoryList());
+          selectedFilters
+              .add(CategoryList(code: category.code, name: category.name));
+        }
+      });
+    }
+
+    // JSON 문자열로 변환하여 저장
+    String encodedSelectedFilters =
+        jsonEncode(selectedFilters.map((filter) => filter.toJson()).toList());
+    await prefs.setString('selectedFilters', encodedSelectedFilters);
+
+    // Navigator.pop을 호출할 때는 List<CategoryList> 타입으로 반환합니다.
+    Navigator.pop(context, selectedFilters);
   }
 }

@@ -1,10 +1,10 @@
-class EwordModel {
+class EWord {
   int? status;
   Data? data;
 
-  EwordModel({this.status, this.data});
+  EWord({this.status, this.data});
 
-  EwordModel.fromJson(Map<String, dynamic> json) {
+  EWord.fromJson(Map<String, dynamic> json) {
     status = json['status'];
     data = json['data'] != null ? Data.fromJson(json['data']) : null;
   }
@@ -20,20 +20,23 @@ class EwordModel {
 }
 
 class Data {
-  String? economicWord;
-  String? economicWordDescription;
+  int? economicWordId;
+  String? word;
+  String? description;
 
-  Data({this.economicWord, this.economicWordDescription});
+  Data({this.economicWordId, this.word, this.description});
 
   Data.fromJson(Map<String, dynamic> json) {
-    economicWord = json['economicWord'];
-    economicWordDescription = json['economicWordDescription'];
+    economicWordId = json['economicWordId'];
+    word = json['word'];
+    description = json['description'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
-    data['economicWord'] = economicWord;
-    data['economicWordDescription'] = economicWordDescription;
+    data['economicWordId'] = economicWordId;
+    data['word'] = word;
+    data['description'] = description;
     return data;
   }
 }

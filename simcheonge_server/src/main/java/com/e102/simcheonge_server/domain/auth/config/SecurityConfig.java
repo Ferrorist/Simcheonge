@@ -39,16 +39,15 @@ public class SecurityConfig {
                         management.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 세션 정책을 STATELESS로 설정
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(HttpMethod.GET, "/posts", "/posts/categories")
-                        .permitAll()
-                // 해당 API에 대해서는 모든 요청을 허가
-                .requestMatchers(HttpMethod.GET, "/posts")
-                        .permitAll() // GET 메소드에 대한 /post 요청을 인증 없이 허용
-                .requestMatchers("/users/signup", "/users/check-nickname", "/users/check-loginId", "/auth/login", "/policy/**", "/news/**", "/economicword", "/auth/reissue")
-                        .permitAll()
-                // USER 권한이 있어야 요청할 수 있음
-//                .requestMatchers("/members/test").hasRole("USER")
-                // 이 밖에 모든 요청에 대해서 인증을 필요로 한다는 설정
-                .anyRequest().authenticated())
+                            .permitAll()
+                        .requestMatchers(HttpMethod.DELETE, "/users")
+                            .authenticated()
+                        .requestMatchers("/users", "/users/check-nickname", "/users/check-loginId", "/auth/login", "/auth/reissue", "/news/**", "/policy/**", "/economicword/**")
+                            .permitAll()
+                        // USER 권한이 있어야 요청할 수 있음
+        //                .requestMatchers("/members/test").hasRole("USER")
+                        // 이 밖에 모든 요청에 대해서 인증을 필요로 한다는 설정
+                        .anyRequest().authenticated())
                 // JWT 인증을 위하여 직접 구현한 필터를 UsernamePasswordAuthenticationFilter 전에 실행
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
                 .build();
