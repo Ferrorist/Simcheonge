@@ -34,7 +34,7 @@ public class BookmarkService {
         // 요청 유효성 검증 로직
         if (("POL".equals(request.getBookmarkType()) && request.getPolicyId() == null) ||
                 ("POS".equals(request.getBookmarkType()) && request.getPostId() == null)) {
-            throw new IllegalArgumentException("Invalid request: mismatch between bookmark type and provided ID");
+            throw new IllegalArgumentException("요청한 북마크 타입과 ID 타입이 일치하는지 확인해주세요.");
         }
 
         // 실제 데이터 존재 여부 확인
