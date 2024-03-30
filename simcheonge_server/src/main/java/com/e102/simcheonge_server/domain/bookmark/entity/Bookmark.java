@@ -1,9 +1,5 @@
 package com.e102.simcheonge_server.domain.bookmark.entity;
 
-import com.e102.simcheonge_server.common.TargetType;
-import com.e102.simcheonge_server.domain.post.entity.Post;
-import com.e102.simcheonge_server.domain.user.entity.User;
-import com.e102.simcheonge_server.domain.policy.entity.Policy;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -25,11 +21,11 @@ public class Bookmark {
 
     @Column(name = "user_id")
     @NotNull
-    private int user;
+    private int userId;
 
-    @Column(name = "reference_id")
+    @Column(name = "referenced_id")
     @NotNull
-    private int reference;
+    private int referencedId;
 
     @Column(name = "bookmark_type", length = 3)
     @Builder.Default
