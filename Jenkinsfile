@@ -178,11 +178,18 @@ pipeline {
             steps {
                 script {
                     dir('simcheonge_admin') {
-                        // Gradle을 사용하여 Spring 애플리케이션 빌드
+                        // EC2에 node.js가 설치되어 있지 않아 npm을 사용할 수 없음
+                        // 그래서 node 이미지를 기반으로 한 임시 컨테이너에서 npm build 작업을 수행함
+                        // stage가 끝나면 컨테이너는 자동으로 삭제됨 (stage가 끝나도 이미지는 로컬(여기서는 EC2)에 남아있음)
+                        // 로컬(EC2)에 이미지가 없으면 자동으로 docker hub에서 다운받아서 작업을 수행함
+                        docker.image('node:latest').inside {
+                        
+                        // Node.js를 사용하여 React 프로젝트 빌드
                         sh "rm -rf node_modules package-lock.json"
                         sh "npm install"
                         sh "CI=false npm run build"
                     }
+                  }
                 }
             }
         }
