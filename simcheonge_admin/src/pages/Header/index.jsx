@@ -4,6 +4,7 @@ import Navbar from "react-bootstrap/Navbar";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 function TopBar() {
+  const loginId = sessionStorage.getItem("loginId");
   const navigate = useNavigate();
 
   const handleLoginClick = () => {
@@ -17,10 +18,18 @@ function TopBar() {
         <Navbar.Toggle />
         <Navbar.Collapse className="justify-content-end">
           <Navbar.Text>
-            Signed in as:{" "}
-            <a href="#login" onClick={handleLoginClick}>
-              admin
-            </a>
+            {loginId ? (
+              <>
+                Signed in as:
+                <a href="#login" onClick={handleLoginClick}>
+                  {loginId}
+                </a>
+              </>
+            ) : (
+              <a href="#login" onClick={handleLoginClick}>
+                Signed in
+              </a>
+            )}
           </Navbar.Text>
         </Navbar.Collapse>
       </Container>

@@ -28,6 +28,7 @@ function Login() {
       if (data.data.accessToken) {
         // 토큰을 상태에 저장하거나 쿠키/로컬 스토리지에 저장합니다.
         sessionStorage.setItem("token", data.data.accessToken);
+        sessionStorage.setItem("loginId", data.data.userLoginId);
         navigate("/");
       } else {
         console.error("Login failed");
