@@ -3,12 +3,12 @@ import { useNavigate } from "react-router-dom";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import axios from "axios";
-import API_DOMAIN from "../../env.config";
 
 function Login() {
   const [userLoginId, setUserLoginId] = useState("");
   const [userPassword, setUserPassword] = useState("");
   const navigate = useNavigate();
+  const API_DOMAIN = process.env.REACT_APP_API_URL;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
