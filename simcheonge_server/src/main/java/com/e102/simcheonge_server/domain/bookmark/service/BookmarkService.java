@@ -4,11 +4,17 @@ import com.e102.simcheonge_server.domain.bookmark.dto.request.BookmarkCreateRequ
 import com.e102.simcheonge_server.domain.bookmark.dto.response.BookmarkResponse;
 import com.e102.simcheonge_server.domain.bookmark.entity.Bookmark;
 import com.e102.simcheonge_server.domain.bookmark.repository.BookmarkRepository;
+import com.e102.simcheonge_server.domain.policy.entity.Policy;
 import com.e102.simcheonge_server.domain.policy.repository.PolicyRepository;
+import com.e102.simcheonge_server.domain.post.entity.Post;
 import com.e102.simcheonge_server.domain.post.repository.PostRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -73,5 +79,47 @@ public class BookmarkService {
                 savedBookmark.getUserId(),
                 savedBookmark.getReferencedId(),
                 savedBookmark.getBookmarkType());
+    }
+
+
+    // 북마크 조회
+    public LinkedHashMap<String, Object> getBookmarksByType(int userId, String bookmarkType) {
+        List<LinkedHashMap<String, Object>> data = new ArrayList<>();
+
+        // POL 타입 북마크 조회
+        if ("POL".equals(bookmarkType)) {
+            List<Bookmark> bookmarks = bookmarkRepository.findByUserIdAndBookmarkType(userId, "POL");
+            bookmarks.forEach(bookmark -> {
+                Policy policy = policyRepository.findByPolicyId(bookmark.getReferencedId())
+                        .orElseThrow(() -> new RuntimeException("Policy not found"));
+                LinkedHashMap<String, Object> item = new LinkedHashMap<>();
+                item.put("bookmarkId", bookmark.getBookmarkId());
+                item.put("bookmarkType", bookmark.getBookmarkType());
+                item.put("policyId", policy.getPolicyId());
+                item.put("policyName", policy.getName());
+                item.put("userId", bookmark.getUserId());
+                data.add(item);
+            });
+        }
+        // POS 타입 북마크 조회
+        else if ("POS".equals(bookmarkType)) {
+            List<Bookmark> bookmarks = bookmarkRepository.findByUserIdAndBookmarkType(userId, "POS");
+            bookmarks.forEach(bookmark -> {
+                Post post = postRepository.findByPostId(bookmark.getReferencedId())
+                        .orElseThrow(() -> new RuntimeException("Post not found"));
+                LinkedHashMap<String, Object> item = new LinkedHashMap<>();
+                item.put("bookmarkId", bookmark.getBookmarkId());
+                item.put("bookmarkType", bookmark.getBookmarkType());
+                item.put("postId", post.getPostId());
+                item.put("postName", post.getPostName());
+                item.put("userId", bookmark.getUserId());
+                data.add(item);
+            });
+        }
+
+        LinkedHashMap<String, Object> response = new LinkedHashMap<>();
+        response.put("status", 200);
+        response.put("data", data);
+        return response;
     }
 }
