@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -18,10 +19,23 @@ class _PostCreateScreenState extends State<PostCreateScreen> {
     {'name': '공모전', 'number': 3},
     {'name': '생활 꿀팁', 'number': 4},
     {'name': '기타', 'number': 5},
-  ]; // 카테고리 옵션 예시
+  ];
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _contentController = TextEditingController();
-  final TextEditingController _usernameController = TextEditingController();
+  String? _userNickname;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserNickname();
+  }
+
+  Future<void> _loadUserNickname() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _userNickname = prefs.getString('userNickname'); // 닉네임 불러오기
+    });
+  }
 
   Future<void> _createPost() async {
     if (_selectedCategoryNumber == null) {
@@ -34,37 +48,35 @@ class _PostCreateScreenState extends State<PostCreateScreen> {
 
     final String? accessToken = prefs.getString('accessToken');
 
-    final url = Uri.parse('https://j10e201.p.ssafy.io/api/posts');
+    final url = Uri.parse('https://j10e102.p.ssafy.io/api/posts');
     final response = await http.post(
       url,
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $accessToken', // JWT 토큰을 여기에 삽입
+        'Content-Type': "application/json; charset=UTF-8",
+        'Authorization': "Bearer $accessToken", // JWT 토큰을 여기에 삽입
       },
       body: jsonEncode({
         'postName': _titleController.text,
         'postContent': _contentController.text,
         'categoryCode': 'POS',
         'categoryNumber': int.parse(_selectedCategoryNumber!),
-        'userNickname': _usernameController.text, // 실제 사용자 닉네임을 여기에 삽입
+        'userNickname': _userNickname, // 실제 사용자 닉네임을 여기에 삽입
       }),
     );
+    print('제목: ${_titleController.text}');
+    print('내용: ${_contentController.text}');
+    print('카테고리 : $_selectedCategoryNumber');
+    print('닉네임 :$_userNickname');
     print(accessToken);
     print('Status code: ${response.statusCode}');
     print('Response body: ${response.body}');
 
-    if (response.statusCode == 200 && response.body.isNotEmpty) {
-      final responseData = json.decode(response.body);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content:
-              Text('글 작성에 성공했습니다. 글 번호: ${responseData["data"]["post_id"]}')));
-      // 글 작성 후 처리 로직, 예: 글 목록 화면으로 돌아가기
+    if (response.statusCode == 200) {
+      Navigator.pop(context); // 성공 시 이전 화면으로 돌아가기
     } else {
-      // 실패 처리
-      final responseData = json.decode(response.body);
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('글 작성 실패: ${responseData["message"]}')));
-      throw Exception('서버로부터 비어 있는 응답을 받았습니다.');
+      print(response.statusCode);
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('게시글 작성에 실패했습니다.')));
     }
   }
 
@@ -188,8 +200,10 @@ class _PostCreateScreenState extends State<PostCreateScreen> {
                     ),
                     ElevatedButton(
                       onPressed: () {
-                        _createPost;
-                        print('check');
+                        if (_formKey.currentState!.validate()) {
+                          _createPost();
+                          print('check');
+                        }
                       }, // 작성 완료 버튼 클릭 시 글 작성 처리
                       child: const Text('작성 완료'),
                     ),

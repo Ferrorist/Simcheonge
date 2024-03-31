@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:simcheonge_front/screens/login_screen.dart';
 import 'package:simcheonge_front/screens/post_create_screen.dart';
+import 'package:simcheonge_front/screens/post_detail_screen.dart';
 import 'package:simcheonge_front/services/post_service.dart';
 
 class DataSearch extends SearchDelegate<String> {
@@ -100,6 +101,7 @@ void _showFilterDialog(BuildContext context) {
 
 void _filterPosts(BuildContext context, int categoryNumber) {
   Navigator.of(context).pop(); // 다이얼로그 닫기
+  // 여기에 선택된 카테고리에 따라 게시글을 필터링하는 로직 추가
 }
 
 class PostScreen extends StatefulWidget {
@@ -110,8 +112,53 @@ class PostScreen extends StatefulWidget {
 }
 
 class _PostScreenState extends State<PostScreen> {
-  List<String> bookmarkedItems =
-      List<String>.generate(20, (i) => 'Item ${i + 1}');
+  final List<Map<String, dynamic>> _categoryOptions = [
+    {'number': 2, 'name': '정책 추천'},
+    {'number': 3, 'name': '공모전'},
+    {'number': 4, 'name': '생활 꿀팁'},
+    {'number': 5, 'name': '기타'},
+  ];
+
+  late Future<List<dynamic>> _postFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _postFuture = PostService.fetchPosts();
+  }
+
+  Future<void> _refreshPosts() async {
+    setState(() {
+      _postFuture = PostService.fetchPosts();
+    });
+  }
+
+  String getCategoryName(int categoryNumber) {
+    var category = _categoryOptions.firstWhere(
+      (option) => option['number'] == categoryNumber,
+      orElse: () => {'name': '기타'},
+    );
+    return category['name'];
+  }
+
+  void _navigateToDetailOrLogin(BuildContext context, int postId) async {
+    String? token = await getSavedToken();
+    if (token == null) {
+      // 로그인하지 않았다면, 로그인 화면으로 이동
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginScreen()),
+      );
+    } else {
+      // 로그인했다면, 게시글 상세 화면으로 이동
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => PostDetailScreen(postId: postId),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -126,10 +173,7 @@ class _PostScreenState extends State<PostScreen> {
             IconButton(
               icon: const Icon(Icons.search),
               onPressed: () {
-                showSearch(
-                  context: context,
-                  delegate: DataSearch(bookmarkedItems),
-                );
+                // 검색 기능 구현
               },
             ),
             IconButton(
@@ -138,55 +182,60 @@ class _PostScreenState extends State<PostScreen> {
                 String? token = await getSavedToken();
                 print(token);
                 if (token == null) {
-                  // 토큰이 없다면 로그인 화면으로 이동합니다.
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) =>
-                          const LoginScreen(), // 로그인 화면으로 변경해주세요
-                    ),
+                        builder: (context) => const LoginScreen()),
                   );
                 } else {
-                  // 토큰이 있다면 PostCreateScreen으로 이동합니다.
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const PostCreateScreen(),
-                    ),
+                        builder: (context) => const PostCreateScreen()),
                   );
                 }
               },
             ),
           ],
         ),
-        body: FutureBuilder<List<dynamic>>(
-          future: PostService.fetchPosts(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.done) {
-              if (snapshot.hasData) {
-                return ListView.builder(
-                  itemCount: snapshot.data!.length,
-                  itemBuilder: (context, index) {
-                    var post = snapshot.data![index];
-                    return ListTile(
-                      leading: Text(post['categoryCode']), // 카테고리
-                      title: Text(post['postName']), // 게시글 제목
-                      subtitle: Text(post['userNickname']), // 작성자 닉네임
-                      trailing: Text(post['createdAt']), // 생성 날짜
-                    );
-                  },
-                );
-              } else if (snapshot.hasError) {
-                // 에러가 있는 경우 에러 메시지를 표시하는 위젯을 반환
-                return Text('${snapshot.error}');
-              } else {
-                // 데이터가 없는 경우
+        body: RefreshIndicator(
+          onRefresh: _refreshPosts,
+          child: FutureBuilder<List<dynamic>>(
+            future: PostService.fetchPosts().then((posts) {
+              _postFuture;
+              // 서버에서 최신순으로 정렬되어 오지 않는 경우, 클라이언트 측에서 정렬
+              posts.sort((a, b) => b['createdAt'].compareTo(a['createdAt']));
+              return posts;
+            }),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.done) {
+                if (snapshot.hasData) {
+                  return ListView.builder(
+                    itemCount: snapshot.data!.length,
+                    itemBuilder: (context, index) {
+                      // null 검사 및 기본값 할당
+                      var post = snapshot.data![index];
+                      return InkWell(
+                        onTap: () =>
+                            _navigateToDetailOrLogin(context, post['postId']),
+                        child: ListTile(
+                          leading: Text(post['categoryName'] ?? '기타'),
+                          title: Text(post['postName'] ?? '제목 없음'),
+                          subtitle: Text(post['userNickname'] ?? '익명'),
+                          trailing: Text(post['createdAt']?.substring(0, 10) ??
+                              '날짜 정보 없음'),
+                        ),
+                      );
+                    },
+                  );
+                } else if (snapshot.hasError) {
+                  return Text('오류 발생: ${snapshot.error}');
+                }
                 return const Text('데이터가 없습니다.');
               }
-            }
-            // 데이터를 불러오는 동안 로딩 인디케이터를 표시
-            return const Center(child: CircularProgressIndicator());
-          },
+              return const Center(child: CircularProgressIndicator());
+            },
+          ),
         ),
       ),
     );
