@@ -20,7 +20,7 @@ class AuthenticationManager {
     // 리프레시 토큰으로 새로운 토큰 요청
     final response = await http.post(
       Uri.parse('$_serverUrl/reissue'),
-      headers: {'Content-Type': 'application/json'},
+      headers: {'Content-Type': 'application/json; charset=UTF-8'},
       body: jsonEncode({'refreshToken': refreshToken}),
     );
 
@@ -30,7 +30,8 @@ class AuthenticationManager {
       await prefs.setString('accessToken', data['accessToken']);
       return true;
     } else {
-      // 토큰 갱신 실패, 로그인 화면으로
+      await prefs.remove('accessToken');
+      await prefs.remove('refreshToken'); // 토큰 갱신 실패, 로그인 화면으로
       return false;
     }
   }
