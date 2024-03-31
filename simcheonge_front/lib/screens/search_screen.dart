@@ -225,6 +225,8 @@ class _SearchScreenState extends State<SearchScreen> {
     bool hasFilters = _selectedFilters.isNotEmpty;
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.white,
+        scrolledUnderElevation: 0,
         title: const Text('검색',
             style: TextStyle(fontSize: 30, fontWeight: FontWeight.w600)),
       ),
@@ -255,7 +257,7 @@ class _SearchScreenState extends State<SearchScreen> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 15), // 좌우 여백 설정
+            padding: const EdgeInsets.symmetric(horizontal: 15),
             child: Visibility(
               visible: hasFilters,
               child: SizedBox(
@@ -337,7 +339,8 @@ class _SearchScreenState extends State<SearchScreen> {
                       softWrap: true,
                       style: const TextStyle(fontSize: 16),
                     ),
-                    trailing: const Icon(Icons.chevron_right),
+                    trailing: const Icon(Icons.chevron_right,
+                        size: 30, color: Color.fromARGB(255, 0, 220, 40)),
                   ),
                 );
               },
