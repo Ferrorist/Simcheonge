@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:simcheonge_front/screens/policy_detail_screen.dart';
 import 'dart:convert';
 import 'package:simcheonge_front/screens/search_filter.dart';
 import 'dart:ui';
@@ -339,8 +340,18 @@ class _SearchScreenState extends State<SearchScreen> {
                       softWrap: true,
                       style: const TextStyle(fontSize: 16),
                     ),
-                    trailing: const Icon(Icons.chevron_right,
-                        size: 30, color: Color.fromARGB(255, 0, 220, 40)),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () {
+                      print('push');
+                      // 여기에서 PostDetailScreen으로 이동
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => PolicyDetailScreen(
+                                  policyId: policy.policyId ?? 0,
+                                )),
+                      );
+                    },
                   ),
                 );
               },
