@@ -1,10 +1,14 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:simcheonge_front/widgets/economic_word.dart';
 import 'package:simcheonge_front/screens/news_detail.dart';
 import 'package:simcheonge_front/providers/economicWordProvider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:simcheonge_front/widgets/pulldown.dart';
 import 'package:provider/provider.dart';
+import 'package:simcheonge_front/models/news_list_model.dart';
+import 'package:simcheonge_front/services/news_list_api.dart';
 
 class NewsScreen extends StatefulWidget {
   const NewsScreen({super.key});
@@ -16,123 +20,93 @@ class NewsScreen extends StatefulWidget {
 class _NewsScreenState extends State<NewsScreen> {
   final RefreshController _refreshController =
       RefreshController(initialRefresh: false);
+  List<Data>? newsList;
 
   @override
   void initState() {
     super.initState();
-    // 최초 데이터 로딩
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<EconomicWordProvider>(context, listen: false)
           .fetchEconomicWord();
     });
+    loadNewsList(); // 수정
   }
 
-  void _onRefresh(BuildContext context) async {
-    // 경제 단어 데이터를 새로고침합니다.
+  Future<void> loadNewsList() async {
+    final NewsList response = await fetchNewsList(); // 올바른 API 호출 함수 이름
+    if (response.data != null) {
+      setState(() {
+        newsList = response.data;
+      });
+    }
+  }
+
+  void _onRefresh() async {
+    await loadNewsList(); // 올바른 메서드 이름으로 수정
     await Provider.of<EconomicWordProvider>(context, listen: false)
-        .fetchEconomicWord();
+        .fetchEconomicWord(); // 경제 용어 새로고침
     _refreshController.refreshCompleted();
   }
 
   @override
   Widget build(BuildContext context) {
-    final List<Map<String, String>> newsData = [
-      {
-        'title': "군복무 기간만큼 국민연금 더 준다…이러쿵저러쿵 어쩌고 저쩌고",
-        'content':
-            '연평해전·천안함 피격사건 참전자 모두 보훈 연평해전·천안함 피격사건 참전자 모두 보훈 연평해전·천안함 피격사건 참전자 모두 보훈 연평해전·천안함 피격사건 참전자 모두 보훈 연평해전·천안함 피격사건 참전자 모두 보훈 연평해전·천안함 피격사건 참전자 모두 보훈'
-      },
-      {'title': '제목 1', 'content': '내용 1'},
-      {
-        'title': '제목 1',
-        'content':
-            '내용 1내용 1내용 1내용 1내용 1내용 1내용 1내용 1내용 1내용 1내용 1내용 1내용 1내용 1내용 1내용 1내용 1내용 1내용 1내용 1내용 1내용 1'
-      },
-      {'title': '제목 1', 'content': '내용 1'},
-      {'title': '제목 1', 'content': '내용 1'},
-      {'title': '제목 1', 'content': '내용 1'},
-      {'title': '제목 1', 'content': '내용 1'},
-      {'title': '제목 1', 'content': '내용 1'},
-      {'title': '제목 1', 'content': '내용 1'},
-    ];
-
     return Scaffold(
       body: Column(children: <Widget>[
         const EconomicWordWidget(),
         const Padding(
           padding: EdgeInsets.all(10.0),
-          child: Text('오늘의 주요 뉴스',
+          child: Text('실시간 주요 뉴스',
               style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
         ),
         Expanded(
           child: SmartRefresher(
             controller: _refreshController,
-            onRefresh: () => _onRefresh(context),
+            onRefresh: _onRefresh,
             child: ListView.separated(
-              itemCount: newsData.length,
-              separatorBuilder: (context, index) => const Divider(),
+              itemCount: newsList?.length ?? 0,
               itemBuilder: (context, index) {
-                return Padding(
-                  padding: const EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 1.0),
+                final newsItem = newsList![index];
+                return InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => NewsDetailScreen(
+                          newsUrl: newsItem.link ?? '기본 URL',
+                        ),
+                      ),
+                    );
+                  },
                   child: Container(
-                    height: 150, // 뉴스 항목의 높이 고정
-                    padding: const EdgeInsets.only(
-                        bottom: 0.0), // 원문보기 버튼의 아래쪽 여백 조정
+                    padding: const EdgeInsets.all(8),
+                    height: 135, // 요소의 높이를 고정합니다.
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          newsData[index]['title']!,
-                          style: const TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
-                          overflow: TextOverflow.ellipsis,
+                          newsItem.publisher ?? '출처 없음',
+                          style:
+                              const TextStyle(fontSize: 12, color: Colors.grey),
                         ),
-                        const SizedBox(height: 5),
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.only(
-                              left: 5.0,
-                              right: 15.0,
-                            ), // 내용의 여백을 조정
-                            child: Text(
-                              newsData[index]['content']!,
-                              style: const TextStyle(fontSize: 15),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 3,
-                            ),
+                        const SizedBox(height: 4),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(10, 3, 10, 2),
+                          child: Text(
+                            newsItem.title ?? '제목 없음',
+                            style: const TextStyle(
+                                fontSize: 21, fontWeight: FontWeight.bold),
+                            maxLines: 2, // 최대 2줄까지만 표시
+                            overflow:
+                                TextOverflow.ellipsis, // 2줄 이상일 경우 '...'으로 표시
                           ),
                         ),
+                        const Spacer(), // 제목과 원문보기 사이의 여백을 최대화합니다.
                         Align(
                           alignment: Alignment.bottomRight,
-                          child: TextButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                PageRouteBuilder(
-                                  pageBuilder: (context, animation,
-                                          secondaryAnimation) =>
-                                      NewsDetailScreen(newsId: 'news_$index'),
-                                  transitionsBuilder: (context, animation,
-                                      secondaryAnimation, child) {
-                                    const begin = Offset(1.0, 0.0);
-                                    const end = Offset.zero;
-                                    const curve = Curves.ease;
-
-                                    var tween = Tween(begin: begin, end: end)
-                                        .chain(CurveTween(curve: curve));
-                                    var offsetAnimation =
-                                        animation.drive(tween);
-
-                                    return SlideTransition(
-                                      position: offsetAnimation,
-                                      child: child,
-                                    );
-                                  },
-                                ),
-                              );
-                            },
-                            child: const Text('원문보기'),
+                          child: Text(
+                            '원문보기',
+                            style: TextStyle(
+                                color: Theme.of(context).primaryColor),
                           ),
                         ),
                       ],
@@ -140,9 +114,18 @@ class _NewsScreenState extends State<NewsScreen> {
                   ),
                 );
               },
+              separatorBuilder: (context, index) {
+                // 마지막 요소에는 구분선을 그리지 않습니다.
+                return index == (newsList?.length ?? 1) - 1
+                    ? Container()
+                    : const Divider(height: 1);
+              },
             ),
           ),
         ),
+        const SizedBox(
+          height: 15,
+        )
       ]),
     );
   }

@@ -147,21 +147,21 @@ class _FilterScreenState extends State<FilterScreen> {
   Widget buildDateSelectionContent() {
     if (dateSelection != DateSelection.selectPeriod ||
         startDate == null ||
-        endDate == null) {
+        endDate == null ||
+        !(periodSelections['기간 선택'] ?? false)) {
       return Container(); // 선택한 날짜 범위가 없으면 아무것도 표시하지 않음
     }
 
     final DateFormat formatter = DateFormat('yyyy-MM-dd');
     final String formattedStartDate = formatter.format(startDate!);
     final String formattedEndDate = formatter.format(endDate!);
-
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '선택 기간: $formattedStartDate - $formattedEndDate',
+            '선택 기간: $formattedStartDate ~ $formattedEndDate',
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
         ],
@@ -267,6 +267,7 @@ class _FilterScreenState extends State<FilterScreen> {
   }
 
   void _showDateRangePickerModal() {
+    DateSelection tempDateSelection = dateSelection;
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -328,10 +329,14 @@ class _FilterScreenState extends State<FilterScreen> {
                   child: const Text("취소"),
                   onPressed: () {
                     Navigator.of(context).pop();
-                    // 취소 버튼을 누르면 상시 선택으로 변경
-                    setState(() {
-                      dateSelection = DateSelection.always;
-                    });
+
+                    if (mounted) {
+                      setState(() {
+                        periodSelections = {};
+                        tempStartDate = null;
+                        tempEndDate = null;
+                      });
+                    }
                   },
                 ),
                 TextButton(
@@ -358,8 +363,15 @@ class _FilterScreenState extends State<FilterScreen> {
         );
       },
     ).then((_) {
-      // 모달이 닫힌 후 선택한 기간이 필터 스크린에 바로 표시되도록 setState 호출
-      setState(() {});
+      // Dialog가 닫히면 (확인 또는 밖을 눌러서)
+      // 사용자가 날짜를 선택하지 않고 닫았다면, 기간 선택이 취소된 것으로 간주하고 초기 상태로 복원합니다.
+      if (mounted) {
+        setState(() {
+          if (startDate == null || endDate == null) {
+            dateSelection = tempDateSelection; // 사용자가 날짜를 선택하지 않았다면 원래의 상태로 복원
+          }
+        });
+      }
     });
   }
 
