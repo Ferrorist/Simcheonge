@@ -9,8 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class NewsItem {
     private String title;
-    private String originallink;
-    private String link;
     private String description;
-    private String pubDate;
+    private String publisher;
+    private String Link;
 }
