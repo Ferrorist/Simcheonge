@@ -37,4 +37,5 @@ public class PolicyUpdateRequest {
     private String operationOrganization;
     private String operationOrganizationContact;
     private String applicationPeriod;
+    private boolean isProcessed;
 }

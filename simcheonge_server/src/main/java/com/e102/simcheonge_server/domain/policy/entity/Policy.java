@@ -152,7 +152,7 @@ public class Policy {
         this.operationOrganizationContact=policyUpdateRequest.getOperationOrganizationContact();
         this.applicationPeriod=policyUpdateRequest.getApplicationPeriod();
 
-        this.isProcessed = true;
+        this.isProcessed = policyUpdateRequest.isProcessed();
         this.processedAt = new Date();
     }
 }

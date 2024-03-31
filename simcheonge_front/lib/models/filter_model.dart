@@ -53,18 +53,21 @@ class Data {
 class CategoryList {
   String? code;
   String? name;
+  String? number; // number 필드 추가
 
-  CategoryList({this.code, this.name});
+  CategoryList({this.code, this.name, this.number});
 
   CategoryList.fromJson(Map<String, dynamic> json) {
     code = json['code'];
     name = json['name'];
+    number = json['number']; // JSON 생성자 수정
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
     data['code'] = code;
     data['name'] = name;
+    data['number'] = number; // toJson 수정
     return data;
   }
 }

@@ -11,6 +11,7 @@ import com.e102.simcheonge_server.domain.auth.dto.request.LoginRequest;
 import com.e102.simcheonge_server.domain.user.entity.User;
 import com.e102.simcheonge_server.domain.user.utill.UserUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/auth")
+@Slf4j
 public class AuthController {
 
     private final AuthService authService;
@@ -34,6 +36,7 @@ public class AuthController {
 
     public ResponseEntity<?> signIn(@RequestBody LoginRequest loginRequest)
     {
+        log.info("loginRequest={}",loginRequest);
         return ResponseUtil.buildBasicResponse(HttpStatus.OK, authService.login(loginRequest));
     }
 

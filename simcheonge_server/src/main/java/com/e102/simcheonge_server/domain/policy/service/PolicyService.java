@@ -9,12 +9,13 @@ import com.e102.simcheonge_server.domain.category.repository.CategoryRepository;
 import com.e102.simcheonge_server.domain.category_detail.dto.request.CategoryDetailSearchRequest;
 import com.e102.simcheonge_server.domain.category_detail.entity.CategoryDetail;
 import com.e102.simcheonge_server.domain.category_detail.repository.CategoryDetailRepository;
+import com.e102.simcheonge_server.domain.policy.dto.admin.PolicyDetailAdminReadResponse;
 import com.e102.simcheonge_server.domain.policy.dto.request.PolicySearchRequest;
 import com.e102.simcheonge_server.domain.policy.dto.request.PolicyUpdateRequest;
+import com.e102.simcheonge_server.domain.policy.dto.admin.PolicyAdminReadResponse;
 import com.e102.simcheonge_server.domain.policy.dto.response.PolicyDetailResponse;
 import com.e102.simcheonge_server.domain.policy.dto.response.PolicyThumbnailResponse;
 import com.e102.simcheonge_server.domain.policy.entity.Policy;
-import com.e102.simcheonge_server.domain.policy.repository.PolicyCustomRepository;
 import com.e102.simcheonge_server.domain.policy.repository.PolicyNativeRepository;
 import com.e102.simcheonge_server.domain.policy.repository.PolicyRepository;
 import com.e102.simcheonge_server.domain.user.entity.User;
@@ -36,7 +37,7 @@ public class PolicyService {
     private final CategoryRepository categoryRepository;
     private final CategoryDetailRepository categoryDetailRepository;
     private final PolicyNativeRepository policyNativeRepository;
-    private final HashMap<String, Integer> categoryCheckMap = new HashMap<>();
+    private final HashMap<String, Integer> codeCheckMap = new HashMap<>();
     private final String[] checkCategories = {"ADM", "SPC", "EPM"};
 
     public PolicyDetailResponse getPolicy(int policyId) {
@@ -123,9 +124,9 @@ public class PolicyService {
 
     public PageImpl<PolicyThumbnailResponse> searchPolicies(PolicySearchRequest policySearchRequest, Pageable pageable) {
 
-        validatePolicySearchRequest(policySearchRequest);
+        List<String> codeList = validatePolicySearchRequest(policySearchRequest);
 
-        PageImpl<Object[]> policyObjectList = policyNativeRepository.searchPolicy(policySearchRequest.getKeyword(), policySearchRequest.getList(), policySearchRequest.getStartDate(), policySearchRequest.getEndDate(), pageable);
+        PageImpl<Object[]> policyObjectList = policyNativeRepository.searchPolicy(policySearchRequest.getKeyword(), policySearchRequest.getList(), policySearchRequest.getStartDate(), policySearchRequest.getEndDate(), codeList,pageable);
         List<PolicyThumbnailResponse> responseList = new ArrayList<>();
         for (Object[] policyObject : policyObjectList) {
             Integer policyId = (Integer) policyObject[0];
@@ -140,15 +141,19 @@ public class PolicyService {
         return new PageImpl<>(responseList, pageable, policyObjectList.getTotalElements());
     }
 
-    private void validatePolicySearchRequest(PolicySearchRequest policySearchRequest) {
+    private List<String> validatePolicySearchRequest(PolicySearchRequest policySearchRequest) {
         if(policySearchRequest.getKeyword()==null){
             throw new IllegalArgumentException("키워드는 null일 수 없습니다. keyword에 빈 값을 담아 요청해주세요.");
         }
 
         // {APC,3}일 경우 startDate, endDate null확인
-        int APCCount = 1;
+        int APCCount = 0;
         boolean isAPC3exist = false;
+        List<String> codeList=new ArrayList<>();
         for (CategoryDetailSearchRequest category : policySearchRequest.getList()) {
+            if(!codeList.contains(category.getCode())){
+                codeList.add(category.getCode());
+            }
             //{ADM,1}, {EPM,1}, {SPC, 1}가 있는지 확인
             if (Arrays.asList(checkCategories).contains(category.getCode()) && category.getNumber() == 1) {
                 throw new IllegalArgumentException("해당 카테고리는 '제한 없음'을 선택할 수 없습니다.");
@@ -166,8 +171,70 @@ public class PolicyService {
         if (isAPC3exist && APCCount > 1) {
             throw new IllegalArgumentException("'특정 기간'은 '상시'나 '미정'과 함께 선택할 수 없습니다.");
         }
-        log.info("체크5");
+        return codeList;
     }
 
 
+    public List<PolicyAdminReadResponse> getAllPolicies(boolean isProcessed,String userNickname) {
+        log.info("userNickname={}",userNickname);
+        //관리자 권한 필요함
+        if(!userNickname.equals("admin")){
+            throw new AuthenticationException("해당 유저는 미가공 데이터에 대한 권한이 없습니다.");
+        }
+
+        List<Policy> policyList = policyRepository.findAllByIsProcessed(isProcessed);
+        List<PolicyAdminReadResponse> responseList=new ArrayList<>();
+        policyList.forEach(policy -> {
+            PolicyAdminReadResponse resp=PolicyAdminReadResponse.builder()
+                    .policyId(policy.getPolicyId())
+                    .policy_name(policy.getName())
+                    .isProcessed(policy.isProcessed())
+                    .build();
+            responseList.add(resp);
+        });
+        return responseList;
+    }
+
+    public PolicyDetailAdminReadResponse getPolicyforAdmin(int policyId, String userLoginId) {
+        if(!userLoginId.equals("admin")){
+            throw new AuthenticationException("해당 유저는 권한이 없습니다.");
+        }
+        Policy policy = policyRepository.findByPolicyId(policyId)
+                .orElseThrow(() -> new DataNotFoundException("해당 정책이 존재하지 않습니다."));
+
+        PolicyDetailAdminReadResponse resp = PolicyDetailAdminReadResponse.builder()
+                .code(policy.getCode())
+                .area(policy.getArea())
+                .name(Optional.ofNullable(policy.getName()).orElse(""))
+                .intro(Optional.ofNullable(policy.getIntro()).orElse(""))
+                .supportContent(policy.getSupportContent())
+                .supportScale(Optional.ofNullable(policy.getSupportScale()).orElse(""))
+                .field(policy.getField())
+                .businessPeriod(policy.getBusinessPeriod())
+                .periodTypeCode(policy.getPeriodTypeCode())
+                .startDate(policy.getStartDate())
+                .endDate(policy.getEndDate())
+                .specializedField(policy.getSpecializedField())
+                .residenceIncome(policy.getResidenceIncome())
+                .additionalClues(policy.getAdditionalClues())
+                .entryLimit(policy.getEntryLimit())
+                .applicationProcedure(policy.getApplicationProcedure())
+                .requiredDocuments(policy.getRequiredDocuments())
+                .evaluationContent(policy.getEvaluationContent())
+                .siteAddress(policy.getSiteAddress())
+                .mainOrganization(policy.getMainOrganization())
+                .mainContact(policy.getMainContact())
+                .operationOrganization(policy.getOperationOrganization())
+                .operationOrganizationContact(policy.getOperationOrganizationContact())
+                .applicationPeriod(policy.getApplicationPeriod())
+                .ageInfo(Optional.ofNullable(policy.getAgeInfo()).orElse(""))
+                .educationRequirements(Optional.ofNullable(policy.getEducationRequirements()).orElse(""))
+                .majorRequirements(Optional.ofNullable(policy.getMajorRequirements()).orElse(""))
+                .employmentStatus(Optional.ofNullable(policy.getEmploymentStatus()).orElse(""))
+                .etc(Optional.ofNullable(policy.getEtc()).orElse(""))
+                .isProcessed(policy.isProcessed())
+                .build();
+
+        return resp;
+    }
 }

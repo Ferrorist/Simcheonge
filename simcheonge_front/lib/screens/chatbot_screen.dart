@@ -19,7 +19,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   void initState() {
     super.initState();
     _messages.insert(0, {
-      'text': '안녕하세요!\n채팅 AI 심청이 입니다.\n원하시는 서비스의 키워드를\n입력해보세요!',
+      'text': '안녕하세요.\n정책 검색 AI 심청이 입니다.\n원하시는 서비스의 내용을\n입력해보세요!',
       'sender': 'bot'
     });
   }

@@ -15,9 +15,35 @@ import 'package:simcheonge_front/screens/news_screen.dart';
 import 'package:simcheonge_front/screens/search_screen.dart';
 import 'package:simcheonge_front/widgets/side_app_bar.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:simcheonge_front/providers/economicWordProvider.dart';
+import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter/services.dart';
 
-void main() {
-  runApp(const MyApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.remove('filters');
+  await prefs.remove('selectedFilters');
+  await prefs.remove('startDate');
+  await prefs.remove('endDate');
+  await clearFilters(); // 필터 정보 초기화
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => EconomicWordProvider()),
+      ],
+      child: const MyApp(),
+    ),
+  );
+}
+
+Future<void> clearFilters() async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  await prefs.remove('filters');
+  await prefs.remove('startDate');
+  await prefs.remove('endDate');
+  // 기타 초기화가 필요한 항목들도 이곳에 추가
 }
 
 Future<bool> checkLoginStatus() async {
@@ -108,45 +134,57 @@ class _MyHomePageState extends State<MyHomePage> {
   // 페이지 변경 함수 수정
   void changePage(int index, {bool isSideBar = false}) {
     setState(() {
-      // 사이드바에서 호출되면 _selectedIndex를 업데이트하고, 바텀 네비게이션 항목이 아니면 -1로 설정
       _selectedIndex =
           isSideBar && (index < 0 || index > bottomNavItems.length - 1)
               ? -1
               : index;
+      print('Current index is now: $_selectedIndex');
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        final now = DateTime.now();
-        if (_scaffoldKey.currentState!.isEndDrawerOpen) {
-          // endDrawer가 열려 있다면 닫습니다.
-          Navigator.of(context).pop();
-          return false; // 이벤트를 더 이상 전파하지 않음
-        } else if (_selectedIndex != 0) {
-          setState(() {
-            _selectedIndex = 0;
-          });
-          return false; // 홈 화면으로 돌아갑니다.
-        } else if (lastPressed == null ||
-            now.difference(lastPressed!) > const Duration(seconds: 2)) {
-          lastPressed = now;
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('한 번 더 누르면 앱이 종료됩니다'),
-              duration: Duration(seconds: 2),
-            ),
-          );
-          return false; // 시스템 레벨의 뒤로가기 동작 방지
+    return PopScope(
+      canPop: false, // 기본적으로 시스템 백 제스처 비활성화
+      onPopInvoked: (didPop) async {
+        if (!didPop) {
+          // 시스템 백 제스처가 발생했으나 팝되지 않은 경우
+          if (_selectedIndex != 0) {
+            setState(() {
+              _selectedIndex = 0; // 인덱스를 0으로 설정
+            });
+          } else {
+            // 앱 종료 로직 처리
+            final currentTime = DateTime.now();
+            final backButtonHasNotBeenPressedOrSnackbarHasBeenClosed =
+                lastPressed == null ||
+                    currentTime.difference(lastPressed!) >
+                        const Duration(seconds: 2);
+
+            if (backButtonHasNotBeenPressedOrSnackbarHasBeenClosed) {
+              lastPressed = currentTime;
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('한 번 더 누르면 앱이 종료됩니다.'),
+                  duration: Duration(seconds: 2),
+                ),
+              );
+            } else {
+              // 사용자가 2초 이내에 뒤로 가기 버튼을 다시 누른 경우, 앱 종료
+              SystemNavigator.pop();
+            }
+          }
         }
-        return true; // 시스템 레벨의 뒤로가기 동작을 허용 (앱 종료)
       },
       child: Scaffold(
         key: _scaffoldKey,
         appBar: AppBar(
-          title: Text(getAppBarTitle()),
+          scrolledUnderElevation: 0,
+          backgroundColor: Colors.white,
+          title: Text(
+            getAppBarTitle(),
+            style: GoogleFonts.dongle(fontSize: 38),
+          ),
           centerTitle: true,
           elevation: 0.0,
           actions: <Widget>[
@@ -216,7 +254,7 @@ class _MyHomePageState extends State<MyHomePage> {
           iconSize: 32.0,
           onTap: (index) {
             setState(() {
-              _selectedIndex = index;
+              changePage(index);
             });
           },
           items: bottomNavItems
