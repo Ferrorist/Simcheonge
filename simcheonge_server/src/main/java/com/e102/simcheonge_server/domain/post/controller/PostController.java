@@ -55,7 +55,7 @@ public class PostController {
 
     // 게시글 조회
     @GetMapping
-    public ResponseEntity<?> getPosts(@RequestParam(value = "category_code", required = true) String categoryCode, @RequestParam(value = "category_number", required = true) Integer categoryNumber, @RequestParam(value = "keyword", required = false) String keyword) {
+    public ResponseEntity<?> getPosts(@RequestParam(value = "categoryCode", required = true) String categoryCode, @RequestParam(value = "categoryNumber", required = true) Integer categoryNumber, @RequestParam(value = "keyword", required = false) String keyword) {
         List<PostResponse> postResponses = postService.findPostsByCategoryCodeAndNumberWithKeyword(categoryCode, categoryNumber, keyword);
 
         Map<String, Object> response = new LinkedHashMap<>();
@@ -118,8 +118,8 @@ public class PostController {
     // 내가 쓴 게시글 조회
     @GetMapping("/my")
     public ResponseEntity<?> getMyPosts(
-            @RequestParam("category_code") String categoryCode,
-            @RequestParam("category_number") Integer categoryNumber,
+            @RequestParam("categoryCode") String categoryCode,
+            @RequestParam("categoryNumber") Integer categoryNumber,
             @AuthenticationPrincipal UserDetails userDetails) {
 
         // UserDetails에서 유저 아이디 추출
