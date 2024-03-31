@@ -24,12 +24,12 @@ public class NewsController {
 //    }
 
 
-    @GetMapping("/crawling")
+    @GetMapping
     public ResponseEntity<?> crawlingNewsList(){
         return ResponseUtil.buildBasicResponse(HttpStatus.OK, newsCrawlerService.getNewsList());
     }
 
-    @GetMapping("/crawling/detail")
+    @GetMapping("/detail")
     public ResponseEntity<?> crawlingNewsDetail(@RequestParam("url") String newsUrl){
         // URL 처리 로직
         return ResponseUtil.buildBasicResponse(HttpStatus.OK, newsCrawlerService.getNewsDetail(newsUrl));
