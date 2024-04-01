@@ -77,8 +77,8 @@ public class NewsCrawlerService {
             try {
                 Document newsDoc = Jsoup.connect(newsLink).get();
 
-                PrintWriter out3 = new PrintWriter(new OutputStreamWriter(new FileOutputStream("result.html"), "UTF-8"));
-                out3.println(newsDoc.toString()); // doc의 HTML 내용을 파일에 쓴다.
+//                PrintWriter out3 = new PrintWriter(new OutputStreamWriter(new FileOutputStream("result.html"), "UTF-8"));
+//                out3.println(newsDoc.toString()); // doc의 HTML 내용을 파일에 쓴다.
 
                 String title = newsDoc.select("#title_area > span").text();
                 String time = newsDoc.select("div.media_end_head_info_datestamp > div > span").text();
@@ -154,7 +154,6 @@ public class NewsCrawlerService {
         HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
 
         String responseBody = response.body();
-        System.out.println(responseBody);
 
         // JSON 문자열 파싱
         ObjectMapper objectMapper = new ObjectMapper();
@@ -167,7 +166,6 @@ public class NewsCrawlerService {
                 JsonNode messageNode = firstChoice.path("message");
                 String content = messageNode.path("content").asText();
 
-                System.out.println(content); // 생성된 텍스트 응답 출력
                 return content; // 생성된 텍스트 응답 반환
             }
 
