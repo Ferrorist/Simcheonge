@@ -27,7 +27,7 @@
 
 ### 개발환경
 
-![개발환경](https://github.com/object1997428/GAWM/assets/71408968/e2fdb7ab-0d78-4be2-bdb2-589ebc31c4c0)
+![image](/uploads/d2d8e1651483e369fc058c4d985283d5/image.png)
 
 ## Service Architecture
 ![architecture.drawio](/uploads/063090b5ba839e26fdb7634f3083dfbc/architecture.drawio.png)
