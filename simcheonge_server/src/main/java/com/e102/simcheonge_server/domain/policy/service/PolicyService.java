@@ -49,6 +49,26 @@ public class PolicyService {
         else if (policy.getPeriodTypeCode().equals("002005")) policy_period_type_code = "미정";
         else if (policy.getPeriodTypeCode().equals("002004")) policy_period_type_code = "특정 기간";
 
+        String policy_area=policy.getArea();
+        if(policy_area.startsWith("3001")) policy_area="중앙부처";
+        else if(policy_area.startsWith("3002001")) policy_area="서울";
+        else if(policy_area.startsWith("3002002")) policy_area="부산";
+        else if(policy_area.startsWith("3002003")) policy_area="대구";
+        else if(policy_area.startsWith("3002004")) policy_area="인천";
+        else if(policy_area.startsWith("3002005")) policy_area="광주";
+        else if(policy_area.startsWith("3002006")) policy_area="대전";
+        else if(policy_area.startsWith("3002007")) policy_area="울산";
+        else if(policy_area.startsWith("3002008")) policy_area="경기";
+        else if(policy_area.startsWith("3002009")) policy_area="강원";
+        else if(policy_area.startsWith("3002010")) policy_area="충북";
+        else if(policy_area.startsWith("3002011")) policy_area="충남";
+        else if(policy_area.startsWith("3002012")) policy_area="전북";
+        else if(policy_area.startsWith("3002013")) policy_area="전남";
+        else if(policy_area.startsWith("3002014")) policy_area="경북";
+        else if(policy_area.startsWith("3002015")) policy_area="경남";
+        else if(policy_area.startsWith("3002016")) policy_area="제주";
+        else if(policy_area.startsWith("3002017")) policy_area="세종";
+
         PolicyDetailResponse thumbnailResponse = PolicyDetailResponse.builder()
                 .policy_name(Optional.ofNullable(policy.getName()).orElse(""))
                 .policy_intro(Optional.ofNullable(policy.getIntro()).orElse(""))
@@ -58,7 +78,7 @@ public class PolicyService {
                 .policy_end_date(Optional.ofNullable(policy.getEndDate()).map(Object::toString).orElse(""))
                 .policy_main_organization(Optional.ofNullable(policy.getMainOrganization()).orElse(""))
                 .policy_operation_organization(Optional.ofNullable(policy.getOperationOrganization()).orElse(""))
-                .policy_area(Optional.ofNullable(policy.getArea()).orElse(""))
+                .policy_area(policy_area)
                 .policy_age_info(Optional.ofNullable(policy.getAgeInfo()).orElse(""))
                 .policy_education_requirements(Optional.ofNullable(policy.getEducationRequirements()).orElse(""))
                 .policy_major_requirements(Optional.ofNullable(policy.getMajorRequirements()).orElse(""))

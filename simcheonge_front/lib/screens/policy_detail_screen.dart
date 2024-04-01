@@ -27,7 +27,6 @@ class PolicyDetailScreen extends StatelessWidget {
             // 에러가 발생한 경우
             if (snapshot.hasError) {
               // 에러 로그 출력
-              print('PolicyDetailScreen Error: ${snapshot.error}');
               return const Center(child: Text('정책 정보를 불러오는데 실패했습니다.'));
             }
 
@@ -35,8 +34,6 @@ class PolicyDetailScreen extends StatelessWidget {
             if (snapshot.hasData) {
               final policy = snapshot.data!;
               // 데이터 로그 출력
-              print('여기여기여기여기 ');
-              print('PolicyDetailScreen Data: ${policy.policyName}');
               return SingleChildScrollView(
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
@@ -52,7 +49,7 @@ class PolicyDetailScreen extends StatelessWidget {
                       const SizedBox(height: 16),
                       buildSection('지원 규모', policy.policySupportScale),
                       buildSection('지원 기간',
-                          '${policy.policyStartDate} ~ ${policy.policyEndDate}'),
+                          '${policy.policyStartDate} - ${policy.policyEndDate}'),
                       buildSection('주관 기관', policy.policyMainOrganization),
                       buildSection('운영 기관', policy.policyOperationOrganization),
                       buildSection('지원 지역', policy.policyArea),
@@ -80,6 +77,12 @@ class PolicyDetailScreen extends StatelessWidget {
   }
 
   Widget buildSection(String title, String content) {
+    // 내용이 비어있는 경우 빈 컨테이너 반환
+    if (content.isEmpty) {
+      return Container();
+    }
+
+    // 내용이 있는 경우 섹션 구성
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
       child: Column(
