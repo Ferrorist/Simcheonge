@@ -1,37 +1,43 @@
-class PostEditScreen extends StatefulWidget {
-  final Post post;
+import 'package:flutter/material.dart';
 
-  const PostEditScreen({Key? key, required this.post}) : super(key: key);
+class PostEditScreen extends StatefulWidget {
+  final Map<String, dynamic> post;
+
+  const PostEditScreen({super.key, required this.post});
 
   @override
   _PostEditScreenState createState() => _PostEditScreenState();
 }
 
 class _PostEditScreenState extends State<PostEditScreen> {
-  final _formKey = GlobalKey<FormState>();
-  late TextEditingController _titleController;
-  late TextEditingController _contentController;
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  late TextEditingController _postNameController;
+  late TextEditingController _postContentController;
+  String? _selectedCategoryName;
+  final List<Map<String, dynamic>> _categoryOptions = [
+    {'name': '정책 추천', 'number': 2},
+    {'name': '공모전', 'number': 3},
+    {'name': '생활 꿀팁', 'number': 4},
+    {'name': '기타', 'number': 5},
+  ];
 
   @override
   void initState() {
     super.initState();
-    // 초기화 시점에 수정할 게시글의 데이터로 컨트롤러를 설정
-    _titleController = TextEditingController(text: widget.post.title);
-    _contentController = TextEditingController(text: widget.post.content);
-  }
-
-  @override
-  void dispose() {
-    _titleController.dispose();
-    _contentController.dispose();
-    super.dispose();
+    _postNameController = TextEditingController(text: widget.post['postName']);
+    _postContentController =
+        TextEditingController(text: widget.post['postContent']);
+    _selectedCategoryName = _categoryOptions.firstWhere(
+      (option) => option['number'] == widget.post['categoryNumber'],
+      orElse: () => _categoryOptions[0],
+    )['name'];
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('글 수정'),
+        title: const Text('게시글 수정'),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -39,28 +45,61 @@ class _PostEditScreenState extends State<PostEditScreen> {
           child: Form(
             key: _formKey,
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                TextFormField(
-                  controller: _titleController,
-                  decoration: const InputDecoration(labelText: '제목'),
+                DropdownButtonFormField<String>(
+                  value: _selectedCategoryName,
+                  hint: const Text('게시판 선택'),
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      _selectedCategoryName = newValue;
+                    });
+                  },
+                  items: _categoryOptions.map<DropdownMenuItem<String>>(
+                      (Map<String, dynamic> option) {
+                    return DropdownMenuItem<String>(
+                      value: option['name'],
+                      child: Text(option['name']),
+                    );
+                  }).toList(),
                 ),
-                SizedBox(height: 16),
-                TextFormField(
-                  controller: _contentController,
-                  decoration: const InputDecoration(labelText: '내용'),
+                // 여기에 다른 필드 (예: _postNameController, _postContentController)를 위한 TextField 위젯 추가
+                const SizedBox(height: 24), // Add some spacing
+
+                TextField(
+                  controller: _postNameController,
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: '게시글 제목',
+                  ),
+                ),
+                const SizedBox(height: 16), // Add some spacing
+                TextField(
+                  controller: _postContentController,
                   maxLines: null,
-                  keyboardType: TextInputType.multiline,
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: '게시글 내용',
+                  ),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 16),
+
                 ElevatedButton(
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
-                      // 수정 로직을 여기에 구현
-                      // 예: 수정된 데이터를 서버에 업로드
-                      Navigator.pop(context);
+                      // 폼이 유효할 경우, 수정된 데이터를 서버에 전송
+                      final updatedPost = {
+                        'postName': _postNameController.text,
+                        'postContent': _postContentController.text,
+                        'categoryNumber': _categoryOptions.firstWhere(
+                          (option) => option['name'] == _selectedCategoryName,
+                          orElse: () => _categoryOptions[0],
+                        )['number'],
+                      };
+                      Navigator.pop(context, updatedPost);
                     }
                   },
-                  child: const Text('수정하기'),
+                  child: const Text('수정 완료'),
                 ),
               ],
             ),
