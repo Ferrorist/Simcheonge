@@ -27,7 +27,7 @@
 
 ### 개발환경
 
-![image](/uploads/d2d8e1651483e369fc058c4d985283d5/image.png)
+![image](/uploads/b14e21c938de253249dbac02a0785dc1/image.png)
 
 ## Service Architecture
 ![architecture.drawio](/uploads/063090b5ba839e26fdb7634f3083dfbc/architecture.drawio.png)
