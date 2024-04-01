@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:simcheonge_front/services/bookmark_service.dart';
-import 'package:simcheonge_front/widgets/bookmark_detail.dart';
+import 'package:simcheonge_front/screens/post_detail_screen.dart';
+import 'package:simcheonge_front/services/post_service.dart';
+import 'package:simcheonge_front/widgets/my_post_detail.dart';
+import 'package:intl/intl.dart';
 
 class MyPostScreen extends StatefulWidget {
   const MyPostScreen({super.key});
@@ -11,35 +13,35 @@ class MyPostScreen extends StatefulWidget {
 }
 
 class _MyPostScreenState extends State<MyPostScreen> {
-  List<Bookmark> allItems = []; // Bookmark 객체의 리스트
-  List<Bookmark> displayedItems = [];
+  List<MyPost> allItems = []; // MyPost 객체의 리스트
+  List<MyPost> displayedItems = [];
   final TextEditingController _controller = TextEditingController();
-  final BookmarkService _bookmarkService = BookmarkService();
 
   @override
   void initState() {
     super.initState();
-
-    _checkLoginStatus().then((isLoggedIn) {
-      if (isLoggedIn) {
-        _bookmarkService.getBookmarks('POS').then((bookmarks) {
-          setState(() {
-            allItems = bookmarks;
-            displayedItems = allItems;
-          });
-        });
-      }
-    });
+    _loadMyPosts();
 
     _controller.addListener(() {
       updateSearchQuery(_controller.text);
     });
   }
 
-  Future<bool> _checkLoginStatus() async {
+  Future<void> _loadMyPosts() async {
     final prefs = await SharedPreferences.getInstance();
     final accessToken = prefs.getString('accessToken');
-    return accessToken != null;
+    if (accessToken != null) {
+      try {
+        final posts = await PostService.getMyPosts('POS', 1);
+        setState(() {
+          allItems = posts;
+          displayedItems = allItems;
+        });
+      } catch (e) {
+        // 에러 처리
+        print('Error fetching posts: $e');
+      }
+    }
   }
 
   @override
@@ -50,17 +52,15 @@ class _MyPostScreenState extends State<MyPostScreen> {
 
   void updateSearchQuery(String newQuery) {
     if (mounted) {
-      setState(
-        () {
-          displayedItems = newQuery.isNotEmpty
-              ? allItems
-                  .where((bookmark) => bookmark.bookmarkType
-                      .toLowerCase()
-                      .contains(newQuery.toLowerCase()))
-                  .toList()
-              : allItems;
-        },
-      );
+      setState(() {
+        displayedItems = newQuery.isNotEmpty
+            ? allItems
+                .where((post) => post.postName
+                    .toLowerCase()
+                    .contains(newQuery.toLowerCase()))
+                .toList()
+            : allItems;
+      });
     }
   }
 
@@ -68,30 +68,20 @@ class _MyPostScreenState extends State<MyPostScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: TextField(
-            controller: _controller,
-            decoration: InputDecoration(
-              hintText: '검색...',
-              border: InputBorder.none,
-              prefixIcon: const Icon(Icons.search),
-              suffixIcon: _controller.text.isNotEmpty
-                  ? IconButton(
-                      icon: const Icon(Icons.clear),
-                      onPressed: () {
-                        _controller.clear();
-                        // 여기서 updateSearchQuery를 명시적으로 호출할 필요가 없습니다.
-                        // 왜냐하면 _controller.clear()가 리스너를 통해 이미 updateSearchQuery를 호출하기 때문입니다.
-                      },
-                    )
-                  : null,
-            ),
+        title: TextField(
+          controller: _controller,
+          decoration: InputDecoration(
+            hintText: '검색...',
+            border: InputBorder.none,
+            prefixIcon: const Icon(Icons.search),
+            suffixIcon: _controller.text.isNotEmpty
+                ? IconButton(
+                    icon: const Icon(Icons.clear),
+                    onPressed: () {
+                      _controller.clear();
+                    },
+                  )
+                : null,
           ),
         ),
       ),
@@ -100,16 +90,16 @@ class _MyPostScreenState extends State<MyPostScreen> {
         itemBuilder: (context, index) {
           final item = displayedItems[index];
           return ListTile(
-            title: Text(item.bookmarkType),
-            trailing: IconButton(
-              icon: const Icon(Icons.bookmark),
-              onPressed: () {
-                setState(() {
-                  allItems.removeWhere((item) => item == displayedItems[index]);
-                  displayedItems.removeAt(index);
-                });
-              },
-            ),
+            title: Text(item.postName),
+            subtitle: Text(DateFormat('yyyy-MM-dd').format(item.createdAt)),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) =>
+                        PostDetailScreen(postId: item.postId)),
+              );
+            },
           );
         },
       ),
