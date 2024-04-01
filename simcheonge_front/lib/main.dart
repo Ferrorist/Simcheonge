@@ -148,7 +148,6 @@ class _MyHomePageState extends State<MyHomePage> {
       canPop: false, // 기본적으로 시스템 백 제스처 비활성화
       onPopInvoked: (didPop) async {
         if (!didPop) {
-          // 시스템 백 제스처가 발생했으나 팝되지 않은 경우
           if (_selectedIndex != 0) {
             setState(() {
               _selectedIndex = 0; // 인덱스를 0으로 설정
@@ -159,14 +158,14 @@ class _MyHomePageState extends State<MyHomePage> {
             final backButtonHasNotBeenPressedOrSnackbarHasBeenClosed =
                 lastPressed == null ||
                     currentTime.difference(lastPressed!) >
-                        const Duration(seconds: 2);
+                        const Duration(seconds: 1);
 
             if (backButtonHasNotBeenPressedOrSnackbarHasBeenClosed) {
               lastPressed = currentTime;
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text('한 번 더 누르면 앱이 종료됩니다.'),
-                  duration: Duration(seconds: 2),
+                  duration: Duration(seconds: 1),
                 ),
               );
             } else {
@@ -183,7 +182,9 @@ class _MyHomePageState extends State<MyHomePage> {
           backgroundColor: Colors.white,
           title: Text(
             getAppBarTitle(),
-            style: GoogleFonts.dongle(fontSize: 38),
+            style: GoogleFonts.orbit(
+              fontSize: 25,
+            ),
           ),
           centerTitle: true,
           elevation: 0.0,
