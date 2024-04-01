@@ -31,8 +31,9 @@ class ChatbotAPI {
     );
 
     if (response.statusCode == 200) {
-      // 응답이 성공적일 때
-      return ChatbotModel.fromJson(jsonDecode(response.body));
+      // 응답이 성공적일 때, UTF-8로 디코딩합니다.
+      final decodedBody = utf8.decode(response.bodyBytes);
+      return ChatbotModel.fromJson(jsonDecode(decodedBody));
     } else {
       // 에러 처리
       print('Failed to load chatbot response: ${response.statusCode}');
