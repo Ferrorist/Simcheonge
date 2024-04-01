@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:simcheonge_front/services/bookmark_service.dart';
+import 'package:simcheonge_front/widgets/bookmark_detail.dart';
 
 class MyPostScreen extends StatefulWidget {
   const MyPostScreen({super.key});
@@ -8,19 +11,35 @@ class MyPostScreen extends StatefulWidget {
 }
 
 class _MyPostScreenState extends State<MyPostScreen> {
-  List<String> allItems = [];
-  List<String> displayedItems = [];
+  List<Bookmark> allItems = []; // Bookmark 객체의 리스트
+  List<Bookmark> displayedItems = [];
   final TextEditingController _controller = TextEditingController();
+  final BookmarkService _bookmarkService = BookmarkService();
 
   @override
   void initState() {
     super.initState();
-    // 페이지 새로 로드될 때 검색 상태를 초기화
-    displayedItems = allItems;
-    _controller.clear();
+
+    _checkLoginStatus().then((isLoggedIn) {
+      if (isLoggedIn) {
+        _bookmarkService.getBookmarks('POS').then((bookmarks) {
+          setState(() {
+            allItems = bookmarks;
+            displayedItems = allItems;
+          });
+        });
+      }
+    });
+
     _controller.addListener(() {
       updateSearchQuery(_controller.text);
     });
+  }
+
+  Future<bool> _checkLoginStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    final accessToken = prefs.getString('accessToken');
+    return accessToken != null;
   }
 
   @override
@@ -31,14 +50,17 @@ class _MyPostScreenState extends State<MyPostScreen> {
 
   void updateSearchQuery(String newQuery) {
     if (mounted) {
-      setState(() {
-        displayedItems = newQuery.isNotEmpty
-            ? allItems
-                .where((item) =>
-                    item.toLowerCase().contains(newQuery.toLowerCase()))
-                .toList()
-            : allItems;
-      });
+      setState(
+        () {
+          displayedItems = newQuery.isNotEmpty
+              ? allItems
+                  .where((bookmark) => bookmark.bookmarkType
+                      .toLowerCase()
+                      .contains(newQuery.toLowerCase()))
+                  .toList()
+              : allItems;
+        },
+      );
     }
   }
 
@@ -76,8 +98,9 @@ class _MyPostScreenState extends State<MyPostScreen> {
       body: ListView.builder(
         itemCount: displayedItems.length,
         itemBuilder: (context, index) {
+          final item = displayedItems[index];
           return ListTile(
-            title: Text(displayedItems[index]),
+            title: Text(item.bookmarkType),
             trailing: IconButton(
               icon: const Icon(Icons.bookmark),
               onPressed: () {
