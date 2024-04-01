@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:simcheonge_front/main.dart';
 import 'package:simcheonge_front/screens/login_screen.dart';
 
 Future<bool> isLoggedIn() async {
@@ -55,7 +56,7 @@ void logout(BuildContext context) async {
 
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
-              builder: (context) => const LoginScreen()), // 여기 수정 필요
+              builder: (context) => const MyHomePage()), // 여기 수정 필요
         );
       } else {
         try {

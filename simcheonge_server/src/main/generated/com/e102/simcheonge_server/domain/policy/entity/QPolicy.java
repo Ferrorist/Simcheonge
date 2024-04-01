@@ -23,6 +23,8 @@ public class QPolicy extends EntityPathBase<Policy> {
 
     public final StringPath ageInfo = createString("ageInfo");
 
+    public final StringPath applicationPeriod = createString("applicationPeriod");
+
     public final StringPath applicationProcedure = createString("applicationProcedure");
 
     public final StringPath area = createString("area");
