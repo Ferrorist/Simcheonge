@@ -147,21 +147,21 @@ class _FilterScreenState extends State<FilterScreen> {
   Widget buildDateSelectionContent() {
     if (dateSelection != DateSelection.selectPeriod ||
         startDate == null ||
-        endDate == null) {
+        endDate == null ||
+        !(periodSelections['기간 선택'] ?? false)) {
       return Container(); // 선택한 날짜 범위가 없으면 아무것도 표시하지 않음
     }
 
     final DateFormat formatter = DateFormat('yyyy-MM-dd');
     final String formattedStartDate = formatter.format(startDate!);
     final String formattedEndDate = formatter.format(endDate!);
-
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '선택 기간: $formattedStartDate - $formattedEndDate',
+            '선택 기간: $formattedStartDate ~ $formattedEndDate',
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
         ],
@@ -267,6 +267,7 @@ class _FilterScreenState extends State<FilterScreen> {
   }
 
   void _showDateRangePickerModal() {
+    DateSelection tempDateSelection = dateSelection;
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -328,10 +329,14 @@ class _FilterScreenState extends State<FilterScreen> {
                   child: const Text("취소"),
                   onPressed: () {
                     Navigator.of(context).pop();
-                    // 취소 버튼을 누르면 상시 선택으로 변경
-                    setState(() {
-                      dateSelection = DateSelection.always;
-                    });
+
+                    if (mounted) {
+                      setState(() {
+                        periodSelections = {};
+                        tempStartDate = null;
+                        tempEndDate = null;
+                      });
+                    }
                   },
                 ),
                 TextButton(
@@ -358,8 +363,15 @@ class _FilterScreenState extends State<FilterScreen> {
         );
       },
     ).then((_) {
-      // 모달이 닫힌 후 선택한 기간이 필터 스크린에 바로 표시되도록 setState 호출
-      setState(() {});
+      // Dialog가 닫히면 (확인 또는 밖을 눌러서)
+      // 사용자가 날짜를 선택하지 않고 닫았다면, 기간 선택이 취소된 것으로 간주하고 초기 상태로 복원합니다.
+      if (mounted) {
+        setState(() {
+          if (startDate == null || endDate == null) {
+            dateSelection = tempDateSelection; // 사용자가 날짜를 선택하지 않았다면 원래의 상태로 복원
+          }
+        });
+      }
     });
   }
 
@@ -417,19 +429,25 @@ class _FilterScreenState extends State<FilterScreen> {
     final prefs = await SharedPreferences.getInstance();
     List<Map<String, dynamic>> filtersList = [];
     bool isAPCSelectedForPeriod = false;
+
     void addToFiltersList(Map<String, bool> selections, String tag) {
       final categoryList = fullCategoryLists[tag] ?? [];
       for (var category in categoryList) {
         if (selections[category.name] == true) {
-          filtersList.add({"code": tag, "number": category.code});
-          if (tag == "APC" && category.code == 3) {
-            isAPCSelectedForPeriod = true; // APC가 3인 경우 true로 설정
+          // 여기에 name도 추가
+          filtersList.add({
+            "code": tag,
+            "number": category.code,
+            "name": category.name, // 이름을 추가
+          });
+          if (tag == "APC" && category.code == "3") {
+            isAPCSelectedForPeriod = true;
           }
         }
       }
     }
 
-    // 각 선택 항목에 대해 addToFiltersList 함수를 호출하여 filtersList를 구성합니다.
+    // 각 선택 항목에 대해 addToFiltersList 함수를 호출
     addToFiltersList(regionSelections, "RGO");
     addToFiltersList(educationSelections, "ADM");
     addToFiltersList(employmentStatusSelections, "EPM");
@@ -437,20 +455,14 @@ class _FilterScreenState extends State<FilterScreen> {
     addToFiltersList(interestSelections, "PFD");
     addToFiltersList(periodSelections, "APC");
 
+    // APC가 3으로 선택되었고, startDate와 endDate가 유효한 경우에만 추가
+    if (isAPCSelectedForPeriod && startDate != null && endDate != null) {
+      prefs.setString('startDate', DateFormat("yyyy-MM-dd").format(startDate!));
+      prefs.setString('endDate', DateFormat("yyyy-MM-dd").format(endDate!));
+    }
+
     // 필터 목록을 SharedPreferences에 저장합니다.
     await prefs.setString('filters', jsonEncode(filtersList));
-
-    // startDate와 endDate를 SharedPreferences에 저장합니다.
-    if (isAPCSelectedForPeriod && startDate != null && endDate != null) {
-      await prefs.setString(
-          'startDate', DateFormat("yyyy-MM-dd").format(startDate!));
-      await prefs.setString(
-          'endDate', DateFormat("yyyy-MM-dd").format(endDate!));
-    } else {
-      // 조건에 맞지 않는 경우 날짜 정보 삭제
-      prefs.remove('startDate');
-      prefs.remove('endDate');
-    }
 
     // 선택된 필터들을 저장합니다. 각 선택된 항목을 CategoryList 객체의 리스트로 변환하여 저장합니다.
     List<CategoryList> selectedFilters = [];

@@ -17,6 +17,8 @@ import 'package:simcheonge_front/widgets/side_app_bar.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:simcheonge_front/providers/economicWordProvider.dart';
 import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter/services.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -136,47 +138,53 @@ class _MyHomePageState extends State<MyHomePage> {
           isSideBar && (index < 0 || index > bottomNavItems.length - 1)
               ? -1
               : index;
-      // 디버그 콘솔에 현재 인덱스 출력
       print('Current index is now: $_selectedIndex');
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        if (_selectedIndex != 0) {
-          // 인덱스가 0이 아닌 경우, 인덱스를 0으로 변경
-          setState(() {
-            _selectedIndex = 0;
-          });
-          return Future.value(false); // 이벤트 소비, 시스템에 의한 뒤로 가기 처리 방지
-        } else {
-          // 인덱스가 0인 경우, 두 번 눌러 앱 종료 처리
-          final currentTime = DateTime.now();
-          final bool backButtonHasNotBeenPressedOrSnackbarHasBeenClosed =
-              lastPressed == null ||
-                  currentTime.difference(lastPressed!) >
-                      const Duration(seconds: 2);
+    return PopScope(
+      canPop: false, // 기본적으로 시스템 백 제스처 비활성화
+      onPopInvoked: (didPop) async {
+        if (!didPop) {
+          // 시스템 백 제스처가 발생했으나 팝되지 않은 경우
+          if (_selectedIndex != 0) {
+            setState(() {
+              _selectedIndex = 0; // 인덱스를 0으로 설정
+            });
+          } else {
+            // 앱 종료 로직 처리
+            final currentTime = DateTime.now();
+            final backButtonHasNotBeenPressedOrSnackbarHasBeenClosed =
+                lastPressed == null ||
+                    currentTime.difference(lastPressed!) >
+                        const Duration(seconds: 2);
 
-          if (backButtonHasNotBeenPressedOrSnackbarHasBeenClosed) {
-            lastPressed = currentTime;
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('한 번 더 누르면 앱이 종료됩니다.'),
-                duration: Duration(seconds: 2),
-              ),
-            );
-            return Future.value(false); // 이벤트 소비
+            if (backButtonHasNotBeenPressedOrSnackbarHasBeenClosed) {
+              lastPressed = currentTime;
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('한 번 더 누르면 앱이 종료됩니다.'),
+                  duration: Duration(seconds: 2),
+                ),
+              );
+            } else {
+              // 사용자가 2초 이내에 뒤로 가기 버튼을 다시 누른 경우, 앱 종료
+              SystemNavigator.pop();
+            }
           }
-
-          return Future.value(true); // 시스템이 뒤로 가기 이벤트를 처리하도록 허용 (앱 종료)
         }
       },
       child: Scaffold(
         key: _scaffoldKey,
         appBar: AppBar(
-          title: Text(getAppBarTitle()),
+          scrolledUnderElevation: 0,
+          backgroundColor: Colors.white,
+          title: Text(
+            getAppBarTitle(),
+            style: GoogleFonts.dongle(fontSize: 38),
+          ),
           centerTitle: true,
           elevation: 0.0,
           actions: <Widget>[
