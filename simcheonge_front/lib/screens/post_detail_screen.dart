@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:simcheonge_front/screens/post_edit_screen.dart';
 import 'package:simcheonge_front/services/post_service.dart';
 import 'package:simcheonge_front/widgets/bookmark_widget.dart'; // 서비스 경로는 예시로 사용
 
@@ -46,17 +47,73 @@ class PostDetailScreen extends StatelessWidget {
                         IconButton(
                           icon: const Icon(Icons.bookmark_border),
                           onPressed: () {
-                            // BookmarkWidget(
-                            //   bookmarkType: 'POS', // 'POS' 타입으로 북마크 위젯 설정
-                            //   postId: postId, // 현재 게시물 ID 전달
-                            // );
+                            print(postId);
+                            BookmarkWidget(
+                              bookmarkType: 'POS', // 'POS' 타입으로 북마크 위젯 설정
+                              postId: postId, // 현재 게시물 ID 전달
+                            );
                             // 북마크 로직 구현
                           },
                         ),
+                        // if (isOwner)
                         IconButton(
                           icon: const Icon(Icons.edit),
-                          onPressed: () {
-                            // 게시글 수정 로직 구현
+                          onPressed: () async {
+                            final updatedPost =
+                                await Navigator.push<Map<String, dynamic>>(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    PostEditScreen(post: post),
+                              ),
+                            );
+
+                            if (updatedPost != null) {
+                              await PostService.updatePost(postId, updatedPost);
+                              // 게시글 수정 후 새로고침 등의 로직이 필요한 경우 여기에 구현
+                            }
+                          },
+                        ),
+                        // if (isOwner)
+                        IconButton(
+                          icon: const Icon(Icons.delete),
+                          onPressed: () async {
+                            final bool confirm = await showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: const Text("게시글 삭제"),
+                                  content: const Text("정말로 게시글을 삭제하시겠습니까?"),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.of(context).pop(false),
+                                      child: const Text("취소"),
+                                    ),
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.of(context).pop(true),
+                                      child: const Text("삭제"),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+
+                            if (confirm) {
+                              final bool deleted =
+                                  await PostService.deletePost(post['postId']);
+                              if (deleted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                        content: Text('게시글이 삭제되었습니다.')));
+                                Navigator.of(context).pop(); // 게시글 목록 화면으로 돌아가기
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                        content: Text('작성한 게시글만 삭제할 수 있습니다.')));
+                              }
+                            }
                           },
                         ),
                       ],
