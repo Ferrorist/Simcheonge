@@ -30,9 +30,8 @@
 ![개발환경](https://github.com/object1997428/GAWM/assets/71408968/e2fdb7ab-0d78-4be2-bdb2-589ebc31c4c0)
 
 ## Service Architecture
+![architecture.drawio](/uploads/063090b5ba839e26fdb7634f3083dfbc/architecture.drawio.png)
 
-
-![아키텍쳐 구조도](https://github.com/object1997428/GAWM/assets/71408968/2796d0bc-38cc-435f-b745-1511f3eb2e88)
 
 ## **💬 ERD**
 
