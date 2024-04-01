@@ -6,6 +6,8 @@ class PostService {
   static const String _baseUrl = 'https://j10e102.p.ssafy.io/api/posts';
 
   static Future<Map<String, dynamic>> fetchPostDetail(int postId) async {
+    print('Fetching post detail for postId: $postId');
+
     final url = Uri.parse('$_baseUrl/$postId');
     final prefs = await SharedPreferences.getInstance();
 
@@ -22,12 +24,15 @@ class PostService {
     if (response.statusCode == 200) {
       final responseBody = utf8.decode(response.bodyBytes); // UTF-8로 디코딩
       final decodedJson = json.decode(responseBody);
+      print('Post detail fetched successfully');
       print(decodedJson['data']);
       return decodedJson['data'];
     } else if (response.statusCode == 401 || response.statusCode == 403) {
       throw Exception('로그인이 필요 합니다.');
     } else {
       print(response.statusCode);
+      print('Failed to fetch post detail');
+
       throw Exception('게시글을 불러오는 데 실패했습니다.');
     }
   }

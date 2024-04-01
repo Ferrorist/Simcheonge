@@ -35,6 +35,7 @@ class PolicyDetailScreen extends StatelessWidget {
             if (snapshot.hasData) {
               final policy = snapshot.data!;
               // 데이터 로그 출력
+              print('여기여기여기여기 ');
               print('PolicyDetailScreen Data: ${policy.policyName}');
               return SingleChildScrollView(
                 child: Padding(

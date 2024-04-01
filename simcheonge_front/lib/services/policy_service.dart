@@ -8,6 +8,7 @@ class PolicyService {
 
   static Future<PolicyDetail> fetchPolicyDetail(int policyId) async {
     final url = Uri.parse('$_baseUrl/$policyId');
+    print(policyId);
     final response = await http.get(url, headers: {
       "Content-Type": "application/json; charset=UTF-8",
     });
