@@ -79,9 +79,13 @@ public class PostService {
                     .orElseThrow(() -> new IllegalArgumentException("User not found"))
                     .getUserNickname();
 
-            String categoryName = categoryDetailRepository.findByCodeAndNumber(categoryCode, categoryNumber)
+            String categoryName = (categoryNumber != 1) ? categoryDetailRepository.findByCodeAndNumber(categoryCode, categoryNumber)
                     .map(CategoryDetail::getName)
-                    .orElse("기타");
+                    .orElse("기타") :
+                    postCategoryRepository.findByPostId(post.getPostId())
+                            .flatMap(pc -> categoryDetailRepository.findByCodeAndNumber(pc.getCategoryCode(), pc.getCategoryNumber()))
+                            .map(CategoryDetail::getName)
+                            .orElse("기타");
 
             return new PostResponse(
                     post.getPostId(),
@@ -185,9 +189,13 @@ public class PostService {
 
         // Post 엔티티 리스트를 MyPostResponse 리스트로 변환
         return posts.stream().map(post -> {
-            String categoryName = categoryDetailRepository.findByCodeAndNumber(categoryCode, categoryNumber)
+            String categoryName = (categoryNumber != 1) ? categoryDetailRepository.findByCodeAndNumber(categoryCode, categoryNumber)
                     .map(CategoryDetail::getName)
-                    .orElse("기타");
+                    .orElse("기타") :
+                    postCategoryRepository.findByPostId(post.getPostId())
+                            .flatMap(pc -> categoryDetailRepository.findByCodeAndNumber(pc.getCategoryCode(), pc.getCategoryNumber()))
+                            .map(CategoryDetail::getName)
+                            .orElse("기타");
 
             return new MyPostResponse(
                     post.getUserId(),
