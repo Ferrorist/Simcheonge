@@ -10,51 +10,70 @@ class ChatbotScreen extends StatefulWidget {
 
 class _ChatbotScreenState extends State<ChatbotScreen> {
   final TextEditingController _controller = TextEditingController();
-  final List<Map<String, String>> _messages = [];
+  final List<Map<String, dynamic>> _messages = [];
   final ScrollController _scrollController = ScrollController();
-  bool _isLoading = false; // 로딩 상태 관리
-  String? _errorMessage; // 에러 메시지 관리
 
   @override
   void initState() {
     super.initState();
     _messages.insert(0, {
       'text': '안녕하세요.\n정책 검색 AI 심청이 입니다.\n원하시는 서비스의 내용을\n입력해보세요!',
-      'sender': 'bot'
+      'sender': 'bot',
+      'loading': false,
     });
   }
 
   void _handleUserInput(String text) async {
     setState(() {
-      _isLoading = true; // 로딩 시작
-      _errorMessage = null; // 에러 메시지 초기화
+      _messages.insert(0, {
+        'text': text,
+        'sender': 'user',
+        'loading': false,
+      });
+      _messages.insert(0, {
+        'text': '답변을 생성 중입니다.',
+        'sender': 'bot',
+        'loading': true,
+      });
+      // 입력 필드를 비웁니다.
+      _controller.clear();
     });
+
+    // 스크롤을 최상단으로 이동시킵니다.
+    _scrollController.animateTo(
+      0.0,
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeOut,
+    );
 
     try {
       final chatbotResponse = await ChatbotAPI.postUserInput(text);
       if (chatbotResponse != null) {
         setState(() {
-          _messages.insert(0, {
+          _messages[0] = {
             'text': chatbotResponse.data?.result ?? '응답을 받아오지 못했습니다.',
-            'sender': 'bot'
-          });
+            'sender': 'bot',
+            'loading': false,
+          };
         });
       } else {
         setState(() {
-          _errorMessage = '인터넷 연결을 확인하세요.';
+          _messages[0] = {
+            'text': '인터넷 연결을 확인하세요.',
+            'sender': 'bot',
+            'loading': false,
+          };
         });
       }
     } catch (e) {
       setState(() {
-        _errorMessage = '에러가 발생했습니다: $e';
-      });
-    } finally {
-      setState(() {
-        _isLoading = false; // 로딩 종료
+        _messages[0] = {
+          'text': '에러가 발생했습니다: $e',
+          'sender': 'bot',
+          'loading': false,
+        };
       });
     }
-
-    _controller.clear(); // 입력 필드를 비웁니다.
   }
 
   @override
@@ -73,30 +92,14 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                 itemBuilder: (context, index) {
                   final message = _messages[index];
                   final bool isUserMessage = message['sender'] == 'user';
-                  final bool isFirstMessage = index == 0 ||
-                      _messages[index - 1]['sender'] != message['sender'];
-
-                  // 챗봇에서 오는 메시지인 경우에만 왼쪽 하단 모서리를 조절합니다.
+                  final bool isLoadingMessage = message['loading'] ?? false;
                   final BorderRadius messageBorderRadius = isUserMessage
-                      ? BorderRadius.only(
-                          topLeft: isFirstMessage
-                              ? const Radius.circular(20.0)
-                              : const Radius.circular(4.0),
-                          topRight: isFirstMessage
-                              ? const Radius.circular(20.0)
-                              : const Radius.circular(4.0),
-                          bottomLeft: const Radius.circular(20.0),
-                          bottomRight: const Radius.circular(20.0),
-                        )
-                      : BorderRadius.only(
-                          topLeft: isFirstMessage
-                              ? const Radius.circular(20.0)
-                              : const Radius.circular(4.0),
-                          topRight: isFirstMessage
-                              ? const Radius.circular(20.0)
-                              : const Radius.circular(4.0),
-                          bottomLeft: const Radius.circular(4.0),
-                          bottomRight: const Radius.circular(20.0),
+                      ? BorderRadius.circular(20.0)
+                      : const BorderRadius.only(
+                          topLeft: Radius.circular(20.0),
+                          topRight: Radius.circular(20.0),
+                          bottomRight: Radius.circular(20.0),
+                          bottomLeft: Radius.circular(0),
                         );
 
                   return Padding(
@@ -107,7 +110,8 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                           : MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        if (!isUserMessage)
+                        // 조건 변경: 사용자 메시지가 아니거나 로딩 메시지인 경우 이미지를 표시
+                        if (!isUserMessage || isLoadingMessage)
                           const Padding(
                             padding: EdgeInsets.only(right: 8.0, top: 5.0),
                             child: CircleAvatar(
@@ -126,9 +130,26 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                                   : Colors.grey[300],
                               borderRadius: messageBorderRadius,
                             ),
-                            child: Text(
-                              message['text'] ?? '',
-                              style: const TextStyle(fontSize: 16.0),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    message['text'] ?? '',
+                                    style: const TextStyle(fontSize: 16.0),
+                                  ),
+                                ),
+                                if (isLoadingMessage)
+                                  const Padding(
+                                    padding: EdgeInsets.only(left: 8.0),
+                                    child: SizedBox(
+                                      width: 18,
+                                      height: 18,
+                                      child: CircularProgressIndicator(
+                                          strokeWidth: 2),
+                                    ),
+                                  ),
+                              ],
                             ),
                           ),
                         ),
@@ -138,17 +159,6 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                 },
               ),
             ),
-            if (_isLoading) // 로딩 인디케이터 표시
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 10),
-                child: CircularProgressIndicator(),
-              ),
-            if (_errorMessage != null) // 에러 메시지 표시
-              Padding(
-                padding: const EdgeInsets.all(10),
-                child: Text(_errorMessage!,
-                    style: const TextStyle(color: Colors.red)),
-              ),
             Padding(
               padding:
                   const EdgeInsets.only(bottom: 8.0, left: 16.0, right: 16.0),

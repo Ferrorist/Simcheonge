@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:simcheonge_front/providers/economicWordProvider.dart'; // 경로 확인 필요
+import 'package:word_break_text/word_break_text.dart';
 
 class EconomicWordWidget extends StatefulWidget {
   const EconomicWordWidget({super.key});
@@ -60,8 +61,10 @@ class _EconomicWordWidgetState extends State<EconomicWordWidget> {
                     child: SingleChildScrollView(
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 13),
-                        child: Text(data?.description ?? '상세 설명을 불러오는 중...',
-                            style: contentStyle),
+                        child: WordBreakText(
+                          data?.description ?? '상세 설명을 불러오는 중...',
+                          style: contentStyle,
+                        ),
                       ),
                     ),
                   ),
