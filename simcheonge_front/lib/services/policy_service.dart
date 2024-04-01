@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-
 import 'package:simcheonge_front/widgets/policy_detail.dart';
 
 class PolicyService {
@@ -16,7 +15,9 @@ class PolicyService {
     if (response.statusCode == 200) {
       final responseBody = utf8.decode(response.bodyBytes); // UTF-8로 디코딩
       final decodedJson = json.decode(responseBody);
-      return PolicyDetail.fromJson(decodedJson);
+      // 'data' 필드에서 필요한 정보를 추출합니다.
+      final policyData = decodedJson['data'];
+      return PolicyDetail.fromJson(policyData);
     } else {
       throw Exception('Failed to load policy detail');
     }
