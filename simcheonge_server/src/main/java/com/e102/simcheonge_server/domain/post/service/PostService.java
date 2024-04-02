@@ -75,9 +75,10 @@ public class PostService {
         }
 
         return posts.stream().map(post -> {
+            // 사용자 정보가 없는 경우 "알 수 없는 사용자"로 처리
             String userNickname = userRepository.findById(post.getUserId())
-                    .orElseThrow(() -> new IllegalArgumentException("User not found"))
-                    .getUserNickname();
+                    .map(User::getUserNickname)
+                    .orElse("알 수 없는 사용자");
 
             String categoryName = (categoryNumber != 1) ? categoryDetailRepository.findByCodeAndNumber(categoryCode, categoryNumber)
                     .map(CategoryDetail::getName)
@@ -88,6 +89,7 @@ public class PostService {
                             .orElse("기타");
 
             return new PostResponse(
+                    post.getUserId(),
                     post.getPostId(),
                     post.getPostName(),
                     post.getPostContent(),
