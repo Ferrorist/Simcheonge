@@ -63,8 +63,8 @@ public class PolicyNativeRepository {
         if (containsDetail) {
             Date currentDate = new Date();
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            sqlQuery += "and (policy_start_date >= '" + sdf.format(startDate) + "' and policy_end_date <= '" + sdf.format(endDate) + "' )";
-            countQuery += "and (policy_start_date >= '" + sdf.format(startDate) + "' and policy_end_date <= '" + sdf.format(endDate) + "' )";
+            sqlQuery += "and (policy_start_date <= '" + sdf.format(startDate) + "' and policy_end_date >= '" + sdf.format(endDate) + "' )";
+            countQuery += "and (policy_start_date <= '" + sdf.format(startDate) + "' and policy_end_date >= '" + sdf.format(endDate) + "' )";
         }
         sqlQuery += subQuery;
         countQuery += subQuery;
