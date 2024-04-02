@@ -1,32 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:simcheonge_front/screens/post_detail_screen.dart';
 import 'dart:convert';
-import 'package:simcheonge_front/widgets/side_app_bar.dart';
 
-// 가정: MyComment 모델
-class MyComment {
+class Comment {
   final int commentId;
-  final String commentType;
-  final int referencedId;
+  final String nickname;
   final String content;
   final String createdAt;
+  final bool isMyComment;
 
-  MyComment({
+  Comment({
     required this.commentId,
-    required this.commentType,
-    required this.referencedId,
+    required this.nickname,
     required this.content,
     required this.createdAt,
+    required this.isMyComment,
   });
 
-  factory MyComment.fromJson(Map<String, dynamic> json) {
-    return MyComment(
-      commentId: json['commentId'],
-      commentType: json['commentType'],
-      referencedId: json['referencedId'],
-      content: json['content'],
-      createdAt: json['createdAt'],
+  factory Comment.fromJson(Map<String, dynamic> json) {
+    return Comment(
+      commentId: json['commentId'] as int,
+      nickname: json['nickname'] as String,
+      content: json['content'] as String,
+      createdAt: json['createAt'] as String,
+      isMyComment: json['myComment'] as bool,
     );
   }
 }
@@ -39,96 +36,46 @@ class MyPostCommentScreen extends StatefulWidget {
 }
 
 class _MyPostCommentScreenState extends State<MyPostCommentScreen> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final TextEditingController _controller = TextEditingController();
-  List<MyComment> allComments = [];
-  List<MyComment> displayedComments = [];
+  List<Comment> comments = [];
 
   @override
   void initState() {
     super.initState();
-    _fetchMyComments();
-    _controller.addListener(() {
-      updateSearchQuery(_controller.text);
-    });
+    _fetchComments();
   }
 
-  Future<void> _fetchMyComments() async {
-    // 가정: 댓글 데이터를 불러오는 서버의 URL
+  Future<void> _fetchComments() async {
+    // URL 수정 필요: 실제 댓글 데이터를 불러오는 URL로 변경하세요
     final response =
-        await http.get(Uri.parse('https://j10e102.p.ssafy.io/api/comment/POS'));
+        await http.get(Uri.parse('https://j10e102.p.ssafy.io/api/comments'));
 
     if (response.statusCode == 200) {
-      final List<dynamic> commentsJson = json.decode(response.body);
+      List<dynamic> commentsJson = json.decode(response.body);
       setState(() {
-        allComments =
-            commentsJson.map((json) => MyComment.fromJson(json)).toList();
-        displayedComments = allComments;
+        comments = commentsJson.map((json) => Comment.fromJson(json)).toList();
       });
+      print('댓글 데이터 로드 성공');
     } else {
-      // 오류 처리
-      print('Failed to load comments');
+      print('댓글 데이터 로드 실패: ${response.body}');
     }
-  }
-
-  void updateSearchQuery(String newQuery) {
-    setState(() {
-      displayedComments = allComments
-          .where((comment) =>
-              comment.content.toLowerCase().contains(newQuery.toLowerCase()))
-          .toList();
-    });
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: _scaffoldKey,
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: TextField(
-            controller: _controller,
-            decoration: InputDecoration(
-              hintText: '검색...',
-              border: InputBorder.none,
-              prefixIcon: const Icon(Icons.search),
-              suffixIcon: _controller.text.isNotEmpty
-                  ? IconButton(
-                      icon: const Icon(Icons.clear),
-                      onPressed: () => _controller.clear(),
-                    )
-                  : null,
-            ),
-          ),
-        ),
-      ),
+      appBar: AppBar(title: const Text('내 댓글 목록')),
       body: ListView.builder(
-        itemCount: displayedComments.length,
+        itemCount: comments.length,
         itemBuilder: (context, index) {
-          final comment = displayedComments[index];
+          final comment = comments[index];
           return ListTile(
-            title: Text(comment.content),
+            title: Text(comment.nickname),
+            subtitle: Text('${comment.content}\n${comment.createdAt}'),
+            isThreeLine: true,
             onTap: () {
-              // 가정: 댓글이 달린 게시물의 상세 화면으로 이동
-              // 여기에서는 이동 로직을 구현하지만, 실제로는 프로젝트의 라우팅 설정에 따라 다름
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) =>
-                        PostDetailScreen(postId: comment.referencedId)),
-              );
+              // 게시글 상세 화면으로 이동하는 로직 추가 (예시)
+              print('댓글 ${comment.commentId}의 게시글로 이동');
             },
           );
         },
