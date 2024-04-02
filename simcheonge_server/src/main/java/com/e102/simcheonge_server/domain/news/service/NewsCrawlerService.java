@@ -77,11 +77,22 @@ public class NewsCrawlerService {
             try {
                 Document newsDoc = Jsoup.connect(newsLink).get();
 
-//                PrintWriter out3 = new PrintWriter(new OutputStreamWriter(new FileOutputStream("result.html"), "UTF-8"));
-//                out3.println(newsDoc.toString()); // doc의 HTML 내용을 파일에 쓴다.
+                PrintWriter out3 = new PrintWriter(new OutputStreamWriter(new FileOutputStream("result.html"), "UTF-8"));
+                out3.println(newsDoc.toString()); // doc의 HTML 내용을 파일에 쓴다.
 
                 String title = newsDoc.select("#title_area > span").text();
-                String time = newsDoc.select("div.media_end_head_info_datestamp > div > span").text();
+
+                Elements modifyTimeElements = newsDoc.select("span._ARTICLE_MODIFY_DATE_TIME");
+                String time;
+
+                if (!modifyTimeElements.isEmpty()) {
+                    // 수정 시간이 있으면 이를 사용합니다.
+                    time = modifyTimeElements.text();
+                } else {
+                    // 수정 시간이 없으면 작성 시간을 사용합니다.
+                    time = newsDoc.select("span._ARTICLE_DATE_TIME").text();
+                }
+
                 String reporter = newsDoc.select("div.media_end_head_journalist > a > em").text();
 
                 // #dic_area ID를 가진 Element를 선택
@@ -92,7 +103,9 @@ public class NewsCrawlerService {
                 for (Node node : originalContentNode.childNodes()) {
                     if (node instanceof TextNode) {
                         TextNode textNode = (TextNode) node;
-                        directText.append(textNode.text().trim()).append("\n"); // 직접 텍스트 추출
+                        directText.append(textNode.text().trim()); // 직접 텍스트 추출 및 줄바꿈 추가
+                    } else if (node.nodeName().equals("br")) {
+                        directText.append("\n"); // <br> 태그를 만날 때마다 줄바꿈 추가
                     }
                 }
 
@@ -152,10 +165,13 @@ public class NewsCrawlerService {
                 .build();
 
         HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
+        System.out.println("@@@@@@@@@@@@@@@@@"+response);
+
 
         String responseBody = response.body();
+        System.out.println("@@@@@@@@@@@@@@@@@"+response.body());
 
-        // JSON 문자열 파싱
+            // JSON 문자열 파싱
         ObjectMapper objectMapper = new ObjectMapper();
 
         JsonNode rootNode = objectMapper.readTree(responseBody);
