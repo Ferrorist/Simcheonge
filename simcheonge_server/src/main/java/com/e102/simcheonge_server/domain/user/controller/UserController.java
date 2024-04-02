@@ -25,7 +25,7 @@ import static com.e102.simcheonge_server.common.util.ResponseUtil.buildBasicResp
 public class UserController {
     private final UserService userService;
 
-    @PostMapping
+    @PostMapping("/signup")
     public ResponseEntity<?> signup(@RequestBody SignUpRequest signUpRequestForm){
         log.info("signUpRequestForm={}",signUpRequestForm);
         userService.saveUser(signUpRequestForm);
