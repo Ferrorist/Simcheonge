@@ -155,7 +155,60 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   // 페이지 변경 함수 수정
-  void changePage(int index, {bool isSideBar = false}) {
+  void changePage(int index, {bool isSideBar = false}) async {
+    if (index == 2) {
+      final isLoggedIn = await checkLoginStatus();
+      if (!isLoggedIn) {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              content: Column(
+                mainAxisSize: MainAxisSize.min, // Use the minimum space
+                mainAxisAlignment:
+                    MainAxisAlignment.center, // Center content vertically
+                children: <Widget>[
+                  const SizedBox(
+                    height: 15,
+                  ),
+                  const Text('로그인 시 이용 가능합니다.',
+                      style: TextStyle(fontSize: 14),
+                      textAlign: TextAlign.center), // Center text horizontally
+                  const SizedBox(
+                      height: 15), // Add some spacing before the buttons
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment
+                        .spaceBetween, // Space out children evenly
+                    children: <Widget>[
+                      TextButton(
+                        child: const Text('로그인'),
+                        onPressed: () {
+                          Navigator.of(context).pop(); // Close the dialog
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => LoginScreen(
+                                      updateLoginStatus:
+                                          updateLoginStatus))); // Navigate to the login screen
+                        },
+                      ),
+                      TextButton(
+                        child: const Text('닫기'),
+                        onPressed: () {
+                          Navigator.of(context).pop(); // Just close the dialog
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+        return; // Prevent further processing if not logged in
+      }
+    }
+    // Proceed with page change if logged in or if the index is not 2
     setState(() {
       _selectedIndex =
           isSideBar && (index < 0 || index > bottomNavItems.length - 1)
