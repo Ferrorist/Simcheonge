@@ -63,15 +63,10 @@ class _PostCreateScreenState extends State<PostCreateScreen> {
         'userNickname': _userNickname, // 실제 사용자 닉네임을 여기에 삽입
       }),
     );
-    print('제목: ${_titleController.text}');
-    print('내용: ${_contentController.text}');
-    print('카테고리 : $_selectedCategoryNumber');
-    print('닉네임 :$_userNickname');
-    print(accessToken);
-    print('Status code: ${response.statusCode}');
-    print('Response body: ${response.body}');
 
     if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      final postId = data['postId'];
       Navigator.pop(context); // 성공 시 이전 화면으로 돌아가기
     } else {
       print(response.statusCode);

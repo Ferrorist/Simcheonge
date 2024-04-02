@@ -3,11 +3,14 @@ package com.e102.simcheonge_server.domain.news.service;
 import com.e102.simcheonge_server.domain.news.dto.NewsDetailResponse;
 import java.net.http.HttpRequest.BodyPublishers;
 import com.e102.simcheonge_server.domain.news.dto.NewsItem;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
+import org.jsoup.nodes.TextNode;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -22,9 +25,7 @@ import java.io.IOException;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 
 @Service
@@ -75,11 +76,29 @@ public class NewsCrawlerService {
 
             try {
                 Document newsDoc = Jsoup.connect(newsLink).get();
-                String title = newsDoc.select("#title_area > span").text();
 
-                String originalContent = newsDoc.select("#dic_area").text();
+//                PrintWriter out3 = new PrintWriter(new OutputStreamWriter(new FileOutputStream("result.html"), "UTF-8"));
+//                out3.println(newsDoc.toString()); // doc의 HTML 내용을 파일에 쓴다.
+
+                String title = newsDoc.select("#title_area > span").text();
                 String time = newsDoc.select("div.media_end_head_info_datestamp > div > span").text();
                 String reporter = newsDoc.select("div.media_end_head_journalist > a > em").text();
+
+                // #dic_area ID를 가진 Element를 선택
+                Element originalContentNode = newsDoc.select("#dic_area").first();
+
+                StringBuilder directText = new StringBuilder();
+                // Element의 직계 자식 노드를 순회 하여 직계 텍스트만 추출
+                for (Node node : originalContentNode.childNodes()) {
+                    if (node instanceof TextNode) {
+                        TextNode textNode = (TextNode) node;
+                        directText.append(textNode.text().trim()).append("\n"); // 직접 텍스트 추출
+                    }
+                }
+
+                // StringBuilder 객체를 String으로 변환
+                String originalContent = directText.toString().trim();
+
 
                 newsDetailResponse.setTitle(title);
                 newsDetailResponse.setOriginalContent(originalContent);
@@ -96,41 +115,57 @@ public class NewsCrawlerService {
     }
 
 
-    public String summarizeTextWithChatGPT(String originalText) {
-        String apiURL = "https://api.openai.com/v1/chat/completions";
-
-        // JSON 문자열 직접 생성
-        String jsonBody = "{"
-                + "\"model\": \"gpt-3.5-turbo\","
-                + "\"messages\": ["
-                + "{ \"role\": \"system\", \"content\": \"You are a helpful assistant.\" },"
-                + "{ \"role\": \"user\", \"content\": \"다음 내용을 간략하게 요약해줘. 답변은 한글로 해줘:\\n" + originalText.replaceAll("\"", "\\\\\"") + "\" }"
-                + "]"
-                + "}";
+    public String summarizeTextWithChatGPT(String originalContent) throws JsonProcessingException {
 
         try {
-            HttpClient client = HttpClient.newHttpClient();
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(apiURL))
-                    .header("Content-Type", "application/json")
-                    .header("Authorization", "Bearer " + this.apiKey)
-                    .POST(BodyPublishers.ofString(jsonBody))
-                    .build();
+        Map<String, Object> jsonMap = new HashMap<>();
+        jsonMap.put("model", "gpt-3.5-turbo");
 
-            HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
-            String responseBody = response.body();
-            // JSON 문자열 파싱
+        List<Map<String, String>> messages = new ArrayList<>();
+        Map<String, String> systemMessage = new HashMap<>();
+        systemMessage.put("role", "system");
+        systemMessage.put("content", "You are a helpful assistant.");
+        messages.add(systemMessage);
 
-            ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, String> userMessage = new HashMap<>();
+        userMessage.put("role", "user");
+        userMessage.put("content", "답변은 한글로 해주고, 답변에는 요청한 내용에 대한 답변 말고는 아무것도 작성하지마. 그리고 뉴스 요약에는 원본 내용의 문맥상 중요한 내용이 다 담기게 해줘. 다음 텍스트에서 뉴스 기사의 핵심 내용을 요약해줘:\\n" + originalContent);
+        messages.add(userMessage);
 
-            JsonNode rootNode = objectMapper.readTree(responseBody);
-            JsonNode choicesNode = rootNode.path("choices");
-            if (choicesNode.isArray() && choicesNode.size() > 0) {
+        jsonMap.put("messages", messages);
+
+        // Jackson ObjectMapper 인스턴스 생성
+        ObjectMapper mapper = new ObjectMapper();
+
+        // 객체를 JSON 문자열로 변환
+        String jsonBody = mapper.writeValueAsString(jsonMap);
+
+        // HTTP 요청 생성 및 전송
+        String apiURL = "https://api.openai.com/v1/chat/completions"; // API URL
+
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(apiURL))
+                .header("Content-Type", "application/json")
+                .header("Authorization", "Bearer " + apiKey) // API 키
+                .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                .build();
+
+        HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
+
+        String responseBody = response.body();
+
+        // JSON 문자열 파싱
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        JsonNode rootNode = objectMapper.readTree(responseBody);
+        JsonNode choicesNode = rootNode.path("choices");
+
+        if (choicesNode.isArray() && choicesNode.size() > 0) {
                 JsonNode firstChoice = choicesNode.get(0);
                 JsonNode messageNode = firstChoice.path("message");
                 String content = messageNode.path("content").asText();
 
-                System.out.println(content); // 생성된 텍스트 응답 출력
                 return content; // 생성된 텍스트 응답 반환
             }
 

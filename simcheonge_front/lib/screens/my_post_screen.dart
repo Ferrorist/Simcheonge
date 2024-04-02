@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:simcheonge_front/screens/post_detail_screen.dart';
+import 'package:simcheonge_front/services/post_service.dart';
+import 'package:simcheonge_front/widgets/my_post_detail.dart';
+import 'package:intl/intl.dart';
 
 class MyPostScreen extends StatefulWidget {
   const MyPostScreen({super.key});
@@ -8,19 +13,35 @@ class MyPostScreen extends StatefulWidget {
 }
 
 class _MyPostScreenState extends State<MyPostScreen> {
-  List<String> allItems = [];
-  List<String> displayedItems = [];
+  List<MyPost> allItems = []; // MyPost 객체의 리스트
+  List<MyPost> displayedItems = [];
   final TextEditingController _controller = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    // 페이지 새로 로드될 때 검색 상태를 초기화
-    displayedItems = allItems;
-    _controller.clear();
+    _loadMyPosts();
+
     _controller.addListener(() {
       updateSearchQuery(_controller.text);
     });
+  }
+
+  Future<void> _loadMyPosts() async {
+    final prefs = await SharedPreferences.getInstance();
+    final accessToken = prefs.getString('accessToken');
+    if (accessToken != null) {
+      try {
+        final posts = await PostService.getMyPosts('POS', 1);
+        setState(() {
+          allItems = posts;
+          displayedItems = allItems;
+        });
+      } catch (e) {
+        // 에러 처리
+        print('Error fetching posts: $e');
+      }
+    }
   }
 
   @override
@@ -34,8 +55,9 @@ class _MyPostScreenState extends State<MyPostScreen> {
       setState(() {
         displayedItems = newQuery.isNotEmpty
             ? allItems
-                .where((item) =>
-                    item.toLowerCase().contains(newQuery.toLowerCase()))
+                .where((post) => post.postName
+                    .toLowerCase()
+                    .contains(newQuery.toLowerCase()))
                 .toList()
             : allItems;
       });
@@ -46,47 +68,38 @@ class _MyPostScreenState extends State<MyPostScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: TextField(
-            controller: _controller,
-            decoration: InputDecoration(
-              hintText: '검색...',
-              border: InputBorder.none,
-              prefixIcon: const Icon(Icons.search),
-              suffixIcon: _controller.text.isNotEmpty
-                  ? IconButton(
-                      icon: const Icon(Icons.clear),
-                      onPressed: () {
-                        _controller.clear();
-                        // 여기서 updateSearchQuery를 명시적으로 호출할 필요가 없습니다.
-                        // 왜냐하면 _controller.clear()가 리스너를 통해 이미 updateSearchQuery를 호출하기 때문입니다.
-                      },
-                    )
-                  : null,
-            ),
+        title: TextField(
+          controller: _controller,
+          decoration: InputDecoration(
+            hintText: '검색...',
+            border: InputBorder.none,
+            prefixIcon: const Icon(Icons.search),
+            suffixIcon: _controller.text.isNotEmpty
+                ? IconButton(
+                    icon: const Icon(Icons.clear),
+                    onPressed: () {
+                      _controller.clear();
+                    },
+                  )
+                : null,
           ),
         ),
       ),
       body: ListView.builder(
         itemCount: displayedItems.length,
         itemBuilder: (context, index) {
+          final item = displayedItems[index];
           return ListTile(
-            title: Text(displayedItems[index]),
-            trailing: IconButton(
-              icon: const Icon(Icons.bookmark),
-              onPressed: () {
-                setState(() {
-                  allItems.removeWhere((item) => item == displayedItems[index]);
-                  displayedItems.removeAt(index);
-                });
-              },
-            ),
+            title: Text(item.postName),
+            subtitle: Text(DateFormat('yyyy-MM-dd').format(item.createdAt)),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) =>
+                        PostDetailScreen(postId: item.postId)),
+              );
+            },
           );
         },
       ),

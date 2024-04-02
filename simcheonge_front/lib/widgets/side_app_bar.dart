@@ -7,17 +7,107 @@ import 'package:simcheonge_front/screens/my_policy_comment_screen.dart';
 import 'package:simcheonge_front/screens/my_post_comment_screen.dart';
 import 'package:simcheonge_front/screens/my_post_screen.dart';
 import 'package:simcheonge_front/auth/auth_service.dart';
+import 'package:simcheonge_front/services/updateNick_api.dart';
 
-class SideAppBar extends StatelessWidget {
-  final Function(int) changePage; // 페이지 변경 함수를 위한 변수 추가
-  const SideAppBar({
-    super.key,
-    required this.changePage, // 생성자를 통해 changePage 함수를 받음
-  });
+class SideAppBar extends StatefulWidget {
+  final Function(int) changePage;
+  const SideAppBar({super.key, required this.changePage});
 
+  @override
+  _SideAppBarState createState() => _SideAppBarState();
+}
+
+class _SideAppBarState extends State<SideAppBar> {
+  bool isNicknameAvailable = false; // 중복 확인 후 변경 버튼 활성화를 위한 변수
   Future<String> _getNickname() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('userNickname') ?? '사용자';
+  }
+
+  void loginSuccess() async {
+    setState(() {
+      // 상태 업데이트로 SideAppBar 포함한 화면 재빌드
+    });
+  }
+
+  Future<void> _showChangeNicknameDialog() async {
+    TextEditingController nicknameController = TextEditingController();
+    // AlertDialog를 보여주는 함수
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("닉네임 변경"),
+          content: Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: nicknameController,
+                  decoration: const InputDecoration(hintText: "새 닉네임을 입력하세요"),
+                ),
+              ),
+              const SizedBox(width: 8),
+              ElevatedButton(
+                onPressed: () async {
+                  final newNickname = nicknameController.text;
+                  // 비동기 작업을 기다림
+                  final isAvailable = await checkNickname(newNickname);
+                  if (!mounted) return;
+
+                  // 상태 업데이트 및 안내창 표시
+                  setState(() {
+                    isNicknameAvailable = isAvailable;
+                  });
+
+                  // SnackBar를 표시
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                          isAvailable ? '사용 가능한 닉네임입니다.' : '이미 존재하는 닉네임입니다.'),
+                    ),
+                  );
+                },
+                child: const Text('중복 확인'),
+              ),
+            ],
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('취소'),
+              onPressed: () {
+                Navigator.of(context).pop(); // 팝업 닫기
+              },
+            ),
+            TextButton(
+              onPressed: isNicknameAvailable
+                  ? () async {
+                      final success =
+                          await updateNickname(nicknameController.text);
+                      if (!mounted) return;
+
+                      if (success) {
+                        // 닉네임 SharedPreferences에 저장
+                        final prefs = await SharedPreferences.getInstance();
+                        await prefs.setString(
+                            'userNickname', nicknameController.text);
+                        Navigator.of(context).pop(); // 팝업 닫기
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("닉네임이 수정되었습니다.")),
+                        );
+                        setState(() {}); // 상태 업데이트로 UI 갱신
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("닉네임 변경에 실패했습니다.")),
+                        );
+                      }
+                    }
+                  : null, // isNicknameAvailable이 false면 버튼 비활성화
+              child: const Text('변경'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -25,8 +115,8 @@ class SideAppBar extends StatelessWidget {
     return Drawer(
       child: Theme(
         data: Theme.of(context).copyWith(
-          dividerColor:
-              Colors.transparent, // ExpansionTile의 divider 색상을 투명하게 설정
+          // ExpansionTile의 divider 색상을 투명하게 설정
+          dividerColor: Colors.transparent,
         ),
         child: Column(
           children: <Widget>[
@@ -86,7 +176,7 @@ class SideAppBar extends StatelessWidget {
                             print('게시글 클릭됨');
                             Navigator.pop(context);
 
-                            changePage(5);
+                            widget.changePage(5);
                           },
                           child: Container(
                             padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -102,7 +192,7 @@ class SideAppBar extends StatelessWidget {
                           onTap: () {
                             print('게시글 댓글 클릭됨');
                             Navigator.pop(context);
-                            changePage(6);
+                            widget.changePage(6);
                           },
                           child: Container(
                             padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -118,7 +208,7 @@ class SideAppBar extends StatelessWidget {
                           onTap: () {
                             print('정책 댓글 클릭됨');
                             Navigator.pop(context);
-                            changePage(7);
+                            widget.changePage(7);
                           },
                           child: Container(
                             padding: const EdgeInsets.symmetric(
@@ -152,7 +242,7 @@ class SideAppBar extends StatelessWidget {
                           onTap: () {
                             print('책갈피 항목 1 클릭됨');
                             Navigator.pop(context);
-                            changePage(8);
+                            widget.changePage(8);
                           },
                           child: Container(
                             padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -168,7 +258,7 @@ class SideAppBar extends StatelessWidget {
                           onTap: () {
                             print('책갈피 항목 2 클릭됨');
                             Navigator.pop(context);
-                            changePage(9);
+                            widget.changePage(9);
                           },
                           child: Container(
                             padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -183,78 +273,28 @@ class SideAppBar extends StatelessWidget {
                       ],
                     ),
                     ExpansionTile(
-                      leading: Icon(
-                        FontAwesomeIcons.userPen,
-                        color: Colors.grey[850],
-                      ),
+                      leading: const Icon(FontAwesomeIcons.userPen,
+                          color: Colors.grey),
                       title:
                           const Text('내 정보 관리', style: TextStyle(fontSize: 20)),
                       children: <Widget>[
-                        InkWell(
+                        ListTile(
+                          title: const Text('닉네임 변경',
+                              style: TextStyle(fontSize: 15)),
                           onTap: () {
-                            showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                // 닉네임을 저장할 변수
-                                TextEditingController nicknameController =
-                                    TextEditingController();
-
-                                return AlertDialog(
-                                  title: const Text("닉네임 변경"),
-                                  content: TextField(
-                                    controller: nicknameController,
-                                    decoration: const InputDecoration(
-                                        hintText: "새 닉네임을 입력하세요"),
-                                  ),
-                                  actions: <Widget>[
-                                    TextButton(
-                                      child: const Text('취소'),
-                                      onPressed: () {
-                                        Navigator.of(context).pop(); // 팝업 닫기
-                                      },
-                                    ),
-                                    TextButton(
-                                      child: const Text('변경'),
-                                      onPressed: () {
-                                        // 닉네임 변경 로직 구현
-                                        // 예: 데이터베이스에 닉네임 업데이트 요청
-                                        print(
-                                            '새 닉네임: ${nicknameController.text}');
-                                        Navigator.of(context).pop(); // 팝업 닫기
-                                      },
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
+                            Navigator.pop(context); // Drawer 닫기
+                            _showChangeNicknameDialog(); // 닉네임 변경 다이얼로그 표시
                           },
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 8.0),
-                            child: const Row(
-                              children: <Widget>[
-                                SizedBox(width: 70.0),
-                                Text('닉네임 변경', style: TextStyle(fontSize: 15)),
-                              ],
-                            ),
-                          ),
                         ),
-                        InkWell(
+                        ListTile(
+                          title: const Text('비밀번호 변경',
+                              style: TextStyle(fontSize: 15)),
                           onTap: () {
-                            print('정보 관리 항목 2 클릭됨');
+                            // 비밀번호 변경 로직
                           },
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 8.0),
-                            child: const Row(
-                              children: <Widget>[
-                                SizedBox(width: 70.0),
-                                Text('비밀번호 수정', style: TextStyle(fontSize: 15)),
-                              ],
-                            ),
-                          ),
                         ),
                       ],
                     ),
-                    // 다른 ExpansionTile 추가 가능
                   ],
                 ),
               ),
