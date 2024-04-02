@@ -30,7 +30,9 @@ class _EconomicWordWidgetState extends State<EconomicWordWidget> {
       child: Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
         child: Material(
-          color: isExpanded ? Colors.green.shade100 : Colors.white,
+          color: isExpanded
+              ? const Color.fromARGB(255, 225, 255, 226)
+              : Colors.white,
           borderRadius: BorderRadius.circular(12),
           child: Column(
             mainAxisSize: MainAxisSize.min,

@@ -205,7 +205,6 @@ class PolicyDetailScreen extends StatelessWidget {
           '신청 홈페이지 바로가기',
           style: TextStyle(
             color: Colors.blue,
-            decoration: TextDecoration.underline,
           ),
         ),
       ),
