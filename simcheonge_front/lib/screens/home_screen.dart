@@ -116,7 +116,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     },
                   ),
                   MainButton(
-                    name: '정책 뉴스',
+                    name: '뉴스 & 상식',
                     imagePath: 'assets/home_screen/news_icon.png', // 이미지 경로 변경
                     isInverted: true,
                     onPressed: () {

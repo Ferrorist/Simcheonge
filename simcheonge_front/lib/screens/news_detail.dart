@@ -97,10 +97,15 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
                   _isSummarized
                       ? Padding(
                           padding: const EdgeInsets.fromLTRB(10, 10, 10, 5),
-                          child: Text(
-                            newsDetail.data!.summarizedContent!,
-                            style: const TextStyle(fontSize: 18),
-                          ),
+                          child: newsDetail.data!.summarizedContent != null
+                              ? Text(
+                                  newsDetail.data!.summarizedContent!,
+                                  style: const TextStyle(fontSize: 18),
+                                )
+                              : const Text(
+                                  '기사 요약이 없습니다',
+                                  style: TextStyle(fontSize: 18),
+                                ),
                         )
                       : Padding(
                           padding: const EdgeInsets.fromLTRB(10, 10, 10, 5),
