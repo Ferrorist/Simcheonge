@@ -101,12 +101,14 @@ class _NewsScreenState extends State<NewsScreen> {
                           ),
                         ),
                         const Spacer(), // 제목과 원문보기 사이의 여백을 최대화합니다.
-                        Align(
-                          alignment: Alignment.bottomRight,
-                          child: Text(
-                            '원문보기',
-                            style: TextStyle(
-                                color: Theme.of(context).primaryColor),
+                        Padding(
+                          padding: const EdgeInsets.only(right: 10.0),
+                          child: Align(
+                            alignment: Alignment.bottomRight,
+                            child: Text(
+                              '원문보기',
+                              style: TextStyle(color: Colors.blueGrey[600]),
+                            ),
                           ),
                         ),
                       ],
