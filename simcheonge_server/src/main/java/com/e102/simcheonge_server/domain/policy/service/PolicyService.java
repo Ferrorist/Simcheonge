@@ -179,7 +179,7 @@ public class PolicyService {
             }
             //{ADM,1}, {EPM,1}, {SPC, 1}가 있는지 확인
             if (Arrays.asList(checkCategories).contains(category.getCode()) && category.getNumber() == 1) {
-                throw new IllegalArgumentException("해당 카테고리는 '제한 없음'을 선택할 수 없습니다.");
+//                throw new IllegalArgumentException("해당 카테고리는 '제한 없음'을 선택할 수 없습니다.");
             }
             else if ("APC".equals(category.getCode())) {
                 if (category.getNumber() == 3) {
