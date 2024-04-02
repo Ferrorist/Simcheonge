@@ -58,6 +58,29 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      theme: ThemeData(
+        colorScheme: const ColorScheme(
+          brightness: Brightness.light, // 또는 Brightness.dark, 화면 밝기에 따라 선택
+          primary:
+              Color.fromRGBO(107, 127, 212, 1), // 버튼의 기본 색상을 파란색 200 색으로 설정
+          onPrimary: Colors.black, // 버튼 텍스트의 색상 설정
+          secondary: Color.fromRGBO(107, 127, 212, 1), // 선택된 입력 줄의 색상을 파란색으로 설정
+          onSecondary: Colors.black, // 버튼 텍스트의 색상 설정
+          error: Colors.red, // 오류 메시지 등의 색상 설정
+          onError: Colors.white, // 오류 텍스트의 색상 설정
+          background: Colors.white, // 배경색 설정
+          onBackground: Colors.black, // 텍스트의 배경색에 대한 색상 설정
+          surface: Color.fromARGB(255, 255, 255, 255), // 표면의 색상 설정
+          onSurface: Colors.black, // 표면에 대한 텍스트의 색상 설정
+        ),
+        inputDecorationTheme: const InputDecorationTheme(
+          focusedBorder: UnderlineInputBorder(
+            borderSide: BorderSide(
+              color: Color.fromRGBO(107, 127, 212, 1),
+            ), // 선택된 입력 줄의 색상을 파란색으로 설정
+          ),
+        ),
+      ),
       home: FutureBuilder<bool>(
         future: AuthenticationManager.checkAndRefreshTokenIfNeeded(),
         builder: (context, snapshot) {

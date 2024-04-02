@@ -8,6 +8,7 @@ import 'package:simcheonge_front/screens/my_post_comment_screen.dart';
 import 'package:simcheonge_front/screens/my_post_screen.dart';
 import 'package:simcheonge_front/auth/auth_service.dart';
 import 'package:simcheonge_front/services/updateNick_api.dart';
+import 'package:simcheonge_front/widgets/changePass.dart';
 
 class SideAppBar extends StatefulWidget {
   final Function(int) changePage;
@@ -323,19 +324,19 @@ class _SideAppBarState extends State<SideAppBar> {
                         ),
                         InkWell(
                           onTap: () {
-                            Navigator.pop(context);
+                            Navigator.pop(context); // 현재 열려있는 드로어나 다이얼로그를 닫습니다.
+                            showChangePasswordDialog(
+                                context); // 비밀번호 변경 다이얼로그를 표시하는 함수 호출
                           },
                           child: Container(
                             padding: const EdgeInsets.symmetric(vertical: 8.0),
                             child: const Row(
                               children: <Widget>[
-                                SizedBox(
-                                  width: 70,
-                                ),
+                                SizedBox(width: 70),
                                 Text(
                                   '비밀번호 변경',
                                   style: TextStyle(fontSize: 15),
-                                )
+                                ),
                               ],
                             ),
                           ),
