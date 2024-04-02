@@ -32,82 +32,105 @@ class _SideAppBarState extends State<SideAppBar> {
 
   Future<void> _showChangeNicknameDialog() async {
     TextEditingController nicknameController = TextEditingController();
-    // AlertDialog를 보여주는 함수
+    bool isButtonDisabled = true;
+    String? nicknameValidationMessage;
+    Color? messageColor;
+
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text("닉네임 변경"),
-          content: Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: nicknameController,
-                  decoration: const InputDecoration(hintText: "새 닉네임을 입력하세요"),
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text("닉네임 변경"),
+              content: SingleChildScrollView(
+                // 스크롤 가능하도록 감싸기
+                child: ListBody(
+                  children: <Widget>[
+                    TextField(
+                      controller: nicknameController,
+                      decoration:
+                          const InputDecoration(hintText: "새 닉네임을 입력하세요"),
+                      onChanged: (value) async {
+                        final isAvailable = await checkNickname(value);
+                        setState(() {
+                          isButtonDisabled = !isAvailable;
+                          if (value.isNotEmpty) {
+                            nicknameValidationMessage = isAvailable
+                                ? "사용 가능한 닉네임 입니다."
+                                : "사용할 수 없는 닉네임 입니다.";
+                            messageColor =
+                                isAvailable ? Colors.green : Colors.red;
+                          } else {
+                            nicknameValidationMessage = null;
+                          }
+                        });
+                      },
+                    ),
+                    if (nicknameValidationMessage != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: Text(
+                          nicknameValidationMessage!,
+                          style: TextStyle(color: messageColor),
+                        ),
+                      ),
+                  ],
                 ),
               ),
-              const SizedBox(width: 8),
-              ElevatedButton(
-                onPressed: () async {
-                  final newNickname = nicknameController.text;
-                  // 비동기 작업을 기다림
-                  final isAvailable = await checkNickname(newNickname);
-                  if (!mounted) return;
-
-                  // 상태 업데이트 및 안내창 표시
-                  setState(() {
-                    isNicknameAvailable = isAvailable;
-                  });
-
-                  // SnackBar를 표시
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                          isAvailable ? '사용 가능한 닉네임입니다.' : '이미 존재하는 닉네임입니다.'),
+              actions: <Widget>[
+                Row(
+                  mainAxisAlignment:
+                      MainAxisAlignment.spaceBetween, // 버튼을 양 끝으로 배치
+                  children: [
+                    TextButton(
+                      child: const Text('취소'),
+                      onPressed: () => Navigator.of(context).pop(),
                     ),
-                  );
-                },
-                child: const Text('중복 확인'),
-              ),
-            ],
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('취소'),
-              onPressed: () {
-                Navigator.of(context).pop(); // 팝업 닫기
-              },
-            ),
-            TextButton(
-              onPressed: isNicknameAvailable
-                  ? () async {
-                      final success =
-                          await updateNickname(nicknameController.text);
-                      if (!mounted) return;
-
-                      if (success) {
-                        // 닉네임 SharedPreferences에 저장
-                        final prefs = await SharedPreferences.getInstance();
-                        await prefs.setString(
-                            'userNickname', nicknameController.text);
-                        Navigator.of(context).pop(); // 팝업 닫기
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text("닉네임이 수정되었습니다.")),
-                        );
-                        setState(() {}); // 상태 업데이트로 UI 갱신
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text("닉네임 변경에 실패했습니다.")),
-                        );
-                      }
-                    }
-                  : null, // isNicknameAvailable이 false면 버튼 비활성화
-              child: const Text('변경'),
-            ),
-          ],
+                    TextButton(
+                      onPressed: isButtonDisabled
+                          ? null
+                          : () async {
+                              bool updateSuccess =
+                                  await updateNickname(nicknameController.text);
+                              if (updateSuccess) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                      content: Text(
+                                          "닉네임이 '${nicknameController.text}'(으)로 변경되었습니다.")),
+                                );
+                                final prefs =
+                                    await SharedPreferences.getInstance();
+                                await prefs.setString(
+                                    'userNickname', nicknameController.text);
+                                Navigator.of(context).pop(); // 상태 변경 전에 닫기
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content:
+                                          Text("닉네임 변경에 실패했습니다. 다시 시도해주세요.")),
+                                );
+                              }
+                            },
+                      child: const Text('변경'),
+                    ),
+                  ],
+                ),
+              ],
+            );
+          },
         );
       },
-    );
+    ).then((_) {
+      // 다이얼로그 닫힘 후 필요한 UI 갱신만 수행
+      if (mounted) {
+        // 위젯 트리에 아직 존재하는지 확인
+        setState(() {
+          // 여기서 필요한 UI 갱신 로직을 추가
+        });
+      }
+    });
   }
 
   @override
@@ -273,25 +296,49 @@ class _SideAppBarState extends State<SideAppBar> {
                       ],
                     ),
                     ExpansionTile(
-                      leading: const Icon(FontAwesomeIcons.userPen,
-                          color: Colors.grey),
+                      leading: Icon(FontAwesomeIcons.userPen,
+                          color: Colors.grey[850]),
                       title:
                           const Text('내 정보 관리', style: TextStyle(fontSize: 20)),
                       children: <Widget>[
-                        ListTile(
-                          title: const Text('닉네임 변경',
-                              style: TextStyle(fontSize: 15)),
+                        InkWell(
                           onTap: () {
-                            Navigator.pop(context); // Drawer 닫기
-                            _showChangeNicknameDialog(); // 닉네임 변경 다이얼로그 표시
+                            Navigator.pop(context);
+                            _showChangeNicknameDialog();
                           },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                            child: const Row(
+                              children: <Widget>[
+                                SizedBox(
+                                  width: 70,
+                                ),
+                                Text(
+                                  '닉네임 변경',
+                                  style: TextStyle(fontSize: 15),
+                                )
+                              ],
+                            ),
+                          ),
                         ),
-                        ListTile(
-                          title: const Text('비밀번호 변경',
-                              style: TextStyle(fontSize: 15)),
+                        InkWell(
                           onTap: () {
-                            // 비밀번호 변경 로직
+                            Navigator.pop(context);
                           },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                            child: const Row(
+                              children: <Widget>[
+                                SizedBox(
+                                  width: 70,
+                                ),
+                                Text(
+                                  '비밀번호 변경',
+                                  style: TextStyle(fontSize: 15),
+                                )
+                              ],
+                            ),
+                          ),
                         ),
                       ],
                     ),
