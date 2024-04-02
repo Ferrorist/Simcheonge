@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:simcheonge_front/services/policy_service.dart';
+import 'package:simcheonge_front/widgets/comment_widget.dart';
 import 'package:simcheonge_front/widgets/policy_detail.dart';
 import 'package:word_break_text/word_break_text.dart';
 
@@ -61,6 +62,10 @@ class PolicyDetailScreen extends StatelessWidget {
                       buildSection('신청 제한', policy.policyEntryLimit),
                       buildSection('참고 사항', policy.policyEtc),
                       buildSection('참고 웹사이트', policy.policySiteAddress),
+                      CommentWidget(
+                        policyId: policyId,
+                        commentType: 'POL',
+                      ),
                     ],
                   ),
                 ),
