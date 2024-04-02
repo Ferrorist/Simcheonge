@@ -14,6 +14,7 @@ Future<bool> checkNickname(String newNickname) async {
       'Authorization': 'Bearer $accessToken',
     },
   );
+  print(newNickname);
   print(response.statusCode);
   return response.statusCode == 200;
 }
