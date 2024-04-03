@@ -2,18 +2,16 @@ class Bookmark {
   final int bookmarkId;
   final String bookmarkType;
   final int userId;
-  final int? policyId;
+  final int? referencedId;
   final String? policyName;
-  final int? postId;
   final String? postName;
 
   Bookmark({
     required this.bookmarkId,
     required this.bookmarkType,
     required this.userId,
-    this.policyId,
+    this.referencedId,
     this.policyName,
-    this.postId,
     this.postName,
   });
 
@@ -22,9 +20,8 @@ class Bookmark {
       bookmarkId: json['bookmarkId'],
       bookmarkType: json['bookmarkType'],
       userId: json['userId'],
-      policyId: json['policyId'],
+      referencedId: json['referencedId'],
       policyName: json['policyName'],
-      postId: json['postId'],
       postName: json['postName'],
     );
   }
