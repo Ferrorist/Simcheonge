@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:simcheonge_front/services/policy_service.dart';
+import 'package:simcheonge_front/widgets/comment_widget.dart';
 import 'package:simcheonge_front/widgets/policy_detail.dart';
 import 'package:word_break_text/word_break_text.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:intl/intl.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:simcheonge_front/widgets/comment_widget.dart';
 
 // PolicyDetail 모델 import 필요, 경로는 실제 프로젝트 구조에 따라 달라짐
 class PolicyDetailScreen extends StatelessWidget {
@@ -72,6 +74,10 @@ class PolicyDetailScreen extends StatelessWidget {
                       buildSection('신청 제한', policy.policyEntryLimit),
                       buildSection('참고 사항', policy.policyEtc),
                       buildWebsiteSection('참고 웹사이트', policy.policySiteAddress),
+                      CommentWidget(
+                        policyId: policyId,
+                        commentType: 'POL',
+                      ),
                     ],
                   ),
                 ),
