@@ -77,7 +77,8 @@ public class BookmarkService {
                 savedBookmark.getBookmarkId(),
                 savedBookmark.getUserId(),
                 savedBookmark.getReferencedId(),
-                savedBookmark.getBookmarkType());
+                savedBookmark.getBookmarkType(),
+                userId==savedBookmark.getUserId());
     }
 
 
