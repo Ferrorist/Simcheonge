@@ -19,7 +19,7 @@ class PolicyDetailScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text(
           '정책 상세보기',
-          style: GoogleFonts.dongle(fontSize: 36), // Google Fonts의 Orbit 글꼴 적용
+          style: GoogleFonts.dongle(fontSize: 30), // Google Fonts의 Orbit 글꼴 적용
         ),
       ),
       body: FutureBuilder<PolicyDetail>(
@@ -53,7 +53,7 @@ class PolicyDetailScreen extends StatelessWidget {
                       const SizedBox(height: 8),
                       Text(policy.policyIntro,
                           style: TextStyle(color: Colors.grey.shade600)),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 20),
                       buildSection('지원 규모', policy.policySupportScale),
                       buildSection(
                           '지원 기간',
@@ -148,7 +148,7 @@ class PolicyDetailScreen extends StatelessWidget {
               style:
                   const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
         ),
-        const SizedBox(height: 25),
+        const SizedBox(height: 0),
         if (title == '지원 기간' && modifiedContent == '상시') // '지원 기간'이 '상시'인 경우
           Padding(
             padding: const EdgeInsets.only(right: 20.0),

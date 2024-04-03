@@ -1,11 +1,15 @@
 import 'dart:convert';
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:simcheonge_front/screens/post_screen.dart';
+
+typedef PostCreatedCallback = void Function();
 
 class PostCreateScreen extends StatefulWidget {
-  const PostCreateScreen({super.key});
+  final PostCreatedCallback? onPostCreated;
+
+  const PostCreateScreen({super.key, this.onPostCreated});
 
   @override
   _PostCreateScreenState createState() => _PostCreateScreenState();
@@ -13,7 +17,7 @@ class PostCreateScreen extends StatefulWidget {
 
 class _PostCreateScreenState extends State<PostCreateScreen> {
   final _formKey = GlobalKey<FormState>();
-  String? _selectedCategoryNumber; // 선택된 카테고리 번호
+  String? _selectedCategoryNumber;
   final List<Map<String, dynamic>> _categoryOptions = [
     {'name': '정책 추천', 'number': 2},
     {'name': '공모전', 'number': 3},
@@ -33,13 +37,12 @@ class _PostCreateScreenState extends State<PostCreateScreen> {
   Future<void> _loadUserNickname() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      _userNickname = prefs.getString('userNickname'); // 닉네임 불러오기
+      _userNickname = prefs.getString('userNickname');
     });
   }
 
   Future<void> _createPost() async {
     if (_selectedCategoryNumber == null) {
-      // 카테고리가 선택되지 않았을 경우 처리
       ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(content: Text('카테고리를 선택해주세요.')));
       return;
@@ -53,25 +56,29 @@ class _PostCreateScreenState extends State<PostCreateScreen> {
       url,
       headers: {
         'Content-Type': "application/json; charset=UTF-8",
-        'Authorization': "Bearer $accessToken", // JWT 토큰을 여기에 삽입
+        'Authorization': "Bearer $accessToken",
       },
       body: jsonEncode({
         'postName': _titleController.text,
         'postContent': _contentController.text,
         'categoryCode': 'POS',
         'categoryNumber': int.parse(_selectedCategoryNumber!),
-        'userNickname': _userNickname, // 실제 사용자 닉네임을 여기에 삽입
+        'userNickname': _userNickname,
       }),
     );
 
     if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      final postId = data['postId'];
-      Navigator.pop(context); // 성공 시 이전 화면으로 돌아가기
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('게시글 작성에 성공했습니다.'),
+        duration: Duration(milliseconds: 500),
+      ));
+      Navigator.pop(context); // 현재 화면을 닫습니다
+      widget.onPostCreated?.call(); // 콜백 함수 호출하여 PostScreen에게 알립니다
     } else {
-      print(response.statusCode);
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('게시글 작성에 실패했습니다.')));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('게시글 작성에 실패했습니다.'),
+        duration: Duration(milliseconds: 500),
+      ));
     }
   }
 
@@ -111,20 +118,18 @@ class _PostCreateScreenState extends State<PostCreateScreen> {
                 TextFormField(
                   controller: _titleController,
                   decoration: InputDecoration(
-                    labelText: '제목', // 라벨 텍스트
-                    hintText: '여기에 제목을 입력하세요', // 힌트 텍스트
+                    labelText:
+                        _titleController.text.isEmpty ? '제목을 입력하세요.' : '',
+                    hintText: '제목',
                     border: OutlineInputBorder(
-                      // 테두리를 정의
-                      borderRadius: BorderRadius.circular(8.0), // 테두리 모서리를 둥글게
+                      borderRadius: BorderRadius.circular(8.0),
                     ),
                     enabledBorder: OutlineInputBorder(
-                      // 활성화 상태일 때의 테두리 스타일
                       borderSide:
                           const BorderSide(color: Colors.blue, width: 2.0),
                       borderRadius: BorderRadius.circular(8.0),
                     ),
                     focusedBorder: OutlineInputBorder(
-                      // 포커스를 받았을 때의 테두리 스타일
                       borderSide:
                           const BorderSide(color: Colors.green, width: 2.0),
                       borderRadius: BorderRadius.circular(8.0),
@@ -134,72 +139,67 @@ class _PostCreateScreenState extends State<PostCreateScreen> {
                     if (value == null || value.isEmpty) {
                       return '제목을 입력해주세요.';
                     }
-                    return null; // 검증을 통과했을 때는 null을 반환
+                    return null;
                   },
+                  onChanged: (value) {
+                    if (_formKey.currentState != null) {
+                      _formKey.currentState!.validate();
+                    }
+                  },
+                  minLines: 1,
+                  maxLines: 5,
                 ),
-                const SizedBox(height: 20),
-                SizedBox(
-                  height: 200,
-                  child: TextFormField(
-                    controller: _contentController, // 컨트롤러 추가
-                    maxLines: null, // 무제한 줄 입력 가능
-                    decoration: InputDecoration(
-                      labelText: '내용', // 라벨 텍스트
-                      hintText: '여기에 내용을 입력하세요', // 힌트 텍스트
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8.0), // 테두리 둥글게
-                        borderSide: const BorderSide(
-                          color: Colors.blue,
-                          width: 2.0,
-                        ),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        // 활성화 상태일 때의 테두리 스타일
-                        borderSide:
-                            const BorderSide(color: Colors.blue, width: 2.0),
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        // 포커스를 받았을 때의 테두리 스타일
-                        borderSide:
-                            const BorderSide(color: Colors.green, width: 2.0),
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                      contentPadding: const EdgeInsets.only(
-                          top: 20.0,
-                          bottom: 20.0,
-                          left: 10.0,
-                          right: 10.0), // 내부 패딩 조정
+                const SizedBox(height: 25),
+                TextFormField(
+                  controller: _contentController,
+                  maxLines: null,
+                  decoration: InputDecoration(
+                    labelText:
+                        _contentController.text.isEmpty ? '내용을 입력하세요.' : '',
+                    hintText: '내용',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return '내용을 입력해주세요.';
-                      }
-                      return null; // 검증을 통과했을 때는 null을 반환
-                    },
+                    alignLabelWithHint: true,
+                    enabledBorder: OutlineInputBorder(
+                      borderSide:
+                          const BorderSide(color: Colors.blue, width: 2.0),
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide:
+                          const BorderSide(color: Colors.green, width: 2.0),
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
                   ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return '내용을 입력해주세요.';
+                    }
+                    return null;
+                  },
+                  onChanged: (value) {
+                    if (_formKey.currentState != null) {
+                      _formKey.currentState!.validate();
+                    }
+                  },
+                  minLines: 10,
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 40),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: <Widget>[
                     ElevatedButton(
-                      onPressed: () {
-                        Navigator.of(context).pop(); // 취소 버튼 클릭 시 이전 화면으로 돌아감
-                        if (_formKey.currentState!.validate()) {
-                          // 모든 validator를 통과하면 _createPost 함수 호출
-                          _createPost();
-                        }
-                      },
+                      onPressed: () => Navigator.pop(context),
                       child: const Text('취소'),
                     ),
                     ElevatedButton(
                       onPressed: () {
                         if (_formKey.currentState!.validate()) {
+                          // 모든 validator를 통과하면 _createPost 함수 호출
                           _createPost();
-                          print('check');
                         }
-                      }, // 작성 완료 버튼 클릭 시 글 작성 처리
+                      },
                       child: const Text('작성 완료'),
                     ),
                   ],
