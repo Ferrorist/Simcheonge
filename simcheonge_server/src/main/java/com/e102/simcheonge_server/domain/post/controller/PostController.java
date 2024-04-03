@@ -102,11 +102,11 @@ public class PostController {
     // 게시글 상세 조회
     @GetMapping("/{postId}")
     public ResponseEntity<?> getPostDetail(@PathVariable("postId") int postId, @AuthenticationPrincipal UserDetails userDetails) {
-        if (userDetails == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
-        }
+//        if (userDetails == null) {
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
+//        }
 
-        PostDetailResponse postDetail = postService.findPostDetailById(postId,userDetails.getUsername());
+        PostDetailResponse postDetail = postService.findPostDetailById(postId,userDetails);
 
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("status", HttpStatus.OK.value());

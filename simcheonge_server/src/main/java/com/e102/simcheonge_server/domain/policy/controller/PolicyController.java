@@ -27,8 +27,9 @@ public class PolicyController {
     private final int DEFAULT_SIZE = 15;
 
     @GetMapping("/{policyId}")
-    public ResponseEntity<?> getPolicy(@PathVariable("policyId") int policyId) {
-        return ResponseUtil.buildBasicResponse(HttpStatus.OK, policyService.getPolicy(policyId));
+    public ResponseEntity<?> getPolicy(@PathVariable("policyId") int policyId, @AuthenticationPrincipal UserDetails userDetails) {
+        log.info("userDetails={}",userDetails);
+        return ResponseUtil.buildBasicResponse(HttpStatus.OK, policyService.getPolicy(policyId,userDetails));
     }
 
     @PostMapping("/search")
