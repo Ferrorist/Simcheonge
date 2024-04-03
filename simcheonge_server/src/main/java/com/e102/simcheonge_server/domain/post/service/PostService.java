@@ -1,6 +1,8 @@
 package com.e102.simcheonge_server.domain.post.service;
 
 import com.e102.simcheonge_server.common.exception.DataNotFoundException;
+import com.e102.simcheonge_server.domain.bookmark.entity.Bookmark;
+import com.e102.simcheonge_server.domain.bookmark.repository.BookmarkRepository;
 import com.e102.simcheonge_server.domain.category_detail.entity.CategoryDetail;
 import com.e102.simcheonge_server.domain.category_detail.repository.CategoryDetailRepository;
 import com.e102.simcheonge_server.domain.post.dto.request.PostRequest;
@@ -16,6 +18,7 @@ import com.e102.simcheonge_server.domain.user.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -33,6 +36,7 @@ public class PostService {
     private final UserRepository userRepository;
     private final PostCategoryRepository postCategoryRepository;
     private final CategoryDetailRepository categoryDetailRepository;
+    private final BookmarkRepository bookmarkRepository;
 
     // 게시글 등록
     @Transactional
@@ -146,12 +150,18 @@ public class PostService {
     }
 
     // 게시글 상세 조회
-    public PostDetailResponse findPostDetailById(int postId) {
+    public PostDetailResponse findPostDetailById(int postId, UserDetails userDetails) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "게시글을 찾을 수 없습니다."));
 
         User user = userRepository.findById(post.getUserId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."));
+
+        String userLoginId = userDetails.getUsername();
+        User loginUser = userRepository.findByUserLoginId(userLoginId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."));
+
+        Optional<Bookmark> bookmark = bookmarkRepository.findByUserIdAndReferencedIdAndBookmarkType(loginUser.getUserId(), postId, "POS");
 
         // 게시글에 연결된 카테고리 정보 조회
         Optional<PostCategory> postCategoryOptional = postCategoryRepository.findByPostId(postId);
@@ -173,7 +183,8 @@ public class PostService {
                 post.getPostContent(),
                 user.getUserNickname(),
                 post.getCreatedAt(),
-                categoryName
+                categoryName,
+                bookmark.isPresent()
         );
     }
 

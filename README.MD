@@ -39,6 +39,74 @@
 
 - 기본적인 경제 관련 용어를 제공
 
+## 📺실행화면
+
+<table>
+ <tr>
+  <th colspan="2">챗봇으로 정책 검색하기</th>
+ </tr>
+ <tr>
+  <td><img src="/uploads/136b52b099d69435b11128f902583fdb/KakaoTalk_20240403_141330828.jpg"></td>
+  <td><img src="/uploads/136b52b099d69435b11128f902583fdb/KakaoTalk_20240403_141330828.jpg"></td>
+ </tr>
+</table>
+<table>
+ <tr>
+  <th colspan="2">검색 필터로 정책 검색하기</th>
+ </tr>
+ <tr>
+  <td><img src="/uploads/864bf65ca6a6664469ffdba6371bd4c6/KakaoTalk_20240403_141332545.jpg"></td>
+  <td><img src="/uploads/f7d01a5c04ad58171b535122e3d65f73/KakaoTalk_20240403_141331916.jpg"></td>
+ </tr>
+ <tr align="center">
+  <td>검색 화면</td>
+  <td>필터 선택</td>
+ </tr>
+</table>
+
+<table>
+ <tr>
+  <th colspan="2">경제 용어 소개</th>
+ </tr>
+ <tr>
+  <td><img src="/uploads/2f01617643420861304fdd8164202d6b/KakaoTalk_20240403_141329742.jpg"></td>
+  <td><img src="/uploads/a842628d2d621465de934f345b16ebb4/KakaoTalk_20240403_141328118.jpg"></td>
+ </tr>
+ <tr align="center">
+  <td>랜덤 경제 용어</td>
+  <td>용어 설명</td>
+ </tr>
+</table>
+
+<table>
+ <tr>
+  <th colspan="2">오늘의 주요 뉴스</th>
+ </tr>
+ <tr>
+  <td><img src="/uploads/ec2753996d9237ae9f7b6ce1b04f793c/KakaoTalk_20240403_151336619.jpg"></td>
+  <td><img src="/uploads/0df0a96ef8c149b0db5379f2c447bcfb/KakaoTalk_20240403_151335802.jpg"></td>
+ </tr>
+ <tr align="center">
+  <td>뉴스 요약</td>
+  <td>뉴스 전문</td>
+ </tr>
+</table>
+
+<table>
+ <tr>
+  <th>정책 관리 시스템</th>
+ </tr>
+ <tr>
+  <td><img src="/uploads/b5802ee2c8b8ce86ae356c54cb972e61/화면_캡처_2024-04-03_150206.png"></td>
+ <tr align="center">
+  <td>정책 목록</td>
+ </tr>
+  <tr>
+  <td><img src="/uploads/0169847f2f50b3b36e737425e24c085c/화면_캡처_2024-04-03_150249.png"></td>
+ <tr align="center">
+  <td>정책 관리</td>
+ </tr>
+</table>
 
 ## Usage
 
@@ -50,10 +118,11 @@
 
 ### 개발환경
 
-![image](/uploads/b14e21c938de253249dbac02a0785dc1/image.png)
+![화면_캡처_2024-04-03_153131](/uploads/559c486ade7fe5cf0c08de73ff7fb3c8/화면_캡처_2024-04-03_153131.png)
+
 
 ## Service Architecture
-![9to6_architecture.drawio__1_](/uploads/735dac6bc035e788d14e3a6cdab9fc9b/9to6_architecture.drawio__1_.png)
+![9to6_architecture2](/uploads/638ae8cfe1124f9f2fe48e28d2c4732c/9to6_architecture2.png)
 
 
 ## **💬 ERD**

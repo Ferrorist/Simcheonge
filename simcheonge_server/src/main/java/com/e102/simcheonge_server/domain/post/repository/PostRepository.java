@@ -4,6 +4,7 @@ import com.e102.simcheonge_server.domain.post.entity.Post;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.expression.spel.ast.OpNE;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;

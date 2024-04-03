@@ -32,8 +32,7 @@ function PolicyModify() {
   const [mainOrganization, setMainOrganization] = useState("");
   const [mainContact, setMainContact] = useState("");
   const [operationOrganization, setOperationOrganization] = useState("");
-  const [operationOrganizationContact, setOperationOrganizationContact] =
-    useState("");
+  const [operationOrganizationContact, setOperationOrganizationContact] = useState("");
   const [applicationPeriod, setApplicationPeriod] = useState("");
   const [employmentStatus, setEmploymentStatus] = useState("");
   const [specializedField, setSpecializedField] = useState("");
@@ -59,10 +58,7 @@ function PolicyModify() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(
-          API_DOMAIN + "/policy/admin/" + policyId,
-          config
-        );
+        const response = await axios.get(API_DOMAIN + "/policy/admin/" + policyId, config);
         if (response.status === 200) {
           setData(response.data.data); // 응답 데이터를 상태에 저장
         } else {
@@ -246,11 +242,7 @@ function PolicyModify() {
         processed,
       };
 
-      const response = await axios.patch(
-        `${API_DOMAIN}/policy/${policyId}`,
-        updatedData,
-        config
-      );
+      const response = await axios.patch(`${API_DOMAIN}/policy/${policyId}`, updatedData, config);
 
       if (response.status === 200) {
         console.log("Policy data updated successfully");
@@ -271,7 +263,7 @@ function PolicyModify() {
   return (
     <div>
       <TopBar />
-      <h2>PolicyId{policyId}정책의 수정 페이지</h2>
+      <h2>PolicyId{policyId}정책</h2>
       <Form>
         <Form.Group className="mb-3" controlId="formBasicEmail">
           <Form.Label htmlFor="inputPassword5">code</Form.Label>

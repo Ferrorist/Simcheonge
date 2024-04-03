@@ -12,4 +12,5 @@ public class BookmarkResponse {
     private int userId;
     private int referencedId;
     private String bookmarkType;
+    private boolean isMyComment;
 }
