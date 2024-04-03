@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:simcheonge_front/widgets/my_post_detail.dart';
-import 'package:simcheonge_front/widgets/post_detail.dart';
+import 'package:simcheonge_front/models/post_detail.dart';
 
 class PostService {
   static const String _baseUrl = 'https://j10e102.p.ssafy.io/api/posts';

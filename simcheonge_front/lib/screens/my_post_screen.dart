@@ -89,9 +89,7 @@ class _MyPostScreenState extends State<MyPostScreen> {
         itemCount: displayedItems.length,
         itemBuilder: (context, index) {
           final item = displayedItems[index];
-          return ListTile(
-            title: Text(item.postName),
-            subtitle: Text(DateFormat('yyyy-MM-dd').format(item.createdAt)),
+          return InkWell(
             onTap: () {
               Navigator.push(
                 context,
@@ -100,6 +98,31 @@ class _MyPostScreenState extends State<MyPostScreen> {
                         PostDetailScreen(postId: item.postId)),
               );
             },
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      item.postName,
+                      style: const TextStyle(
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  Text(
+                    DateFormat('yyyy-MM-dd').format(item.createdAt),
+                    style: const TextStyle(
+                      fontSize: 14.0,
+                      color: Colors.grey,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           );
         },
       ),
