@@ -15,7 +15,10 @@ class PolicyDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('정책 상세'),
+        title: Text(
+          '정책 상세보기',
+          style: GoogleFonts.dongle(fontSize: 30), // Google Fonts의 Orbit 글꼴 적용
+        ),
       ),
       body: FutureBuilder<PolicyDetail>(
         future: PolicyService.fetchPolicyDetail(policyId),
@@ -62,7 +65,7 @@ class PolicyDetailScreen extends StatelessWidget {
                       const SizedBox(height: 8),
                       Text(policy.policyIntro,
                           style: TextStyle(color: Colors.grey.shade600)),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 20),
                       buildSection('지원 규모', policy.policySupportScale),
                       buildSection('지원 기간',
                           '${policy.policyStartDate} - ${policy.policyEndDate}'),
@@ -125,29 +128,67 @@ class PolicyDetailScreen extends StatelessWidget {
         children: [
           Text(title,
               style:
-                  const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 8),
-          if (title == '참고 사항' ||
-              title == '지원 내용' ||
-              title == '신청 절차' ||
-              title == '신청 제한')
-            ...modifiedContent
-                .split(splitPattern)
-                .where((item) => item.isNotEmpty)
-                .map((item) {
-              // 괄호 내용을 원래대로 복원
-              String restoredItem = item.replaceAllMapped(RegExp(r'⌜(\d+)⌝'),
-                  (match) => bracketContents[int.parse(match.group(1)!)]);
-              // 이 시점에서 item은 이미 isNotEmpty에 의해 필터링되었습니다.
-              return Text(restoredItem,
-                  style: TextStyle(color: Colors.grey.shade800));
-            })
-          else
-            WordBreakText(content,
-                style: TextStyle(color: Colors.grey.shade800)),
-          const SizedBox(height: 16),
-          const Divider(),
-        ],
+                  const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        ),
+        const SizedBox(height: 0),
+        if (title == '지원 기간' && modifiedContent == '상시') // '지원 기간'이 '상시'인 경우
+          Padding(
+            padding: const EdgeInsets.only(right: 20.0),
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: Text(
+                '상시',
+                style: TextStyle(color: Colors.grey.shade800, fontSize: 16),
+                textAlign: TextAlign.start,
+              ),
+            ),
+          )
+        else // 그 외의 경우
+          ...modifiedContent
+              .split(splitPattern)
+              .where((item) => item.isNotEmpty)
+              .map((item) {
+            String restoredItem = item.replaceAllMapped(RegExp(r'⌜(\d+)⌝'),
+                (match) => bracketContents[int.parse(match.group(1)!)]);
+            return Padding(
+              padding: isRightAligned
+                  ? const EdgeInsets.only(right: 20.0)
+                  : EdgeInsets.zero,
+              child: Align(
+                alignment: isRightAligned
+                    ? Alignment.centerRight
+                    : Alignment.centerLeft,
+                child: Text(
+                  restoredItem,
+                  style: defaultTextStyle,
+                  textAlign: textAlign,
+                ),
+              ),
+            );
+          }),
+        const SizedBox(height: 5),
+        const Divider(),
+      ],
+    );
+  }
+
+  Widget buildWebsiteSection(String title, String url) {
+    if (url.isEmpty) {
+      return Container();
+    }
+
+    return GestureDetector(
+      onTap: () {
+        _launchURL(url.trim());
+      },
+      child: const Align(
+        alignment: Alignment.centerRight,
+        child: Text(
+          '신청 홈페이지 바로가기',
+          style: TextStyle(
+            color: Colors.blue,
+          ),
+        ),
       ),
     );
   }

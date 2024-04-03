@@ -31,7 +31,7 @@ class _EconomicWordWidgetState extends State<EconomicWordWidget> {
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
         child: Material(
           color: isExpanded
-              ? const Color.fromARGB(255, 225, 255, 226)
+              ? const Color.fromRGBO(227, 241, 255, 1)
               : Colors.white,
           borderRadius: BorderRadius.circular(12),
           child: Column(
@@ -42,11 +42,11 @@ class _EconomicWordWidgetState extends State<EconomicWordWidget> {
                     isExpanded
                         ? Icons.tips_and_updates
                         : Icons.tips_and_updates_outlined,
-                    color: Colors.blue[300]),
+                    color: const Color.fromARGB(246, 255, 246, 121)),
                 title: Text(data?.word ?? '로딩 중...', style: titleStyle),
                 trailing: Icon(
                     isExpanded ? Icons.expand_less : Icons.expand_more,
-                    color: Colors.blue[300]),
+                    color: Colors.black),
                 onTap: () {
                   setState(() {
                     isExpanded = !isExpanded;
