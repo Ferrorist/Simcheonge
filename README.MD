@@ -118,7 +118,8 @@
 
 ### 개발환경
 
-![image](/uploads/b14e21c938de253249dbac02a0785dc1/image.png)
+![화면_캡처_2024-04-03_153131](/uploads/559c486ade7fe5cf0c08de73ff7fb3c8/화면_캡처_2024-04-03_153131.png)
+
 
 ## Service Architecture
 ![9to6_architecture2](/uploads/638ae8cfe1124f9f2fe48e28d2c4732c/9to6_architecture2.png)
