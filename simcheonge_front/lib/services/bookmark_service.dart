@@ -1,13 +1,15 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:simcheonge_front/widgets/bookmark_detail.dart';
+import 'package:simcheonge_front/models/bookmark_detail.dart';
 
 class BookmarkService {
   static const String _baseUrl = 'https://j10e102.p.ssafy.io/api/bookmarks';
 
   // 북마크 조회 메서드 추가
   Future<List<Bookmark>> getBookmarks(String bookmarkType) async {
+    print('체크중');
+
     final prefs = await SharedPreferences.getInstance();
     final String? accessToken = prefs.getString('accessToken');
 
@@ -38,8 +40,17 @@ class BookmarkService {
 
   Future<void> createBookmark(String bookmarkType,
       {int? policyId, int? postId}) async {
+    print('체크중');
+
     final prefs = await SharedPreferences.getInstance();
     final accessToken = prefs.getString('accessToken');
+    print('Creating bookmark: $bookmarkType'); // 로그 추가
+
+    Map<String, dynamic> body = {
+      'bookmarkType': bookmarkType,
+      if (bookmarkType == "POL") 'policyId': policyId,
+      if (bookmarkType == "POS") 'postId': postId,
+    };
 
     final response = await http.post(
       Uri.parse(_baseUrl),
@@ -47,17 +58,13 @@ class BookmarkService {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $accessToken',
       },
-      body: jsonEncode({
-        'bookmarkType': bookmarkType,
-        'policyId': policyId,
-        'postId': postId,
-      }),
+      body: jsonEncode(body),
     );
 
     if (response.statusCode == 200) {
       print('Bookmark created successfully');
     } else {
-      print('Failed to create bookmark');
+      print('Failed to create bookmark: ${response.body}');
     }
   }
 

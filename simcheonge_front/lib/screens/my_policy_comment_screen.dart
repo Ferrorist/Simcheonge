@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:simcheonge_front/widgets/side_app_bar.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:simcheonge_front/models/comment_detail.dart';
+import 'package:simcheonge_front/screens/my_post_comment_screen.dart';
+import 'package:simcheonge_front/screens/policy_detail_screen.dart';
 
 class MyPolicyCommentScreen extends StatefulWidget {
   const MyPolicyCommentScreen({super.key});
@@ -9,64 +14,136 @@ class MyPolicyCommentScreen extends StatefulWidget {
 }
 
 class _MyPolicyCommentScreenState extends State<MyPolicyCommentScreen> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  final TextEditingController _controller = TextEditingController();
-
-  // 더미 데이터를 생성합니다.
-  final List<String> allItems =
-      List<String>.generate(20, (i) => 'Comment ${i + 1}');
-  List<String> filteredItems = [];
+  List<Comment> comments = [];
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    // 초기 상태에서는 모든 아이템을 보여줍니다.
-    filteredItems = List.from(allItems);
-    // 텍스트 필드의 변화를 감지하여 검색 결과를 필터링합니다.
-    _controller.addListener(_filterItems);
+    _fetchMyPolicyComments();
   }
 
-  void _filterItems() {
-    final query = _controller.text.toLowerCase();
-    final matchedItems = allItems.where((item) {
-      return item.toLowerCase().contains(query);
-    }).toList();
+  Future<void> _fetchMyPolicyComments() async {
+    final prefs = await SharedPreferences.getInstance();
+    final accessToken = prefs.getString('accessToken');
+    final url = Uri.parse('https://j10e102.p.ssafy.io/api/comment/POL');
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
 
-    setState(() {
-      filteredItems = matchedItems;
-    });
+      if (response.statusCode == 200) {
+        // 명시적으로 UTF-8로 디코드
+        final responseBody = utf8.decode(response.bodyBytes);
+        final Map<String, dynamic> data = json.decode(responseBody);
+        final List<dynamic> fetchedComments = data['data'];
+        setState(() {
+          comments =
+              fetchedComments.map((json) => Comment.fromJson(json)).toList();
+        });
+      } else {
+        print('서버 오류: ${response.body}');
+      }
+    } catch (e) {
+      print('데이터 로드 실패: $e');
+    }
+  }
+
+  Future<void> _filterComments(String query) async {
+    if (query.isEmpty) {
+      // 검색어가 비어있을 경우 초기 댓글 목록을 불러오거나 다른 로직을 수행
+      return;
+    }
+
+    final prefs = await SharedPreferences.getInstance();
+    final accessToken = prefs.getString('accessToken');
+    const String commentType = "POL"; // 예시로 "POL"을 사용, 필요에 따라 변경
+    final url = Uri.parse(
+        'https://j10e102.p.ssafy.io/api/comment/$commentType/search?keyword=$query');
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = json.decode(response.body);
+        final List<dynamic> fetchedComments = data['data'];
+        setState(() {
+          comments =
+              fetchedComments.map((json) => Comment.fromJson(json)).toList();
+        });
+      } else {
+        print('서버 오류: ${response.body}');
+      }
+    } catch (e) {
+      print('데이터 로드 실패: $e');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: _scaffoldKey,
       appBar: AppBar(
         title: TextField(
-          controller: _controller,
+          controller: _searchController,
+          onChanged: _filterComments,
           decoration: InputDecoration(
-            hintText: '정책 댓글 검색...',
+            hintText: '댓글 검색...',
+            hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
             border: InputBorder.none,
-            prefixIcon: const Icon(Icons.search),
-            suffixIcon: _controller.text.isNotEmpty
-                ? IconButton(
-                    icon: const Icon(Icons.clear),
-                    onPressed: () => _controller.clear(),
-                  )
-                : null,
+            icon: const Icon(Icons.search, color: Colors.white),
           ),
+          style: const TextStyle(color: Colors.white, fontSize: 20),
         ),
       ),
       body: ListView.builder(
-        itemCount: filteredItems.length,
+        itemCount: comments.length,
         itemBuilder: (context, index) {
-          return ListTile(
-            title: Text(filteredItems[index]),
-            trailing: IconButton(
-              icon: const Icon(Icons.bookmark),
-              onPressed: () {
-                // 기능 구현 예시 (아이템 북마크 기능 등)
-              },
+          final comment = comments[index];
+          return InkWell(
+            onTap: () {
+              // 여기에 탭했을 때 실행할 로직을 추가합니다. 예를 들어, 상세 페이지로 이동
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => PolicyDetailScreen(
+                    policyId: comment.referencedId,
+                  ),
+                ),
+              );
+            },
+            child: Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+              child: Row(
+                children: [
+                  Expanded(
+                      child: Text(
+                    comment.content,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  )), // 긴 텍스트 처리를 위해 Expanded 사용
+
+                  Text(
+                    comment.createdAt,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey,
+                    ),
+                  ),
+                ],
+              ),
             ),
           );
         },
@@ -76,7 +153,11 @@ class _MyPolicyCommentScreenState extends State<MyPolicyCommentScreen> {
 
   @override
   void dispose() {
-    _controller.dispose();
+    _searchController.dispose(); // 컨트롤러를 정리합니다.
     super.dispose();
   }
+}
+
+void main() {
+  runApp(const MaterialApp(home: MyPolicyCommentScreen()));
 }
