@@ -33,7 +33,7 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
-        title: const Text('뉴스 읽기'),
+        title: const Text('원문 보기'),
         leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () {

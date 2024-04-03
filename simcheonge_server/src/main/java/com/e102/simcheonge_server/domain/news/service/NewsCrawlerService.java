@@ -99,7 +99,7 @@ public class NewsCrawlerService {
                 Element originalContentNode = newsDoc.select("#dic_area").first();
 
                 StringBuilder directText = new StringBuilder();
-                // Element의 직계 자식 노드를 순회 하여 직계 텍스트만 추출
+                //     Element의 직계 자식 노드를 순회 하여 직계 텍스트만 추출
                 for (Node node : originalContentNode.childNodes()) {
                     if (node instanceof TextNode) {
                         TextNode textNode = (TextNode) node;

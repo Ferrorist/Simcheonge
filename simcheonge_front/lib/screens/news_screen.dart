@@ -52,11 +52,21 @@ class _NewsScreenState extends State<NewsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(children: <Widget>[
-        const EconomicWordWidget(),
         const Padding(
-          padding: EdgeInsets.all(10.0),
-          child: Text('실시간 주요 뉴스',
-              style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
+          padding:
+              EdgeInsets.fromLTRB(20.0, 0.0, 0.0, 0.0), // 왼쪽으로 16.0, 위로 12.0 이동
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Text('[랜덤 경제 용어]'),
+          ),
+        ),
+        Container(
+          margin:
+              const EdgeInsets.only(top: 0), // 위쪽 마진값을 줄여서 텍스트와 위젯 사이의 간격을 조절
+          child: const EconomicWordWidget(),
+        ),
+        const SizedBox(
+          height: 20,
         ),
         Expanded(
           child: SmartRefresher(
@@ -94,19 +104,22 @@ class _NewsScreenState extends State<NewsScreen> {
                           child: Text(
                             newsItem.title ?? '제목 없음',
                             style: const TextStyle(
-                                fontSize: 21, fontWeight: FontWeight.bold),
+                                fontSize: 18, fontWeight: FontWeight.bold),
                             maxLines: 2, // 최대 2줄까지만 표시
                             overflow:
                                 TextOverflow.ellipsis, // 2줄 이상일 경우 '...'으로 표시
                           ),
                         ),
                         const Spacer(), // 제목과 원문보기 사이의 여백을 최대화합니다.
-                        Align(
-                          alignment: Alignment.bottomRight,
-                          child: Text(
-                            '원문보기',
-                            style: TextStyle(
-                                color: Theme.of(context).primaryColor),
+                        const Padding(
+                          padding: EdgeInsets.only(right: 10.0),
+                          child: Align(
+                            alignment: Alignment.bottomRight,
+                            child: Text(
+                              '원문보기',
+                              style: TextStyle(
+                                  color: Color.fromRGBO(107, 127, 212, 1)),
+                            ),
                           ),
                         ),
                       ],
@@ -118,7 +131,10 @@ class _NewsScreenState extends State<NewsScreen> {
                 // 마지막 요소에는 구분선을 그리지 않습니다.
                 return index == (newsList?.length ?? 1) - 1
                     ? Container()
-                    : const Divider(height: 1);
+                    : Divider(
+                        height: 1,
+                        color: Colors.grey[400],
+                      );
               },
             ),
           ),

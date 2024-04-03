@@ -70,7 +70,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
         'loading': false,
       });
       _messages.insert(0, {
-        'text': '답변을 생성 중입니다.',
+        'text': '잠시만 기다려 주세요...',
         'sender': 'bot',
         'loading': true,
       });
@@ -116,6 +116,20 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        scrolledUnderElevation: 0,
+        backgroundColor: Colors.white,
+        actions: [
+          ElevatedButton(
+            onPressed: _resetMessages,
+            style: ElevatedButton.styleFrom(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 10.0, vertical: 3.0),
+            ),
+            child: const Text('대화 삭제'),
+          ),
+        ],
+      ),
       resizeToAvoidBottomInset: true,
       body: Stack(
         children: [
@@ -255,20 +269,6 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                   ),
                 ),
               ],
-            ),
-          ),
-          Positioned(
-            top: 14.0,
-            left: 14.0,
-            child: ElevatedButton(
-              onPressed: _resetMessages,
-              style: ElevatedButton.styleFrom(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10.0, vertical: 3.0),
-                foregroundColor: Colors.white,
-                backgroundColor: const Color.fromARGB(141, 19, 142, 243), // 글자색
-              ),
-              child: const Text('대화 삭제'),
             ),
           ),
         ],
