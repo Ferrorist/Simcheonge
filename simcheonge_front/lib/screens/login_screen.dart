@@ -56,9 +56,8 @@ class _LoginScreenState extends State<LoginScreen> {
           duration: Duration(seconds: 1),
         ),
       );
-
+      print(data['data']['accessToken']);
       widget.updateLoginStatus?.call(true);
-
       // 로그인 성공 시 홈 화면으로 이동
       Navigator.pushAndRemoveUntil(
         context,

@@ -4,9 +4,16 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CommentWidget extends StatefulWidget {
-  final int postId;
+  final int? postId;
+  final int? policyId;
+  final String commentType;
 
-  const CommentWidget({super.key, required this.postId});
+  const CommentWidget({
+    super.key,
+    this.policyId,
+    this.postId,
+    required this.commentType,
+  });
 
   @override
   _CommentWidgetState createState() => _CommentWidgetState();
@@ -14,7 +21,7 @@ class CommentWidget extends StatefulWidget {
 
 class _CommentWidgetState extends State<CommentWidget> {
   final TextEditingController _commentController = TextEditingController();
-  List<dynamic> _comments = []; // 변수명을 _Comment에서 _comments로 변경하여 의미를 명확하게 함
+  List<dynamic> _comments = [];
 
   @override
   void initState() {
@@ -23,20 +30,42 @@ class _CommentWidgetState extends State<CommentWidget> {
   }
 
   Future<void> _fetchComments() async {
-    final prefs = await SharedPreferences.getInstance();
-    final String? accessToken = prefs.getString('accessToken');
-    final url = Uri.parse(
-        'https://j10e102.p.ssafy.io/api/comment/POS/${widget.postId}');
-    final response = await http.get(url, headers: {
-      'Authorization': 'Bearer $accessToken',
-    });
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final String? accessToken = prefs.getString('accessToken');
+      String url0 = '';
+      print(widget.postId);
 
-    if (response.statusCode == 200) {
-      setState(() {
-        _comments = json.decode(response.body)['data'];
+      if (widget.commentType == 'POS') {
+        url0 =
+            'https://j10e102.p.ssafy.io/api/comment/${widget.commentType}/${widget.postId}';
+      } else if (widget.commentType == 'POL') {
+        url0 =
+            'https://j10e102.p.ssafy.io/api/comment/${widget.commentType}/${widget.policyId}';
+      } else {
+        // postId 또는 policyId가 제공되지 않았을 때의 처리
+        print('Error: No valid ID provided for the comment type.');
+        return;
+      }
+
+      final url = Uri.parse(url0);
+      print(url);
+      final response = await http.get(url, headers: {
+        'Authorization': 'Bearer $accessToken',
       });
-    } else {
-      print('Failed to load comments: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final responseBody = utf8.decode(response.bodyBytes);
+        final parsedData = json.decode(responseBody);
+
+        setState(() {
+          _comments = parsedData['data'];
+        });
+      } else {
+        print('Failed to load comments: ${response.body}');
+      }
+    } catch (e) {
+      print('CommentWidget: 댓글 로딩 중 예외 발생 - $e');
     }
   }
 
@@ -44,19 +73,26 @@ class _CommentWidgetState extends State<CommentWidget> {
     final prefs = await SharedPreferences.getInstance();
     final String? accessToken = prefs.getString('accessToken');
     final url = Uri.parse('https://j10e102.p.ssafy.io/api/comment');
+
+    int? referencedId;
+    if (widget.commentType == 'POS') {
+      referencedId = widget.postId;
+    } else if (widget.commentType == 'POL') {
+      referencedId = widget.policyId;
+    }
+
     final response = await http.post(url,
         headers: {
           'Content-Type': 'application/json; charset=UTF-8',
           'Authorization': 'Bearer $accessToken',
         },
         body: jsonEncode({
-          'commentType': 'POS',
-          'referencedId': widget.postId,
+          'commentType': widget.commentType,
+          'referencedId': referencedId,
           'content': content,
         }));
 
     if (response.statusCode == 200) {
-      print('Comment added successfully');
       _commentController.clear();
       _fetchComments();
     } else {
@@ -73,7 +109,6 @@ class _CommentWidgetState extends State<CommentWidget> {
     });
 
     if (response.statusCode == 200) {
-      print('Comment deleted successfully');
       _fetchComments();
     } else {
       print('Failed to delete comment: ${response.body}');
@@ -82,51 +117,90 @@ class _CommentWidgetState extends State<CommentWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('댓글'),
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView.builder(
-              itemCount: _comments.length,
-              itemBuilder: (context, index) {
-                final comment = _comments[index];
-                return ListTile(
-                  title: Text(comment['nickname']),
-                  subtitle: Text(comment['content']),
-                  trailing: comment['isMyComment']
-                      ? IconButton(
-                          icon: const Icon(Icons.delete),
-                          onPressed: () => _deleteComment(comment['id']),
-                        )
-                      : null,
-                );
-              },
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _commentController,
-                    decoration: const InputDecoration(
-                      hintText: '댓글 추가...',
+    return Column(
+      children: [
+        ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: _comments.length,
+          itemBuilder: (context, index) {
+            final comment = _comments[index];
+            print('코멘트는 $comment["isMyComment"]');
+
+            return ListTile(
+              title: Text(comment['content']),
+              subtitle: Row(
+                children: [
+                  Expanded(
+                    child: Text(comment['nickname'] ?? 'Unknown'),
+                  ),
+                  Text(
+                    comment['createAt'],
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey,
                     ),
                   ),
+                ],
+              ),
+              trailing: comment['myComment'] == true
+                  ? IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: const Text('댓글 삭제'),
+                              content: const Text('댓글을 삭제하시겠습니까?'),
+                              actions: <Widget>[
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop(); // 다이얼로그 닫기
+                                  },
+                                  child: const Text('아니오'),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop(); // 다이얼로그 닫기
+                                    _deleteComment(
+                                        comment['id']); // 댓글 삭제 메소드 호출
+                                  },
+                                  child: const Text('예'),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      },
+                    )
+                  : null,
+            );
+          },
+        ),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _commentController,
+                  decoration: const InputDecoration(
+                    hintText: '댓글 추가...',
+                  ),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.send),
-                  onPressed: () => _addComment(_commentController.text),
+              ),
+              InkWell(
+                onTap: () => _addComment(_commentController.text),
+                child: Container(
+                  padding: const EdgeInsets.all(8.0),
+                  child: const Icon(Icons.send),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

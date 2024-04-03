@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:simcheonge_front/widgets/policy_detail.dart';
+import 'package:simcheonge_front/models/policy_detail.dart';
 
 class PolicyService {
   static const String _baseUrl = 'https://j10e102.p.ssafy.io/api/policy';
