@@ -40,7 +40,7 @@ public class UserService {
 
     private void isValidatePassword(String password, String passwordCheck) {
         String pattern = "^(?=.*[a-zA-Z])(?=.*[0-9])[a-zA-Z0-9!@#$%^&*]{8,16}$";
-        String pattern2 = "^(?=.*[a-zA-Z])(?=.*\\d)[a-zA-Z\\d!?@#$%^&*]{6,}$";
+        String pattern2 = "^(?=.*[a-zA-Z])(?=.*\\d)[a-zA-Z\\d!?@#$%^&*]{8,}$";
 
 
         if(!password.matches(pattern)||!password.matches(pattern2)){
@@ -67,9 +67,8 @@ public class UserService {
 
     public void isValidateNickname(String nickname) {
         String pattern = "^[가-힣a-zA-Z0-9]{2,8}$";
-        String pattern2 = "^(?=.*[a-zA-Z])(?=.*\\d)[a-zA-Z\\d!?@#$%^&*]{6,}$";
 
-        if (!nickname.matches(pattern)||!nickname.matches(pattern2)) {
+        if (!nickname.matches(pattern)) {
             throw new IllegalArgumentException("닉네임 규칙에 맞지 않습니다.");
         }
 
