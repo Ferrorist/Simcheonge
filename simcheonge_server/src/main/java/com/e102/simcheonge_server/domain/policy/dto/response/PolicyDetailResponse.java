@@ -24,4 +24,6 @@ public class PolicyDetailResponse {
     private String policy_entry_limit;
     private String policy_application_procedure;
     private String policy_etc;
+
+    private boolean isBookmarked;
 }
