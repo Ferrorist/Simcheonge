@@ -176,7 +176,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                         mainAxisAlignment:
                             MainAxisAlignment.spaceBetween, // 양쪽 끝에 자식들을 정렬
                         children: [
-                          Text('작성자 : ${post['userNickname']}}',
+                          Text('작성자 : ${post['userNickname']}',
                               style: const TextStyle(
                                   fontWeight: FontWeight
                                       .w200)), // 여기서는 작성자 닉네임 등의 실제 데이터를 표시하도록 변경할 수 있습니다.
