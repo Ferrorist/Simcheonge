@@ -38,13 +38,10 @@ class BookmarkService {
     }
   }
 
-  Future<void> createBookmark(String bookmarkType,
+  Future<int?> createBookmark(String bookmarkType,
       {int? policyId, int? postId}) async {
-    print('체크중');
-
     final prefs = await SharedPreferences.getInstance();
     final accessToken = prefs.getString('accessToken');
-    print('Creating bookmark: $bookmarkType'); // 로그 추가
 
     Map<String, dynamic> body = {
       'bookmarkType': bookmarkType,
@@ -60,11 +57,15 @@ class BookmarkService {
       },
       body: jsonEncode(body),
     );
-
+    print('여기여기 ${response.statusCode}');
     if (response.statusCode == 200) {
-      print('Bookmark created successfully');
+      final jsonResponse = jsonDecode(response.body);
+      // 서버 응답에서 bookmarkId 추출
+      return jsonResponse['bookmarkId'];
     } else {
+      // 오류 처리: 상태 코드가 200이 아닌 경우, 실패로 간주
       print('Failed to create bookmark: ${response.body}');
+      return null; // 실패 시 null 반환
     }
   }
 

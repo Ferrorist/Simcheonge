@@ -180,7 +180,9 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                         ),
                       ),
                       // 여기에 추가 UI 요소를 배치할 수 있습니다.
-                      // CommentWidget(postId: postId), // 댓글 위젯 주석 처리
+                      CommentWidget(
+                          commentType: 'POS',
+                          postId: widget.postId), // 댓글 위젯 주석 처리
                     ],
                   ),
                 );
