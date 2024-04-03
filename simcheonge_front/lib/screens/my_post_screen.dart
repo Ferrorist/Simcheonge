@@ -12,7 +12,8 @@ class MyPostScreen extends StatefulWidget {
   _MyPostScreenState createState() => _MyPostScreenState();
 }
 
-class _MyPostScreenState extends State<MyPostScreen> {
+class _MyPostScreenState extends State<MyPostScreen>
+    with WidgetsBindingObserver {
   List<MyPost> allItems = []; // MyPost 객체의 리스트
   List<MyPost> displayedItems = [];
   final TextEditingController _controller = TextEditingController();
@@ -20,8 +21,8 @@ class _MyPostScreenState extends State<MyPostScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _loadMyPosts();
-
     _controller.addListener(() {
       updateSearchQuery(_controller.text);
     });
@@ -46,8 +47,18 @@ class _MyPostScreenState extends State<MyPostScreen> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _controller.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    // 앱이 다시 활성화 될 때(_loadMyPosts를 호출해야 하는 상황) 콘텐츠를 새로고침합니다.
+    if (state == AppLifecycleState.resumed) {
+      _loadMyPosts();
+    }
   }
 
   void updateSearchQuery(String newQuery) {
