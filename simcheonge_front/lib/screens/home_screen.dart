@@ -7,6 +7,7 @@ import 'package:simcheonge_front/screens/search_screen.dart';
 import 'package:simcheonge_front/widgets/main_button.dart'; // 수정된 MainButton 위젯 import
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import 'package:simcheonge_front/screens/post_detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final Function(int) changePage;
@@ -27,12 +28,32 @@ class _HomeScreenState extends State<HomeScreen> {
     // 이미지 슬라이더의 높이를 화면 높이의 일정 비율로 설정
     double sliderHeight = screenHeight * 0.4; // 예시로 40%로 설정
 
-    return SizedBox(
-      width: screenWidth,
-      height: sliderHeight, // 수정된 부분: 이미지 슬라이더의 높이 조절
-      child: Image.asset(
-        'assets/home_screen/home_img${index + 1}.png',
-        fit: BoxFit.cover, // 이미지를 늘리거나 줄여서 영역을 채우도록 설정
+    // postId 매핑
+    Map<int, int> postIds = {
+      1: 56, // 2번째 이미지
+      2: 54, // 3번째 이미지
+      3: 55, // 4번째 이미지
+      4: 57, // 5번째 이미지
+    };
+
+    return GestureDetector(
+      onTap: () {
+        if (postIds.containsKey(index)) {
+          int postId = postIds[index]!;
+          // Navigator를 사용하여 PostDetailScreen으로 이동
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => PostDetailScreen(postId: postId)));
+        }
+      },
+      child: SizedBox(
+        width: screenWidth,
+        height: sliderHeight,
+        child: Image.asset(
+          'assets/home_screen/home_img${index + 1}.png',
+          fit: BoxFit.cover,
+        ),
       ),
     );
   }
