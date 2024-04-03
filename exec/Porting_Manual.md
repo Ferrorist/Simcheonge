@@ -39,7 +39,7 @@ Dependency를 적습니다.
 
 - build.gradle
 
-  ```jsx
+  ```
   plugins {
   	id 'java'
   	id 'org.springframework.boot' version '3.2.3'
@@ -138,7 +138,7 @@ Dependency를 적습니다.
 
 - package.json
 
-  ```jsx
+  ```
   {
     "name": "simcheonge_admin",
     "version": "0.1.0",
@@ -228,7 +228,7 @@ Dependency를 적습니다.
 
 - requirements.txt
 
-  ```json
+  ```
   accelerate==0.27.2
   aiohttp==3.9.3
   aiosignal==1.3.1
@@ -382,7 +382,7 @@ Dependency를 적습니다.
 
     /src/resources/application-prod.properties
 
-    ```json
+    ```
     # Spring Server-Port
     server.port=
     
@@ -420,7 +420,7 @@ Dependency를 적습니다.
 
     /src/resources/application.properties
 
-    ```json
+    ```
     # JPA 설정
     spring.jpa.database=mysql
     spring.jpa.hibernate.ddl-auto=none
@@ -464,7 +464,7 @@ Dependency를 적습니다.
 
     리액트 /.env
 
-    ```json
+    ```
     REACT_APP_API_URL={{요청 서버 도메인}}
     ```
 
