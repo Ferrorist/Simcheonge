@@ -1,8 +1,9 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:simcheonge_front/models/bookmark_detail.dart';
 import 'package:simcheonge_front/services/bookmark_service.dart';
-import 'package:simcheonge_front/widgets/bookmark_detail.dart';
-// BookmarkService와 Bookmark 모델을 적절히 임포트해야 합니다.
 
 class BookmarkWidget extends StatefulWidget {
   final String bookmarkType; // "POL" 또는 "POS"
@@ -21,13 +22,13 @@ class BookmarkWidget extends StatefulWidget {
 }
 
 class _BookmarkWidgetState extends State<BookmarkWidget> {
-  final BookmarkService _bookmarkService = BookmarkService();
   bool _isBookmarked = false;
-  int? _bookmarkId; // 북마크 ID
+  int? _bookmarkId;
 
   @override
   void initState() {
     super.initState();
+    print('여기여기');
     _checkLoginStatus().then((isLoggedIn) {
       if (isLoggedIn) {
         _checkBookmarkStatus();
@@ -36,41 +37,35 @@ class _BookmarkWidgetState extends State<BookmarkWidget> {
   }
 
   Future<bool> _checkLoginStatus() async {
+    print('체크중');
+
     final prefs = await SharedPreferences.getInstance();
-    final accessToken = prefs.getString('accessToken');
-    return accessToken != null;
+    return prefs.getString('accessToken') != null;
   }
 
-  void _checkBookmarkStatus() async {
-    try {
-      int? referenceId =
-          widget.bookmarkType == 'POL' ? widget.policyId : widget.postId;
-      if (referenceId == null) {
-        setState(() {
-          _isBookmarked = false;
-        });
-        return;
-      }
+  Future<void> _checkBookmarkStatus() async {
+    final isLoggedIn = await _checkLoginStatus();
+    print('체크중');
+    if (!isLoggedIn) {
+      print('User is not logged in');
+      return;
+    }
 
-      final List<Bookmark> bookmarks =
-          await _bookmarkService.getBookmarks(widget.bookmarkType);
-      final Bookmark currentBookmark = bookmarks.firstWhere(
-        (bookmark) =>
-            (widget.bookmarkType == 'POL'
-                ? bookmark.policyId
-                : bookmark.postId) ==
-            referenceId,
-        // orElse: () => null,
+    try {
+      final bookmarks =
+          await BookmarkService().getBookmarks(widget.bookmarkType);
+      Bookmark? bookmark = bookmarks.firstWhere(
+        (b) => widget.bookmarkType == 'POL'
+            ? b.policyId == widget.policyId
+            : b.postId == widget.postId,
       );
 
       setState(() {
-        _isBookmarked =
-            currentBookmark != null; // True if a currentBookmark exists
-        _bookmarkId = currentBookmark
-            .bookmarkId; // Safely access bookmarkId, which may be null
+        _isBookmarked = bookmark != null;
+        _bookmarkId = bookmark.bookmarkId;
       });
     } catch (e) {
-      print('Error checking bookmark status: $e');
+      print('Failed to check bookmark status: $e');
       setState(() {
         _isBookmarked = false;
         _bookmarkId = null;
@@ -79,21 +74,39 @@ class _BookmarkWidgetState extends State<BookmarkWidget> {
   }
 
   void _toggleBookmark() async {
-    print("북마크 상태 변경 전: $_isBookmarked");
+    print('Toggle Bookmark Button Pressed'); // 버튼이 눌렸는지 확인
+    final isLoggedIn = await _checkLoginStatus();
+    print('Is Logged In: $isLoggedIn'); // 로그인 상태 확인 로그
+
+    if (!isLoggedIn) {
+      print('User is not logged in'); // 로그인 상태 로그
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('로그인이 필요합니다.')),
+      );
+      return;
+    }
 
     if (_isBookmarked) {
       // 북마크 삭제 로직
+      print('Attempting to delete bookmark, ID: $_bookmarkId'); // 삭제 시도 로그
       if (_bookmarkId != null) {
-        await _bookmarkService.deleteBookmark(_bookmarkId!);
+        try {
+          await BookmarkService().deleteBookmark(_bookmarkId!);
+          print('Bookmark deleted successfully'); // 삭제 성공 로그
+        } catch (e) {
+          print('Failed to delete bookmark: $e'); // 삭제 실패 로그
+        }
       }
     } else {
-      // 북마크 추가 로직
-      await _bookmarkService.createBookmark(
-        widget.bookmarkType,
-        policyId: widget.policyId,
-        postId: widget.postId,
-      );
-      // 북마크 생성 후 ID 업데이트 필요. 실제 구현에서 서버로부터 북마크 ID를 받아와야 함.
+      // 북마크 생성 로직
+      print('Attempting to create bookmark'); // 생성 시도 로그
+      try {
+        await BookmarkService().createBookmark(widget.bookmarkType,
+            policyId: widget.policyId, postId: widget.postId);
+        print('Bookmark created successfully'); // 생성 성공 로그
+      } catch (e) {
+        print('Failed to create bookmark: $e'); // 생성 실패 로그
+      }
     }
 
     setState(() {
@@ -102,14 +115,6 @@ class _BookmarkWidgetState extends State<BookmarkWidget> {
         _bookmarkId = null; // 북마크 삭제 후 _bookmarkId 초기화
       }
     });
-
-    print("북마크 상태 변경 후: $_isBookmarked");
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(_isBookmarked ? '북마크에 추가되었습니다.' : '북마크에서 제거되었습니다.'),
-        duration: const Duration(seconds: 2),
-      ),
-    );
   }
 
   @override
@@ -118,18 +123,16 @@ class _BookmarkWidgetState extends State<BookmarkWidget> {
       icon: Icon(_isBookmarked ? Icons.bookmark : Icons.bookmark_border),
       color: _isBookmarked ? Colors.yellow : null, // 북마크 상태에 따라 아이콘 색상 변경
       onPressed: () async {
-        try {
-          final isLoggedIn = await _checkLoginStatus();
-          if (isLoggedIn) {
-            _toggleBookmark();
-          } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('로그인이 필요합니다.')),
-            );
-          }
-        } catch (e) {
-          print("북마크 처리 중 에러 발생: $e");
+        print('체크중');
+
+        final isLoggedIn = await _checkLoginStatus();
+        if (!isLoggedIn) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('로그인이 필요합니다.')),
+          );
+          return;
         }
+        _toggleBookmark();
       },
     );
   }
