@@ -42,11 +42,13 @@ public class CommentService {
                 .orElseThrow(() -> new DataNotFoundException("해당 사용자가 존재하지 않습니다."));
 
         if (commentRequest.getCommentType().equals("POS")) {
-            Post post = postRepository.findByPostId(commentRequest.getReferencedId())
+            Post post = postRepository.findByPostIdAndIsDeleted(commentRequest.getReferencedId(),false)
                     .orElseThrow(() -> new DataNotFoundException("해당 게시물이 존재하지 않습니다."));
         } else if (commentRequest.getCommentType().equals("POL")) {
-            Policy policy = policyRepository.findByPolicyId(commentRequest.getReferencedId())
+            Policy policy = policyRepository.findByPolicyIdAndIsProcessed(commentRequest.getReferencedId(),true)
                     .orElseThrow(() -> new DataNotFoundException("해당 정책이 존재하지 않습니다."));
+        }else{
+            throw new IllegalArgumentException("게시물과 정책 외에 다른 타입에 대한 댓글은 존재하지 않습니다.");
         }
 
         Comment comment = Comment.builder()
@@ -62,11 +64,13 @@ public class CommentService {
         User user = userRepostory.findById(userId)
                 .orElseThrow(() -> new DataNotFoundException("해당 사용자가 존재하지 않습니다."));
         if (commentType.equals("POS")) {
-            Post post = postRepository.findByPostId(referencedId)
+            Post post = postRepository.findByPostIdAndIsDeleted(referencedId,false)
                     .orElseThrow(() -> new DataNotFoundException("해당 게시물이 존재하지 않습니다."));
         } else if (commentType.equals("POL")) {
-            Policy policy = policyRepository.findByPolicyId(referencedId)
+            Policy policy = policyRepository.findByPolicyIdAndIsProcessed(referencedId,true)
                     .orElseThrow(() -> new DataNotFoundException("해당 정책이 존재하지 않습니다."));
+        }else{
+            throw new IllegalArgumentException("게시물과 정책 외에 다른 타입에 대한 댓글은 존재하지 않습니다.");
         }
 
         List<Comment> commentList = commentRepository.findByCommentTypeAndReferencedIdAndIsDeletedFalse(commentType, referencedId);

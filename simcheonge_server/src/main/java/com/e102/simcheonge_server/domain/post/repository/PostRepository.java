@@ -4,7 +4,6 @@ import com.e102.simcheonge_server.domain.post.entity.Post;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.expression.spel.ast.OpNE;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -13,6 +12,8 @@ import java.util.Optional;
 @Repository
 public interface PostRepository extends JpaRepository<Post, Integer> {
     Optional<Post> findByPostId(int postId);
+
+    Optional<Post> findByPostIdAndIsDeleted(int postId, boolean isDeleted);
 
     // 게시글 조회
         // 모든 게시글을 키워드에 따라 조회
