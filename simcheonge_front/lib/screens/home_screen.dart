@@ -136,7 +136,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 20),
             const Center(
-              child: Text("ⓒ 2024. 9to6 all rights reserved."),
+              child: Text("ⓒ 2024. 9ty6 all rights reserved."),
             ),
             const SizedBox(
               height: 12,

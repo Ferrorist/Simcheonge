@@ -72,7 +72,7 @@ class _PostCreateScreenState extends State<PostCreateScreen> {
         content: Text('게시글 작성에 성공했습니다.'),
         duration: Duration(milliseconds: 500),
       ));
-      Navigator.pop(context); // 현재 화면을 닫습니다
+      Navigator.pop(context, true); // 현재 화면을 닫습니다
       widget.onPostCreated?.call(); // 콜백 함수 호출하여 PostScreen에게 알립니다
     } else {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
