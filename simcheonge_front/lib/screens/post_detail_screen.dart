@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:simcheonge_front/screens/post_edit_screen.dart';
 import 'package:simcheonge_front/services/post_service.dart';
-import 'package:simcheonge_front/widgets/bookmark_widget.dart'; // 서비스 경로는 예시로 사용
+import 'package:simcheonge_front/widgets/bookmark_widget.dart';
+import 'package:simcheonge_front/widgets/comment_widget.dart'; // 댓글 위젯 import
 
 class PostDetailScreen extends StatefulWidget {
   final int postId;
