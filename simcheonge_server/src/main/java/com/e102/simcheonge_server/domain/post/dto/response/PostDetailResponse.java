@@ -16,4 +16,5 @@ public class PostDetailResponse {
     private String userNickname;
     private Date createdAt;
     private String categoryName;
+    private boolean isBookmarked;
 }
