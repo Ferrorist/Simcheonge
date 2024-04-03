@@ -6,6 +6,7 @@ import 'package:simcheonge_front/models/comment_detail.dart';
 import 'package:simcheonge_front/screens/my_post_comment_screen.dart';
 import 'package:simcheonge_front/screens/policy_detail_screen.dart';
 import 'package:simcheonge_front/screens/post_detail_screen.dart';
+import 'package:simcheonge_front/services/post_service.dart';
 
 class MyPostCommentScreen extends StatefulWidget {
   const MyPostCommentScreen({super.key});
@@ -16,12 +17,16 @@ class MyPostCommentScreen extends StatefulWidget {
 
 class _MyPostCommentScreenState extends State<MyPostCommentScreen> {
   List<Comment> comments = [];
-  final TextEditingController _searchController = TextEditingController();
+  List<Comment> displayedComments = []; // 필터링된 댓글의 리스트
+  final TextEditingController _controller = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _fetchMyPostComments();
+    _controller.addListener(() {
+      updateSearchQuery(_controller.text);
+    });
   }
 
   Future<void> _fetchMyPostComments() async {
@@ -36,7 +41,7 @@ class _MyPostCommentScreenState extends State<MyPostCommentScreen> {
           'Authorization': 'Bearer $accessToken',
         },
       );
-
+      print('나는 프론트의왕 서준하다 ${response.statusCode}');
       if (response.statusCode == 200) {
         // 명시적으로 UTF-8로 디코드
         final responseBody = utf8.decode(response.bodyBytes);
@@ -90,20 +95,45 @@ class _MyPostCommentScreenState extends State<MyPostCommentScreen> {
     }
   }
 
+  void updateSearchQuery(String newQuery) {
+    if (mounted) {
+      setState(() {
+        displayedComments = newQuery.isNotEmpty
+            ? comments
+                .where((comments) => comments.content
+                    .toLowerCase()
+                    .contains(newQuery.toLowerCase()))
+                .toList()
+            : comments;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose(); // 컨트롤러를 정리합니다.
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: TextField(
-          controller: _searchController,
-          onChanged: _filterComments,
+          controller: _controller,
           decoration: InputDecoration(
-            hintText: '댓글 검색...',
-            hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
+            hintText: '검색...',
             border: InputBorder.none,
-            icon: const Icon(Icons.search, color: Colors.white),
+            prefixIcon: const Icon(Icons.search),
+            suffixIcon: _controller.text.isNotEmpty
+                ? IconButton(
+                    icon: const Icon(Icons.clear),
+                    onPressed: () {
+                      _controller.clear();
+                    },
+                  )
+                : null,
           ),
-          style: const TextStyle(color: Colors.white, fontSize: 20),
         ),
       ),
       body: ListView.builder(
@@ -150,12 +180,6 @@ class _MyPostCommentScreenState extends State<MyPostCommentScreen> {
         },
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _searchController.dispose(); // 컨트롤러를 정리합니다.
-    super.dispose();
   }
 }
 
