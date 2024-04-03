@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:simcheonge_front/models/policy_detail.dart';
 import 'package:simcheonge_front/services/policy_service.dart';
-import 'package:simcheonge_front/widgets/policy_detail.dart';
+import 'package:simcheonge_front/widgets/comment_widget.dart';
 import 'package:word_break_text/word_break_text.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:intl/intl.dart';
@@ -72,6 +73,10 @@ class PolicyDetailScreen extends StatelessWidget {
                       buildSection('신청 제한', policy.policyEntryLimit),
                       buildSection('참고 사항', policy.policyEtc),
                       buildWebsiteSection('참고 웹사이트', policy.policySiteAddress),
+                      CommentWidget(
+                        policyId: policyId,
+                        commentType: 'POL',
+                      ),
                     ],
                   ),
                 ),
@@ -148,7 +153,7 @@ class PolicyDetailScreen extends StatelessWidget {
               style:
                   const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
         ),
-        const SizedBox(height: 25),
+        const SizedBox(height: 0),
         if (title == '지원 기간' && modifiedContent == '상시') // '지원 기간'이 '상시'인 경우
           Padding(
             padding: const EdgeInsets.only(right: 20.0),

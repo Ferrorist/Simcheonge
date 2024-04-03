@@ -1,35 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:simcheonge_front/screens/post_detail_screen.dart';
 import 'dart:convert';
-import 'package:simcheonge_front/widgets/side_app_bar.dart';
-
-// 가정: MyComment 모델
-class MyComment {
-  final int commentId;
-  final String commentType;
-  final int referencedId;
-  final String content;
-  final String createdAt;
-
-  MyComment({
-    required this.commentId,
-    required this.commentType,
-    required this.referencedId,
-    required this.content,
-    required this.createdAt,
-  });
-
-  factory MyComment.fromJson(Map<String, dynamic> json) {
-    return MyComment(
-      commentId: json['commentId'],
-      commentType: json['commentType'],
-      referencedId: json['referencedId'],
-      content: json['content'],
-      createdAt: json['createdAt'],
-    );
-  }
-}
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:simcheonge_front/models/comment_detail.dart';
+import 'package:simcheonge_front/screens/my_post_comment_screen.dart';
+import 'package:simcheonge_front/screens/policy_detail_screen.dart';
+import 'package:simcheonge_front/screens/post_detail_screen.dart';
 
 class MyPostCommentScreen extends StatefulWidget {
   const MyPostCommentScreen({super.key});
@@ -39,100 +15,150 @@ class MyPostCommentScreen extends StatefulWidget {
 }
 
 class _MyPostCommentScreenState extends State<MyPostCommentScreen> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  final TextEditingController _controller = TextEditingController();
-  List<MyComment> allComments = [];
-  List<MyComment> displayedComments = [];
+  List<Comment> comments = [];
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _fetchMyComments();
-    _controller.addListener(() {
-      updateSearchQuery(_controller.text);
-    });
+    _fetchMyPostComments();
   }
 
-  Future<void> _fetchMyComments() async {
-    // 가정: 댓글 데이터를 불러오는 서버의 URL
-    final response =
-        await http.get(Uri.parse('https://j10e102.p.ssafy.io/api/comment/POS'));
+  Future<void> _fetchMyPostComments() async {
+    final prefs = await SharedPreferences.getInstance();
+    final accessToken = prefs.getString('accessToken');
+    final url = Uri.parse('https://j10e102.p.ssafy.io/api/comment/POS');
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
 
-    if (response.statusCode == 200) {
-      final List<dynamic> commentsJson = json.decode(response.body);
-      setState(() {
-        allComments =
-            commentsJson.map((json) => MyComment.fromJson(json)).toList();
-        displayedComments = allComments;
-      });
-    } else {
-      // 오류 처리
-      print('Failed to load comments');
+      if (response.statusCode == 200) {
+        // 명시적으로 UTF-8로 디코드
+        final responseBody = utf8.decode(response.bodyBytes);
+        final Map<String, dynamic> data = json.decode(responseBody);
+        final List<dynamic> fetchedComments = data['data'];
+        setState(() {
+          comments =
+              fetchedComments.map((json) => Comment.fromJson(json)).toList();
+        });
+      } else {
+        print('서버 오류: ${response.body}');
+      }
+    } catch (e) {
+      print('데이터 로드 실패: $e');
     }
   }
 
-  void updateSearchQuery(String newQuery) {
-    setState(() {
-      displayedComments = allComments
-          .where((comment) =>
-              comment.content.toLowerCase().contains(newQuery.toLowerCase()))
-          .toList();
-    });
-  }
+  Future<void> _filterComments(String query) async {
+    if (query.isEmpty) {
+      // 검색어가 비어있을 경우 초기 댓글 목록을 불러오거나 다른 로직을 수행
+      return;
+    }
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
+    final prefs = await SharedPreferences.getInstance();
+    final accessToken = prefs.getString('accessToken');
+    const String commentType = "POS"; // 예시로 "POL"을 사용, 필요에 따라 변경
+    final url = Uri.parse(
+        'https://j10e102.p.ssafy.io/api/comment/$commentType/search?keyword=$query');
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = json.decode(response.body);
+        final List<dynamic> fetchedComments = data['data'];
+        setState(() {
+          comments =
+              fetchedComments.map((json) => Comment.fromJson(json)).toList();
+        });
+      } else {
+        print('서버 오류: ${response.body}');
+      }
+    } catch (e) {
+      print('데이터 로드 실패: $e');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: _scaffoldKey,
       appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
+        title: TextField(
+          controller: _searchController,
+          onChanged: _filterComments,
+          decoration: InputDecoration(
+            hintText: '댓글 검색...',
+            hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
+            border: InputBorder.none,
+            icon: const Icon(Icons.search, color: Colors.white),
           ),
-          child: TextField(
-            controller: _controller,
-            decoration: InputDecoration(
-              hintText: '검색...',
-              border: InputBorder.none,
-              prefixIcon: const Icon(Icons.search),
-              suffixIcon: _controller.text.isNotEmpty
-                  ? IconButton(
-                      icon: const Icon(Icons.clear),
-                      onPressed: () => _controller.clear(),
-                    )
-                  : null,
-            ),
-          ),
+          style: const TextStyle(color: Colors.white, fontSize: 20),
         ),
       ),
       body: ListView.builder(
-        itemCount: displayedComments.length,
+        itemCount: comments.length,
         itemBuilder: (context, index) {
-          final comment = displayedComments[index];
-          return ListTile(
-            title: Text(comment.content),
+          final comment = comments[index];
+          return InkWell(
             onTap: () {
-              // 가정: 댓글이 달린 게시물의 상세 화면으로 이동
-              // 여기에서는 이동 로직을 구현하지만, 실제로는 프로젝트의 라우팅 설정에 따라 다름
+              // 여기에 탭했을 때 실행할 로직을 추가합니다. 예를 들어, 상세 페이지로 이동
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) =>
-                        PostDetailScreen(postId: comment.referencedId)),
+                  builder: (context) => PostDetailScreen(
+                    postId: comment.referencedId,
+                  ),
+                ),
               );
             },
+            child: Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+              child: Row(
+                children: [
+                  Expanded(
+                      child: Text(
+                    comment.content,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  )), // 긴 텍스트 처리를 위해 Expanded 사용
+
+                  Text(
+                    comment.createdAt,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           );
         },
       ),
     );
   }
+
+  @override
+  void dispose() {
+    _searchController.dispose(); // 컨트롤러를 정리합니다.
+    super.dispose();
+  }
+}
+
+void main() {
+  runApp(const MaterialApp(home: MyPostCommentScreen()));
 }
