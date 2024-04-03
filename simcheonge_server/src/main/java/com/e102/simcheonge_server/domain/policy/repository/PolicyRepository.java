@@ -13,6 +13,9 @@ import java.util.Optional;
 @Repository
 public interface PolicyRepository extends JpaRepository<Policy,Integer>, PolicyCustomRepository {
     Optional<Policy> findByPolicyId(int policyId);
+
+    Optional<Policy> findByPolicyIdAndIsProcessed(int policyId, boolean isProcessed);
+
     @Query("SELECT p FROM Policy p WHERE p.policyId IN :policyIds")
     PageImpl<Policy> findByPolicyIds(List<Integer> policyIds, Pageable pageable);
     PageImpl<Policy> findAll(Pageable pageable);
