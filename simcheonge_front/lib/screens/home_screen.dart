@@ -8,6 +8,7 @@ import 'package:simcheonge_front/widgets/main_button.dart'; // 수정된 MainBut
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:simcheonge_front/screens/post_detail_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeScreen extends StatefulWidget {
   final Function(int) changePage;
@@ -28,6 +29,12 @@ class _HomeScreenState extends State<HomeScreen> {
     // 이미지 슬라이더의 높이를 화면 높이의 일정 비율로 설정
     double sliderHeight = screenHeight * 0.4; // 예시로 40%로 설정
 
+    Future<bool> isLoggedIn() async {
+      final prefs = await SharedPreferences.getInstance();
+      final accessToken = prefs.getString('accessToken');
+      return accessToken != null;
+    }
+
     // postId 매핑
     Map<int, int> postIds = {
       1: 56, // 2번째 이미지
@@ -37,10 +44,14 @@ class _HomeScreenState extends State<HomeScreen> {
     };
 
     return GestureDetector(
-      onTap: () {
+      onTap: () async {
+        bool loggedIn = await isLoggedIn();
+        if (!loggedIn) {
+          // 로그인 되어 있지 않으면 아무 동작도 하지 않음
+          return;
+        }
         if (postIds.containsKey(index)) {
           int postId = postIds[index]!;
-          // Navigator를 사용하여 PostDetailScreen으로 이동
           Navigator.push(
               context,
               MaterialPageRoute(
@@ -74,17 +85,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // 화면의 높이와 너비를 계산
-    // double screenHeight = MediaQuery.of(context).size.height;
-    // double screenWidth = MediaQuery.of(context).size.width;
-
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       body: SafeArea(
-        child: Column(
-          // ListView를 Column으로 변경
-          children: [
-            Container(
+        child: SingleChildScrollView(
+          // SingleChildScrollView 추가
+          child: Column(
+            children: [
+              Container(
                 margin: const EdgeInsets.only(bottom: 30),
                 child:
                     Stack(alignment: Alignment.bottomCenter, children: <Widget>[
@@ -97,9 +105,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       },
                       viewportFraction: 1,
                       enlargeCenterPage: true,
-                      autoPlay: true, // 자동 재생 활성화
-                      autoPlayInterval:
-                          const Duration(seconds: 5), // 3초마다 슬라이드 전환
+                      autoPlay: true,
+                      autoPlayInterval: const Duration(seconds: 5),
                     ),
                     itemCount: 5,
                     itemBuilder: (context, index, realIndex) {
@@ -107,62 +114,44 @@ class _HomeScreenState extends State<HomeScreen> {
                     },
                   ),
                   Align(alignment: Alignment.bottomCenter, child: indicator()),
-                ])),
-            Expanded(
-              child: GridView.count(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(), // 스크롤 동작 비활성화
-                crossAxisCount: 2, // 2개의 열
-                childAspectRatio: 1 / 0.9, // 비율 조정
-                crossAxisSpacing: 18, // 가로 간격
-                mainAxisSpacing: 18, // 세로 간격
-                padding: const EdgeInsets.all(15), // GridView 패딩
+                ]),
+              ),
+              GridView.count(
+                shrinkWrap: true, // 이 속성이 중요함
+                physics: const ClampingScrollPhysics(), // 스크롤 가능하게 변경
+                crossAxisCount: 2,
+                childAspectRatio: 1 / 0.9,
+                crossAxisSpacing: 18,
+                mainAxisSpacing: 18,
+                padding: const EdgeInsets.all(15),
                 children: [
                   MainButton(
-                    name: 'AI 채팅',
-                    imagePath:
-                        'assets/home_screen/chat_icon.png', // icon 대신 imagePath 사용
-                    isInverted: true,
-                    onPressed: () {
-                      widget.changePage(2);
-                    },
-                  ),
+                      name: 'AI 채팅',
+                      imagePath: 'assets/home_screen/chat_icon.png',
+                      isInverted: true,
+                      onPressed: () => widget.changePage(2)),
                   MainButton(
-                    name: '정책 검색',
-                    imagePath:
-                        'assets/home_screen/search_icon.png', // 이미지 경로 변경
-                    isInverted: true,
-                    onPressed: () {
-                      widget.changePage(1);
-                    },
-                  ),
+                      name: '정책 검색',
+                      imagePath: 'assets/home_screen/search_icon.png',
+                      isInverted: true,
+                      onPressed: () => widget.changePage(1)),
                   MainButton(
-                    name: '뉴스 & 상식',
-                    imagePath: 'assets/home_screen/news_icon.png', // 이미지 경로 변경
-                    isInverted: true,
-                    onPressed: () {
-                      widget.changePage(3);
-                    },
-                  ),
+                      name: '뉴스 & 상식',
+                      imagePath: 'assets/home_screen/news_icon.png',
+                      isInverted: true,
+                      onPressed: () => widget.changePage(3)),
                   MainButton(
-                    name: '게시판',
-                    imagePath: 'assets/home_screen/board_icon.png', // 이미지 경로 변경
-                    isInverted: true,
-                    onPressed: () {
-                      widget.changePage(4);
-                    },
-                  ),
+                      name: '게시판',
+                      imagePath: 'assets/home_screen/board_icon.png',
+                      isInverted: true,
+                      onPressed: () => widget.changePage(4)),
                 ],
               ),
-            ),
-            const SizedBox(height: 20),
-            const Center(
-              child: Text("ⓒ 2024. 9to6 all rights reserved."),
-            ),
-            const SizedBox(
-              height: 12,
-            )
-          ],
+              const SizedBox(height: 20),
+              const Center(child: Text("ⓒ 2024. 9to6 all rights reserved.")),
+              const SizedBox(height: 12),
+            ],
+          ),
         ),
       ),
     );
