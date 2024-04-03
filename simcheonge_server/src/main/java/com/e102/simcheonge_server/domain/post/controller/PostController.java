@@ -106,7 +106,7 @@ public class PostController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
         }
 
-        PostDetailResponse postDetail = postService.findPostDetailById(postId);
+        PostDetailResponse postDetail = postService.findPostDetailById(postId,userDetails.getUsername());
 
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("status", HttpStatus.OK.value());
