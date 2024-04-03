@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:simcheonge_front/models/policy_detail.dart';
 import 'package:simcheonge_front/services/policy_service.dart';
 import 'package:simcheonge_front/widgets/comment_widget.dart';
-import 'package:simcheonge_front/widgets/policy_detail.dart';
 import 'package:word_break_text/word_break_text.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:intl/intl.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:simcheonge_front/widgets/comment_widget.dart';
 
 // PolicyDetail 모델 import 필요, 경로는 실제 프로젝트 구조에 따라 달라짐
 class PolicyDetailScreen extends StatelessWidget {
@@ -21,7 +20,7 @@ class PolicyDetailScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text(
           '정책 상세보기',
-          style: GoogleFonts.dongle(fontSize: 30), // Google Fonts의 Orbit 글꼴 적용
+          style: GoogleFonts.dongle(fontSize: 36), // Google Fonts의 Orbit 글꼴 적용
         ),
       ),
       body: FutureBuilder<PolicyDetail>(
@@ -42,37 +41,26 @@ class PolicyDetailScreen extends StatelessWidget {
             // 데이터가 있는 경우
             if (snapshot.hasData) {
               final policy = snapshot.data!;
+
               return SingleChildScrollView(
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        children: [
-                          Text(policy.policyName,
-                              style: const TextStyle(
-                                  fontSize: 24, fontWeight: FontWeight.bold)),
-                          IconButton(
-                            icon: const Icon(Icons.bookmark_border),
-                            onPressed: () {
-                              print(policyId);
-                              BookmarkWidget(
-                                bookmarkType: 'POL', // 'POS' 타입으로 북마크 위젯 설정
-                                policyId: policyId, // 현재 게시물 ID 전달
-                              );
-                              // 북마크 로직 구현
-                            },
-                          ),
-                        ],
-                      ),
+                      Text(policy.policyName,
+                          style: const TextStyle(
+                              fontSize: 24, fontWeight: FontWeight.bold)),
                       const SizedBox(height: 8),
                       Text(policy.policyIntro,
                           style: TextStyle(color: Colors.grey.shade600)),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 16),
                       buildSection('지원 규모', policy.policySupportScale),
-                      buildSection('지원 기간',
-                          '${policy.policyStartDate} - ${policy.policyEndDate}'),
+                      buildSection(
+                          '지원 기간',
+                          policy.policyPeriodTypeCode == '상시'
+                              ? '상시'
+                              : '${_formatDate(policy.policyStartDate)} ~ ${_formatDate(policy.policyEndDate)}'),
                       buildSection('지원 지역', policy.policyArea),
                       buildSection('주관 기관', policy.policyMainOrganization),
                       buildSection('운영 기관', policy.policyOperationOrganization),
@@ -103,34 +91,65 @@ class PolicyDetailScreen extends StatelessWidget {
     );
   }
 
+  String _formatDate(String date) {
+    if (date.isEmpty) {
+      return '';
+    }
+    DateTime dateTime = DateTime.parse(date);
+    return DateFormat('yyyy-MM-dd').format(dateTime);
+  }
+
   Widget buildSection(String title, String content) {
     if (content.isEmpty) {
       return Container();
     }
 
-    // 괄호 안의 내용을 일시적으로 대체
     final bracketContents = <String>[];
     var modifiedContent =
         content.replaceAllMapped(RegExp(r'\([^\)]+\)'), (match) {
       bracketContents.add(match.group(0)!);
-      return '⌜${bracketContents.length - 1}⌝'; // 괄호 임시 표시자
+      return '⌜${bracketContents.length - 1}⌝';
     });
 
-    modifiedContent = modifiedContent.replaceAll(RegExp(r' {3}'), '\n');
+    if (title == '지원 내용' || title == '신청 제한' || title == '참고 사항') {
+      modifiedContent =
+          modifiedContent.replaceAll(RegExp(r'(\d+)\. '), '\n\$1. ');
+      modifiedContent =
+          modifiedContent.replaceAll(RegExp(r'[-○●■□◆★☆※❖•] '), '\n- ');
+      modifiedContent =
+          modifiedContent.replaceAll(RegExp(r'[\u2460-\u2473]'), '\n\$0');
+    }
+    final splitPattern = RegExp(r'(?<=\n)');
+    TextStyle defaultTextStyle =
+        TextStyle(color: Colors.grey.shade800, fontSize: 16);
+    TextAlign textAlign = TextAlign.start;
 
-    // 원 안의 숫자와 다른 일반적인 리스트 기호에 대한 추가 처리
-    modifiedContent =
-        modifiedContent.replaceAll(RegExp(r'(\d+)\. '), '\n\$1. ');
-    modifiedContent = modifiedContent.replaceAll(RegExp(r'[-○*※❍] '), '\n- ');
+    bool isRightAligned = [
+      '지원 규모',
+      '지원 기간',
+      '지원 지역',
+      '주관 기관',
+      '운영 기관',
+      '대상 연령',
+      '학력 요건',
+      '전공 요건',
+      '고용 상태',
+      '참고 웹사이트'
+    ].contains(title);
 
-    final splitPattern = RegExp(r'(?<=\n)|(?=[-○*※❍])');
+    EdgeInsets padding = isRightAligned
+        ? const EdgeInsets.only(bottom: 16.0, right: 20.0)
+        : const EdgeInsets.only(bottom: 16.0);
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(title,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(
+          height: 5,
+        ),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 16.0, left: 4),
+          child: Text(title,
               style:
                   const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
         ),
@@ -191,9 +210,22 @@ class PolicyDetailScreen extends StatelessWidget {
           '신청 홈페이지 바로가기',
           style: TextStyle(
             color: Colors.blue,
+            decoration: TextDecoration.underline,
           ),
         ),
       ),
     );
+  }
+
+  void _launchURL(String url) async {
+    try {
+      if (await canLaunch(url)) {
+        await launch(url);
+      } else {
+        print('주소를 열 수 없습니다: $url');
+      }
+    } catch (e) {
+      print('주소를 열 수 없습니다: $url');
+    }
   }
 }
