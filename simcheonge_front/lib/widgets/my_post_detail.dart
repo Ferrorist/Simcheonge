@@ -25,7 +25,7 @@ class MyPost {
       postName: json['postName'],
       postContent: json['postContent'],
       userNickname: json['userNickname'],
-      createdAt: DateTime.parse(json['createAt']),
+      createdAt: DateTime.parse(json['createdAt']),
       categoryName: json['categoryName'],
     );
   }

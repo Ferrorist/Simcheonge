@@ -30,7 +30,7 @@
 ![image](/uploads/b14e21c938de253249dbac02a0785dc1/image.png)
 
 ## Service Architecture
-![architecture.drawio](/uploads/063090b5ba839e26fdb7634f3083dfbc/architecture.drawio.png)
+![9to6_architecture.drawio](/uploads/c9b309ad96a333c0b32938686df959a6/9to6_architecture.drawio.png)
 
 
 ## **💬 ERD**

@@ -58,6 +58,29 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      theme: ThemeData(
+        colorScheme: const ColorScheme(
+          brightness: Brightness.light, // 또는 Brightness.dark, 화면 밝기에 따라 선택
+          primary:
+              Color.fromRGBO(107, 127, 212, 1), // 버튼의 기본 색상을 파란색 200 색으로 설정
+          onPrimary: Colors.black, // 버튼 텍스트의 색상 설정
+          secondary: Color.fromRGBO(107, 127, 212, 1), // 선택된 입력 줄의 색상을 파란색으로 설정
+          onSecondary: Colors.black, // 버튼 텍스트의 색상 설정
+          error: Colors.red, // 오류 메시지 등의 색상 설정
+          onError: Colors.white, // 오류 텍스트의 색상 설정
+          background: Colors.white, // 배경색 설정
+          onBackground: Colors.black, // 텍스트의 배경색에 대한 색상 설정
+          surface: Color.fromARGB(255, 255, 255, 255), // 표면의 색상 설정
+          onSurface: Colors.black, // 표면에 대한 텍스트의 색상 설정
+        ),
+        inputDecorationTheme: const InputDecorationTheme(
+          focusedBorder: UnderlineInputBorder(
+            borderSide: BorderSide(
+              color: Color.fromRGBO(107, 127, 212, 1),
+            ), // 선택된 입력 줄의 색상을 파란색으로 설정
+          ),
+        ),
+      ),
       home: FutureBuilder<bool>(
         future: AuthenticationManager.checkAndRefreshTokenIfNeeded(),
         builder: (context, snapshot) {
@@ -132,7 +155,60 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   // 페이지 변경 함수 수정
-  void changePage(int index, {bool isSideBar = false}) {
+  void changePage(int index, {bool isSideBar = false}) async {
+    if (index == 2) {
+      final isLoggedIn = await checkLoginStatus();
+      if (!isLoggedIn) {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              content: Column(
+                mainAxisSize: MainAxisSize.min, // Use the minimum space
+                mainAxisAlignment:
+                    MainAxisAlignment.center, // Center content vertically
+                children: <Widget>[
+                  const SizedBox(
+                    height: 15,
+                  ),
+                  const Text('로그인 시 이용 가능합니다.',
+                      style: TextStyle(fontSize: 14),
+                      textAlign: TextAlign.center), // Center text horizontally
+                  const SizedBox(
+                      height: 15), // Add some spacing before the buttons
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment
+                        .spaceBetween, // Space out children evenly
+                    children: <Widget>[
+                      TextButton(
+                        child: const Text('로그인'),
+                        onPressed: () {
+                          Navigator.of(context).pop(); // Close the dialog
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => LoginScreen(
+                                      updateLoginStatus:
+                                          updateLoginStatus))); // Navigate to the login screen
+                        },
+                      ),
+                      TextButton(
+                        child: const Text('닫기'),
+                        onPressed: () {
+                          Navigator.of(context).pop(); // Just close the dialog
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+        return; // Prevent further processing if not logged in
+      }
+    }
+    // Proceed with page change if logged in or if the index is not 2
     setState(() {
       _selectedIndex =
           isSideBar && (index < 0 || index > bottomNavItems.length - 1)
