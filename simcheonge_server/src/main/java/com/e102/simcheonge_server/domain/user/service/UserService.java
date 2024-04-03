@@ -43,7 +43,7 @@ public class UserService {
         String pattern2 = "^(?=.*[a-zA-Z])(?=.*\\d)[a-zA-Z\\d!?@#$%^&*]{6,}$";
 
 
-        if(!password.matches(pattern)&&!password.matches(pattern2)){
+        if(!password.matches(pattern)||!password.matches(pattern2)){
             throw new IllegalArgumentException("비밀번호는 영문과 숫자, 허용되는 특수문자를 포함한 8 ~ 16자만 가능합니다.");
         }
 
@@ -69,7 +69,7 @@ public class UserService {
         String pattern = "^[가-힣a-zA-Z0-9]{2,8}$";
         String pattern2 = "^(?=.*[a-zA-Z])(?=.*\\d)[a-zA-Z\\d!?@#$%^&*]{6,}$";
 
-        if (!nickname.matches(pattern)&&!nickname.matches(pattern2)) {
+        if (!nickname.matches(pattern)||!nickname.matches(pattern2)) {
             throw new IllegalArgumentException("닉네임 규칙에 맞지 않습니다.");
         }
 
