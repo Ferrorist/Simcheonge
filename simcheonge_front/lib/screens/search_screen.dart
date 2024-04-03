@@ -326,36 +326,41 @@ class _SearchScreenState extends State<SearchScreen> {
           ),
           const SizedBox(height: 10),
           Expanded(
-            child: ListView.builder(
-              controller: _scrollController,
-              itemCount: _filteredPolices.length,
-              itemBuilder: (BuildContext context, int index) {
-                final policy = _filteredPolices[index];
-                return Card(
-                  margin:
-                      const EdgeInsets.symmetric(vertical: 5, horizontal: 20),
-                  child: ListTile(
-                    title: Text(
-                      policy.policyName ?? 'No name',
-                      softWrap: true,
-                      style: const TextStyle(fontSize: 16),
-                    ),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () {
-                      print('push');
-                      // 여기에서 PostDetailScreen으로 이동
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => PolicyDetailScreen(
+            child: _filteredPolices.isEmpty
+                ? const Center(
+                    child: Text('검색 결과가 없습니다...'),
+                  )
+                : ListView.builder(
+                    controller: _scrollController,
+                    itemCount: _filteredPolices.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      final policy = _filteredPolices[index];
+                      return Card(
+                        margin: const EdgeInsets.symmetric(
+                            vertical: 5, horizontal: 20),
+                        child: ListTile(
+                          title: Text(
+                            policy.policyName ?? 'No name',
+                            softWrap: true,
+                            style: const TextStyle(fontSize: 16),
+                          ),
+                          trailing: const Icon(Icons.chevron_right),
+                          onTap: () {
+                            print('push');
+                            // 여기에서 PostDetailScreen으로 이동
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => PolicyDetailScreen(
                                   policyId: policy.policyId ?? 0,
-                                )),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
                       );
                     },
                   ),
-                );
-              },
-            ),
           ),
         ],
       ),

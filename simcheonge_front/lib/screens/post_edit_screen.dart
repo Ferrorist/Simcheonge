@@ -13,7 +13,7 @@ class _PostEditScreenState extends State<PostEditScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   late TextEditingController _postNameController;
   late TextEditingController _postContentController;
-  String? _selectedCategoryName;
+  String? _selectedCategoryNumber;
   final List<Map<String, dynamic>> _categoryOptions = [
     {'name': '정책 추천', 'number': 2},
     {'name': '공모전', 'number': 3},
@@ -27,17 +27,20 @@ class _PostEditScreenState extends State<PostEditScreen> {
     _postNameController = TextEditingController(text: widget.post['postName']);
     _postContentController =
         TextEditingController(text: widget.post['postContent']);
-    _selectedCategoryName = _categoryOptions.firstWhere(
-      (option) => option['number'] == widget.post['categoryNumber'],
-      orElse: () => _categoryOptions[0],
-    )['name'];
+    _selectedCategoryNumber = _categoryOptions
+        .firstWhere(
+          (option) => option['number'] == widget.post['categoryNumber'],
+          orElse: () => _categoryOptions[0],
+        )['number']
+        .toString();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('게시글 수정'),
+        title: const Text('글 수정'),
+        centerTitle: true,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -47,59 +50,118 @@ class _PostEditScreenState extends State<PostEditScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
+                const SizedBox(height: 20),
                 DropdownButtonFormField<String>(
-                  value: _selectedCategoryName,
+                  value: _selectedCategoryNumber,
                   hint: const Text('게시판 선택'),
                   onChanged: (String? newValue) {
                     setState(() {
-                      _selectedCategoryName = newValue;
+                      _selectedCategoryNumber = newValue!;
                     });
                   },
                   items: _categoryOptions.map<DropdownMenuItem<String>>(
-                      (Map<String, dynamic> option) {
-                    return DropdownMenuItem<String>(
-                      value: option['name'],
-                      child: Text(option['name']),
-                    );
-                  }).toList(),
+                    (Map<String, dynamic> option) {
+                      return DropdownMenuItem<String>(
+                        value: option['number'].toString(),
+                        child: Text(option['name']),
+                      );
+                    },
+                  ).toList(),
                 ),
-                // 여기에 다른 필드 (예: _postNameController, _postContentController)를 위한 TextField 위젯 추가
-                const SizedBox(height: 24), // Add some spacing
-
-                TextField(
+                const SizedBox(height: 20),
+                TextFormField(
                   controller: _postNameController,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: '게시글 제목',
+                  decoration: InputDecoration(
+                    labelText:
+                        _postNameController.text.isEmpty ? '제목을 입력하세요.' : '',
+                    hintText: '제목',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide:
+                          const BorderSide(color: Colors.blue, width: 2.0),
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide:
+                          const BorderSide(color: Colors.green, width: 2.0),
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 16), // Add some spacing
-                TextField(
-                  controller: _postContentController,
-                  maxLines: null,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: '게시글 내용',
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                ElevatedButton(
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      // 폼이 유효할 경우, 수정된 데이터를 서버에 전송
-                      final updatedPost = {
-                        'postName': _postNameController.text,
-                        'postContent': _postContentController.text,
-                        'categoryNumber': _categoryOptions.firstWhere(
-                          (option) => option['name'] == _selectedCategoryName,
-                          orElse: () => _categoryOptions[0],
-                        )['number'],
-                      };
-                      Navigator.pop(context, updatedPost);
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return '제목을 입력해주세요.';
+                    }
+                    return null;
+                  },
+                  onChanged: (value) {
+                    if (_formKey.currentState != null) {
+                      _formKey.currentState!.validate();
                     }
                   },
-                  child: const Text('수정 완료'),
+                  minLines: 1,
+                  maxLines: 5,
+                ),
+                const SizedBox(height: 25),
+                TextFormField(
+                  controller: _postContentController,
+                  maxLines: null,
+                  decoration: InputDecoration(
+                    labelText:
+                        _postContentController.text.isEmpty ? '내용을 입력하세요.' : '',
+                    hintText: '내용',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    alignLabelWithHint: true,
+                    enabledBorder: OutlineInputBorder(
+                      borderSide:
+                          const BorderSide(color: Colors.blue, width: 2.0),
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide:
+                          const BorderSide(color: Colors.green, width: 2.0),
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return '내용을 입력해주세요.';
+                    }
+                    return null;
+                  },
+                  onChanged: (value) {
+                    if (_formKey.currentState != null) {
+                      _formKey.currentState!.validate();
+                    }
+                  },
+                  minLines: 10,
+                ),
+                const SizedBox(height: 40),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: <Widget>[
+                    ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('취소'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        if (_formKey.currentState!.validate()) {
+                          final updatedPost = {
+                            'postName': _postNameController.text,
+                            'postContent': _postContentController.text,
+                            'categoryNumber':
+                                int.parse(_selectedCategoryNumber!),
+                          };
+                          Navigator.pop(context, updatedPost);
+                        }
+                      },
+                      child: const Text('수정 완료'),
+                    ),
+                  ],
                 ),
               ],
             ),
