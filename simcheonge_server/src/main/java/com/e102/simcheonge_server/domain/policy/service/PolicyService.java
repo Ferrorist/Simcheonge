@@ -2,6 +2,8 @@ package com.e102.simcheonge_server.domain.policy.service;
 
 import com.e102.simcheonge_server.common.exception.AuthenticationException;
 import com.e102.simcheonge_server.common.exception.DataNotFoundException;
+import com.e102.simcheonge_server.domain.bookmark.entity.Bookmark;
+import com.e102.simcheonge_server.domain.bookmark.repository.BookmarkRepository;
 import com.e102.simcheonge_server.domain.category.dto.response.CategoryResponse;
 import com.e102.simcheonge_server.domain.category.dto.response.PolicyCategoryResponse;
 import com.e102.simcheonge_server.domain.category.entity.Category;
@@ -24,6 +26,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -37,14 +40,23 @@ public class PolicyService {
     private final CategoryRepository categoryRepository;
     private final CategoryDetailRepository categoryDetailRepository;
     private final PolicyNativeRepository policyNativeRepository;
+    private final BookmarkRepository bookmarkRepository;
     private final HashMap<String, Integer> codeCheckMap = new HashMap<>();
     private final String[] checkCategories = {"ADM", "SPC", "EPM"};
 
-    public PolicyDetailResponse getPolicy(int policyId) {
+    public PolicyDetailResponse getPolicy(int policyId, UserDetails userDetails) {
         Policy policy = policyRepository.findByPolicyId(policyId)
                 .orElseThrow(() -> new DataNotFoundException("해당 정책이 존재하지 않습니다."));
         if(!policy.isProcessed()){
             throw new AuthenticationException("해당 정책 조회에 대한 권한이 없습니다.");
+        }
+
+        boolean isBookmarked=false;
+        if(userDetails!=null){
+            String userLoginId = userDetails.getUsername();
+            Optional<User> loginUser = userRepository.findByUserLoginId(userLoginId);
+            Optional<Bookmark> bookmark = bookmarkRepository.findByUserIdAndReferencedIdAndBookmarkType(loginUser.get().getUserId(), policyId, "POL");
+            isBookmarked=bookmark.isPresent();
         }
 
         String policy_period_type_code = policy.getPeriodTypeCode();
@@ -91,6 +103,7 @@ public class PolicyService {
                 .policy_entry_limit(Optional.ofNullable(policy.getEntryLimit()).orElse(""))
                 .policy_application_procedure(Optional.ofNullable(policy.getApplicationProcedure()).orElse(""))
                 .policy_etc(Optional.ofNullable(policy.getEtc()).orElse(""))
+                .isBookmarked(isBookmarked)
                 .build();
         return thumbnailResponse;
     }
@@ -179,7 +192,7 @@ public class PolicyService {
             }
             //{ADM,1}, {EPM,1}, {SPC, 1}가 있는지 확인
             if (Arrays.asList(checkCategories).contains(category.getCode()) && category.getNumber() == 1) {
-//                throw new IllegalArgumentException("해당 카테고리는 '제한 없음'을 선택할 수 없습니다.");
+                throw new IllegalArgumentException("해당 카테고리는 '제한 없음'을 선택할 수 없습니다.");
             }
             else if ("APC".equals(category.getCode())) {
                 if (category.getNumber() == 3) {

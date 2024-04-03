@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:simcheonge_front/screens/post_edit_screen.dart';
 import 'package:simcheonge_front/services/post_service.dart';
 import 'package:simcheonge_front/widgets/bookmark_widget.dart';
@@ -15,11 +16,22 @@ class PostDetailScreen extends StatefulWidget {
 
 class _PostDetailScreenState extends State<PostDetailScreen> {
   Map<String, dynamic> post = {}; // 초기 게시물 데이터를 저장할 변수
-
+  String? currentUserNickname;
   @override
   void initState() {
     super.initState();
+    _loadCurrentUserNickname();
     _loadPostDetail(); // 게시물 상세 정보를 로드하는 로직
+  }
+
+  Future<void> _loadCurrentUserNickname() async {
+    currentUserNickname = await getSavedUserNickname();
+    setState(() {});
+  }
+
+  Future<String?> getSavedUserNickname() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('userNickname');
   }
 
   Future<void> _loadPostDetail() async {
@@ -58,7 +70,6 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                             child: Container(
                               padding: const EdgeInsets.all(8.0),
                               decoration: BoxDecoration(
-                                color: Colors.blue.shade100,
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               child: Text(
@@ -81,72 +92,74 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                               // 북마크 로직 구현
                             },
                           ),
-                          // if (isOwner)
-                          IconButton(
-                            icon: const Icon(Icons.edit),
-                            onPressed: () async {
-                              final updatedPost =
-                                  await Navigator.push<Map<String, dynamic>>(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      PostEditScreen(post: post),
-                                ),
-                              );
+                          if (post['userNickname'] == currentUserNickname) ...[
+                            // if (isOwner)
+                            IconButton(
+                              icon: const Icon(Icons.edit),
+                              onPressed: () async {
+                                final updatedPost =
+                                    await Navigator.push<Map<String, dynamic>>(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        PostEditScreen(post: post),
+                                  ),
+                                );
 
-                              if (updatedPost != null) {
-                                await PostService.updatePost(
-                                    widget.postId, updatedPost);
-                                setState(() {});
-                                // 게시글 수정 후 새로고침 등의 로직이 필요한 경우 여기에 구현
-                              }
-                            },
-                          ),
-                          // if (isOwner)
-                          IconButton(
-                            icon: const Icon(Icons.delete),
-                            onPressed: () async {
-                              final bool confirm = await showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return AlertDialog(
-                                    title: const Text("게시글 삭제"),
-                                    content: const Text("정말로 게시글을 삭제하시겠습니까?"),
-                                    actions: <Widget>[
-                                      TextButton(
-                                        onPressed: () =>
-                                            Navigator.of(context).pop(false),
-                                        child: const Text("취소"),
-                                      ),
-                                      TextButton(
-                                        onPressed: () =>
-                                            Navigator.of(context).pop(true),
-                                        child: const Text("삭제"),
-                                      ),
-                                    ],
-                                  );
-                                },
-                              );
-
-                              if (confirm) {
-                                final bool deleted =
-                                    await PostService.deletePost(
-                                        post['postId']);
-                                if (deleted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                          content: Text('게시글이 삭제되었습니다.')));
-                                  Navigator.of(context)
-                                      .pop(true); // 게시글 목록 화면으로 돌아가기
-                                } else {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                          content:
-                                              Text('작성한 게시글만 삭제할 수 있습니다.')));
+                                if (updatedPost != null) {
+                                  await PostService.updatePost(
+                                      widget.postId, updatedPost);
+                                  setState(() {});
+                                  // 게시글 수정 후 새로고침 등의 로직이 필요한 경우 여기에 구현
                                 }
-                              }
-                            },
-                          ),
+                              },
+                            ),
+                            // if (isOwner)
+                            IconButton(
+                              icon: const Icon(Icons.delete),
+                              onPressed: () async {
+                                final bool confirm = await showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      title: const Text("게시글 삭제"),
+                                      content: const Text("정말로 게시글을 삭제하시겠습니까?"),
+                                      actions: <Widget>[
+                                        TextButton(
+                                          onPressed: () =>
+                                              Navigator.of(context).pop(false),
+                                          child: const Text("취소"),
+                                        ),
+                                        TextButton(
+                                          onPressed: () =>
+                                              Navigator.of(context).pop(true),
+                                          child: const Text("삭제"),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+
+                                if (confirm) {
+                                  final bool deleted =
+                                      await PostService.deletePost(
+                                          post['postId']);
+                                  if (deleted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                            content: Text('게시글이 삭제되었습니다.')));
+                                    Navigator.of(context)
+                                        .pop(true); // 게시글 목록 화면으로 돌아가기
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                            content:
+                                                Text('작성한 게시글만 삭제할 수 있습니다.')));
+                                  }
+                                }
+                              },
+                            ),
+                          ],
                         ],
                       ),
                       Padding(
@@ -159,9 +172,19 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                               ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                       ),
-                      Text(
-                        '작성일: ${post['createdAt'].substring(0, 10)}',
-                        style: Theme.of(context).textTheme.bodySmall,
+                      Row(
+                        mainAxisAlignment:
+                            MainAxisAlignment.spaceBetween, // 양쪽 끝에 자식들을 정렬
+                        children: [
+                          Text('작성자 : ${post['userNickname']}',
+                              style: const TextStyle(
+                                  fontWeight: FontWeight
+                                      .w200)), // 여기서는 작성자 닉네임 등의 실제 데이터를 표시하도록 변경할 수 있습니다.
+                          Text(
+                            '작성일: ${post['createdAt'].substring(0, 10)}',
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 10),
                       Divider(color: Colors.grey.shade400),
@@ -179,10 +202,10 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                           style: const TextStyle(fontSize: 16),
                         ),
                       ),
-                      // 여기에 추가 UI 요소를 배치할 수 있습니다.
                       CommentWidget(
-                          commentType: 'POS',
-                          postId: widget.postId), // 댓글 위젯 주석 처리
+                        postId: widget.postId,
+                        commentType: 'POS',
+                      ),
                     ],
                   ),
                 );

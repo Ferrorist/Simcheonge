@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -96,14 +97,17 @@ public class CommentService {
         List<Comment> commentList = commentRepository.findByUserAndCommentTypeAndIsDeletedFalseOrderByCreatedAtDesc(userId,commentType);
         List<MyCommentResponse> responses = new ArrayList<>();
         SimpleDateFormat formatter = new SimpleDateFormat("MM-dd");
-        commentList.forEach(comment -> {
+        for (Comment comment : commentList) {
             if (!comment.isDeleted()) {
                 if (commentType.equals("POS")) {
-                    Post post = postRepository.findByPostId(comment.getReferencedId())
-                            .orElseThrow(() -> new DataNotFoundException("해당 게시물이 존재하지 않습니다."));
+                    Optional<Post> post = postRepository.findByPostId(comment.getReferencedId());
+                    if(post.isEmpty()||post.get().isDeleted()) continue;
                 } else if (commentType.equals("POL")) {
-                    Policy policy = policyRepository.findByPolicyId(comment.getReferencedId())
-                            .orElseThrow(() -> new DataNotFoundException("해당 정책이 존재하지 않습니다."));
+                    Optional<Policy> policy = policyRepository.findByPolicyId(comment.getReferencedId());
+                    if(policy.isEmpty()||!policy.get().isProcessed()) continue;
+                }
+                else{
+                    throw new DataNotFoundException("해당 타입은 존재하지 않습니다.");
                 }
                 MyCommentResponse myCommentResponse=MyCommentResponse.builder()
                         .commentId(comment.getCommentId())
@@ -114,7 +118,7 @@ public class CommentService {
                         .build();
                 responses.add(myCommentResponse);
             }
-        });
+        }
         return responses;
     }
 
