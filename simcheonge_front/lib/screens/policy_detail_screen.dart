@@ -2,29 +2,65 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:simcheonge_front/models/policy_detail.dart';
 import 'package:simcheonge_front/services/policy_service.dart';
+import 'package:simcheonge_front/widgets/bookmark_widget.dart';
 import 'package:simcheonge_front/widgets/comment_widget.dart';
 import 'package:word_break_text/word_break_text.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:intl/intl.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:simcheonge_front/services/bookmark_service.dart';
 
 // PolicyDetail 모델 import 필요, 경로는 실제 프로젝트 구조에 따라 달라짐
-class PolicyDetailScreen extends StatelessWidget {
+class PolicyDetailScreen extends StatefulWidget {
   final int policyId;
 
   const PolicyDetailScreen({super.key, required this.policyId});
 
   @override
+  State<PolicyDetailScreen> createState() => _PolicyDetailScreenState();
+}
+
+class _PolicyDetailScreenState extends State<PolicyDetailScreen> {
+  PolicyDetail? policy;
+  bool isLoading = true; // 로딩 상태를 관리하는 변수
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPolicyDetail();
+  }
+
+  Future<void> _loadPolicyDetail() async {
+    try {
+      final fetchedPolicy =
+          await PolicyService.fetchPolicyDetail(widget.policyId);
+      setState(() {
+        policy = fetchedPolicy;
+        isLoading = false; // 데이터 로딩 완료
+      });
+    } catch (e) {
+      setState(() {
+        isLoading = false; // 에러 발생 시에도 로딩 상태 업데이트
+        print('정책 정보를 불러오는데 실패했습니다: $e');
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          '정책 상세보기',
-          style: GoogleFonts.dongle(fontSize: 36), // Google Fonts의 Orbit 글꼴 적용
-        ),
+        title: isLoading
+            ? const Text('Loading...')
+            : Text(policy?.policyName ?? 'No Title', // 로딩 완료 후 제목 표시
+                style:
+                    const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+        actions: isLoading
+            ? []
+            : [BookmarkWidget(bookmarkType: 'POL', policyId: widget.policyId)],
       ),
       body: FutureBuilder<PolicyDetail>(
-        future: PolicyService.fetchPolicyDetail(policyId),
+        future: PolicyService.fetchPolicyDetail(widget.policyId),
         builder: (context, snapshot) {
           // 로딩 중 상태
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -48,9 +84,6 @@ class PolicyDetailScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(policy.policyName,
-                          style: const TextStyle(
-                              fontSize: 24, fontWeight: FontWeight.bold)),
                       const SizedBox(height: 8),
                       Text(policy.policyIntro,
                           style: TextStyle(color: Colors.grey.shade600)),
@@ -74,7 +107,7 @@ class PolicyDetailScreen extends StatelessWidget {
                       buildSection('참고 사항', policy.policyEtc),
                       buildWebsiteSection('참고 웹사이트', policy.policySiteAddress),
                       CommentWidget(
-                        policyId: policyId,
+                        policyId: widget.policyId,
                         commentType: 'POL',
                       ),
                     ],

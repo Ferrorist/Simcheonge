@@ -15,7 +15,9 @@ class MyPolicyCommentScreen extends StatefulWidget {
 
 class _MyPolicyCommentScreenState extends State<MyPolicyCommentScreen> {
   List<Comment> comments = [];
-  final TextEditingController _searchController = TextEditingController();
+  List<Comment> displayedComments = []; // 필터링된 댓글의 리스트
+
+  final TextEditingController _controller = TextEditingController();
 
   @override
   void initState() {
@@ -89,20 +91,45 @@ class _MyPolicyCommentScreenState extends State<MyPolicyCommentScreen> {
     }
   }
 
+  void updateSearchQuery(String newQuery) {
+    if (mounted) {
+      setState(() {
+        displayedComments = newQuery.isNotEmpty
+            ? comments
+                .where((Comment) => Comment.content
+                    .toLowerCase()
+                    .contains(newQuery.toLowerCase()))
+                .toList()
+            : comments;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose(); // 컨트롤러를 정리합니다.
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: TextField(
-          controller: _searchController,
-          onChanged: _filterComments,
+          controller: _controller,
           decoration: InputDecoration(
-            hintText: '댓글 검색...',
-            hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
+            hintText: '검색...',
             border: InputBorder.none,
-            icon: const Icon(Icons.search, color: Colors.white),
+            prefixIcon: const Icon(Icons.search),
+            suffixIcon: _controller.text.isNotEmpty
+                ? IconButton(
+                    icon: const Icon(Icons.clear),
+                    onPressed: () {
+                      _controller.clear();
+                    },
+                  )
+                : null,
           ),
-          style: const TextStyle(color: Colors.white, fontSize: 20),
         ),
       ),
       body: ListView.builder(
@@ -149,12 +176,6 @@ class _MyPolicyCommentScreenState extends State<MyPolicyCommentScreen> {
         },
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _searchController.dispose(); // 컨트롤러를 정리합니다.
-    super.dispose();
   }
 }
 
