@@ -77,8 +77,8 @@ public class NewsCrawlerService {
             try {
                 Document newsDoc = Jsoup.connect(newsLink).get();
 
-                PrintWriter out3 = new PrintWriter(new OutputStreamWriter(new FileOutputStream("result.html"), "UTF-8"));
-                out3.println(newsDoc.toString()); // doc의 HTML 내용을 파일에 쓴다.
+//                PrintWriter out3 = new PrintWriter(new OutputStreamWriter(new FileOutputStream("result.html"), "UTF-8"));
+//                out3.println(newsDoc.toString()); // doc의 HTML 내용을 파일에 쓴다.
 
                 String title = newsDoc.select("#title_area > span").text();
 
