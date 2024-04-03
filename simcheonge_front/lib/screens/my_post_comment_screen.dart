@@ -1,32 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
-class Comment {
-  final int commentId;
-  final String nickname;
-  final String content;
-  final String createdAt;
-  final bool isMyComment;
-
-  Comment({
-    required this.commentId,
-    required this.nickname,
-    required this.content,
-    required this.createdAt,
-    required this.isMyComment,
-  });
-
-  factory Comment.fromJson(Map<String, dynamic> json) {
-    return Comment(
-      commentId: json['commentId'] as int,
-      nickname: json['nickname'] as String,
-      content: json['content'] as String,
-      createdAt: json['createAt'] as String,
-      isMyComment: json['myComment'] as bool,
-    );
-  }
-}
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:simcheonge_front/models/comment_detail.dart';
+import 'package:simcheonge_front/screens/my_post_comment_screen.dart';
+import 'package:simcheonge_front/screens/policy_detail_screen.dart';
+import 'package:simcheonge_front/screens/post_detail_screen.dart';
 
 class MyPostCommentScreen extends StatefulWidget {
   const MyPostCommentScreen({super.key});
@@ -36,50 +15,150 @@ class MyPostCommentScreen extends StatefulWidget {
 }
 
 class _MyPostCommentScreenState extends State<MyPostCommentScreen> {
-  final TextEditingController _controller = TextEditingController();
   List<Comment> comments = [];
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _fetchComments();
+    _fetchMyPostComments();
   }
 
-  Future<void> _fetchComments() async {
-    // URL 수정 필요: 실제 댓글 데이터를 불러오는 URL로 변경하세요
-    final response =
-        await http.get(Uri.parse('https://j10e102.p.ssafy.io/api/comments'));
+  Future<void> _fetchMyPostComments() async {
+    final prefs = await SharedPreferences.getInstance();
+    final accessToken = prefs.getString('accessToken');
+    final url = Uri.parse('https://j10e102.p.ssafy.io/api/comment/POS');
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
 
-    if (response.statusCode == 200) {
-      List<dynamic> commentsJson = json.decode(response.body);
-      setState(() {
-        comments = commentsJson.map((json) => Comment.fromJson(json)).toList();
-      });
-      print('댓글 데이터 로드 성공');
-    } else {
-      print('댓글 데이터 로드 실패: ${response.body}');
+      if (response.statusCode == 200) {
+        // 명시적으로 UTF-8로 디코드
+        final responseBody = utf8.decode(response.bodyBytes);
+        final Map<String, dynamic> data = json.decode(responseBody);
+        final List<dynamic> fetchedComments = data['data'];
+        setState(() {
+          comments =
+              fetchedComments.map((json) => Comment.fromJson(json)).toList();
+        });
+      } else {
+        print('서버 오류: ${response.body}');
+      }
+    } catch (e) {
+      print('데이터 로드 실패: $e');
+    }
+  }
+
+  Future<void> _filterComments(String query) async {
+    if (query.isEmpty) {
+      // 검색어가 비어있을 경우 초기 댓글 목록을 불러오거나 다른 로직을 수행
+      return;
+    }
+
+    final prefs = await SharedPreferences.getInstance();
+    final accessToken = prefs.getString('accessToken');
+    const String commentType = "POS"; // 예시로 "POL"을 사용, 필요에 따라 변경
+    final url = Uri.parse(
+        'https://j10e102.p.ssafy.io/api/comment/$commentType/search?keyword=$query');
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = json.decode(response.body);
+        final List<dynamic> fetchedComments = data['data'];
+        setState(() {
+          comments =
+              fetchedComments.map((json) => Comment.fromJson(json)).toList();
+        });
+      } else {
+        print('서버 오류: ${response.body}');
+      }
+    } catch (e) {
+      print('데이터 로드 실패: $e');
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('내 댓글 목록')),
+      appBar: AppBar(
+        title: TextField(
+          controller: _searchController,
+          onChanged: _filterComments,
+          decoration: InputDecoration(
+            hintText: '댓글 검색...',
+            hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
+            border: InputBorder.none,
+            icon: const Icon(Icons.search, color: Colors.white),
+          ),
+          style: const TextStyle(color: Colors.white, fontSize: 20),
+        ),
+      ),
       body: ListView.builder(
         itemCount: comments.length,
         itemBuilder: (context, index) {
           final comment = comments[index];
-          return ListTile(
-            title: Text(comment.nickname),
-            subtitle: Text('${comment.content}\n${comment.createdAt}'),
-            isThreeLine: true,
+          return InkWell(
             onTap: () {
-              // 게시글 상세 화면으로 이동하는 로직 추가 (예시)
-              print('댓글 ${comment.commentId}의 게시글로 이동');
+              // 여기에 탭했을 때 실행할 로직을 추가합니다. 예를 들어, 상세 페이지로 이동
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => PostDetailScreen(
+                    postId: comment.referencedId,
+                  ),
+                ),
+              );
             },
+            child: Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+              child: Row(
+                children: [
+                  Expanded(
+                      child: Text(
+                    comment.content,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  )), // 긴 텍스트 처리를 위해 Expanded 사용
+
+                  Text(
+                    comment.createdAt,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           );
         },
       ),
     );
   }
+
+  @override
+  void dispose() {
+    _searchController.dispose(); // 컨트롤러를 정리합니다.
+    super.dispose();
+  }
+}
+
+void main() {
+  runApp(const MaterialApp(home: MyPostCommentScreen()));
 }

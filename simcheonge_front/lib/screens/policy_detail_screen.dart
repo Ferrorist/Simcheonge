@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:simcheonge_front/models/policy_detail.dart';
 import 'package:simcheonge_front/services/policy_service.dart';
+import 'package:simcheonge_front/widgets/bookmark_widget.dart';
 import 'package:simcheonge_front/widgets/comment_widget.dart';
-import 'package:simcheonge_front/widgets/policy_detail.dart';
 import 'package:word_break_text/word_break_text.dart';
 
 // PolicyDetail 모델 import 필요, 경로는 실제 프로젝트 구조에 따라 달라짐
@@ -40,9 +41,24 @@ class PolicyDetailScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(policy.policyName,
-                          style: const TextStyle(
-                              fontSize: 24, fontWeight: FontWeight.bold)),
+                      Row(
+                        children: [
+                          Text(policy.policyName,
+                              style: const TextStyle(
+                                  fontSize: 24, fontWeight: FontWeight.bold)),
+                          IconButton(
+                            icon: const Icon(Icons.bookmark_border),
+                            onPressed: () {
+                              print(policyId);
+                              BookmarkWidget(
+                                bookmarkType: 'POL', // 'POS' 타입으로 북마크 위젯 설정
+                                policyId: policyId, // 현재 게시물 ID 전달
+                              );
+                              // 북마크 로직 구현
+                            },
+                          ),
+                        ],
+                      ),
                       const SizedBox(height: 8),
                       Text(policy.policyIntro,
                           style: TextStyle(color: Colors.grey.shade600)),

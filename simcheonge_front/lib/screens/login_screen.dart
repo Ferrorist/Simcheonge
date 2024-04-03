@@ -51,11 +51,13 @@ class _LoginScreenState extends State<LoginScreen> {
           data['data']['refreshToken'], data['data']['userNickname']);
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('로그인에 성공했습니다.')),
+        const SnackBar(
+          content: Text('로그인에 성공했습니다.'),
+          duration: Duration(seconds: 1),
+        ),
       );
-
+      print(data['data']['accessToken']);
       widget.updateLoginStatus?.call(true);
-
       // 로그인 성공 시 홈 화면으로 이동
       Navigator.pushAndRemoveUntil(
         context,
@@ -75,7 +77,10 @@ class _LoginScreenState extends State<LoginScreen> {
         print(e);
         // JSON 형식이 아닌 경우 기본 에러 메시지 표시
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('ID 혹은 비밀번호가 잘못되었습니다.')),
+          const SnackBar(
+            content: Text('ID 혹은 비밀번호가 잘못되었습니다.'),
+            duration: Duration(milliseconds: 500), // 지속 시간을 800밀리초(0.8초)로 설정
+          ),
         );
       }
     }

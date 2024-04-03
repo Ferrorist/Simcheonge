@@ -43,6 +43,9 @@ public class PolicyService {
     public PolicyDetailResponse getPolicy(int policyId) {
         Policy policy = policyRepository.findByPolicyId(policyId)
                 .orElseThrow(() -> new DataNotFoundException("해당 정책이 존재하지 않습니다."));
+        if(!policy.isProcessed()){
+            throw new AuthenticationException("해당 정책 조회에 대한 권한이 없습니다.");
+        }
 
         String policy_period_type_code = policy.getPeriodTypeCode();
         if (policy.getPeriodTypeCode().equals("002001")) policy_period_type_code = "상시";
@@ -176,7 +179,7 @@ public class PolicyService {
             }
             //{ADM,1}, {EPM,1}, {SPC, 1}가 있는지 확인
             if (Arrays.asList(checkCategories).contains(category.getCode()) && category.getNumber() == 1) {
-                throw new IllegalArgumentException("해당 카테고리는 '제한 없음'을 선택할 수 없습니다.");
+//                throw new IllegalArgumentException("해당 카테고리는 '제한 없음'을 선택할 수 없습니다.");
             }
             else if ("APC".equals(category.getCode())) {
                 if (category.getNumber() == 3) {
@@ -257,4 +260,5 @@ public class PolicyService {
 
         return resp;
     }
+
 }
