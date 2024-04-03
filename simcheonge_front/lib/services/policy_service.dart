@@ -7,13 +7,15 @@ class PolicyService {
 
   static Future<PolicyDetail> fetchPolicyDetail(int policyId) async {
     final url = Uri.parse('$_baseUrl/$policyId');
-    print(policyId);
     final response = await http.get(url, headers: {
       "Content-Type": "application/json; charset=UTF-8",
     });
+    print('fetchPolicyDetail Response: ${response.body}'); // 로깅 추가
 
     if (response.statusCode == 200) {
       final responseBody = utf8.decode(response.bodyBytes); // UTF-8로 디코딩
+      print("Server Response: $responseBody"); // 서버 응답 로그 출력
+
       final decodedJson = json.decode(responseBody);
       // 'data' 필드에서 필요한 정보를 추출합니다.
       final policyData = decodedJson['data'];

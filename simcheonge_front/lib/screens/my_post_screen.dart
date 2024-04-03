@@ -96,46 +96,49 @@ class _MyPostScreenState extends State<MyPostScreen>
           ),
         ),
       ),
-      body: ListView.builder(
-        itemCount: displayedItems.length,
-        itemBuilder: (context, index) {
-          final item = displayedItems[index];
-          return InkWell(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) =>
-                        PostDetailScreen(postId: item.postId)),
-              );
-            },
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Text(
-                      item.postName,
-                      style: const TextStyle(
-                        fontSize: 16.0,
-                        fontWeight: FontWeight.bold,
+      body: RefreshIndicator(
+        onRefresh: _loadMyPosts,
+        child: ListView.builder(
+          itemCount: displayedItems.length,
+          itemBuilder: (context, index) {
+            final item = displayedItems[index];
+            return InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          PostDetailScreen(postId: item.postId)),
+                );
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        item.postName,
+                        style: const TextStyle(
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                  Text(
-                    DateFormat('yyyy-MM-dd').format(item.createdAt),
-                    style: const TextStyle(
-                      fontSize: 14.0,
-                      color: Colors.grey,
+                    Text(
+                      DateFormat('yyyy-MM-dd').format(item.createdAt),
+                      style: const TextStyle(
+                        fontSize: 14.0,
+                        color: Colors.grey,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }
