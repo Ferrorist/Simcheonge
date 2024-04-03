@@ -39,19 +39,36 @@ public class UserService {
     }
 
     private void isValidatePassword(String password, String passwordCheck) {
+        String pattern = "^(?=.*[a-zA-Z])(?=.*[0-9])[a-zA-Z0-9!@#$%^&*]{8,16}$";
+
+        if(!password.matches(pattern)){
+            throw new IllegalArgumentException("영문과 숫자, 허용되는 특수문자를 포함한 8 ~ 16자만 가능합니다.");
+        }
+
         if (!password.equals(passwordCheck) || password.trim().isEmpty() || passwordCheck.trim().isEmpty()){
             throw new IllegalArgumentException("비밀번호와 비밀번호 확인이 일치하지 않습니다.");
         }
     }
 
     public void isValidateLoginId(String userLoginId) {
+        String pattern = "^(?=.*[a-zA-Z])(?=.*[0-9])[a-zA-Z0-9]{6,10}$";
+        if (!userLoginId.matches(pattern)) {
+            throw new IllegalArgumentException("영문과 숫자를 포함한 6 ~ 10자만 가능합니다.");
+        }
+
         Optional<User> user = userRepository.findByUserLoginId(userLoginId);
+
         if (user.isPresent()) {
             throw new IllegalArgumentException("이미 존재하는 아이디 입니다.");
         }
     }
 
     public void isValidateNickname(String nickname) {
+        String pattern = "^[가-힣a-zA-Z0-9]{2,8}$";
+        if (!nickname.matches(pattern)) {
+            throw new IllegalArgumentException("닉네임 규칙에 맞지 않습니다.");
+        }
+
         Optional<User> user = userRepository.findByUserNickname(nickname);
         if (user.isPresent()) {
             throw new IllegalArgumentException("이미 존재하는 닉네임 입니다.");
