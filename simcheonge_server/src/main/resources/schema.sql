@@ -88,6 +88,8 @@ CREATE TABLE `policy`
     `policy_created_at`                     DATETIME    NOT NULL DEFAULT (CURRENT_DATE) COMMENT '원본 데이터 반입 일자'
 );
 
+CREATE INDEX idx_policy_code ON policy(policy_code);
+
 
 CREATE TABLE `comment`
 (

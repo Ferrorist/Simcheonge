@@ -45,7 +45,13 @@ public class UserService {
     }
 
     public void isValidateLoginId(String userLoginId) {
+        String pattern = "^(?=.*[a-zA-Z])(?=.*[0-9])[a-zA-Z0-9]{6,10}$";
+        if (!userLoginId.matches(pattern)) {
+            throw new IllegalArgumentException("영문과 숫자를 포함한 6 ~ 10자만 가능합니다.");
+        }
+
         Optional<User> user = userRepository.findByUserLoginId(userLoginId);
+
         if (user.isPresent()) {
             throw new IllegalArgumentException("이미 존재하는 아이디 입니다.");
         }
