@@ -5,11 +5,8 @@ import 'package:simcheonge_front/models/bookmark_detail.dart';
 
 class BookmarkService {
   static const String _baseUrl = 'https://j10e102.p.ssafy.io/api/bookmarks';
-
-  // 북마크 조회 메서드 추가
+// BookmarkService 클래스 내 getBookmarks 메서드 수정
   Future<List<Bookmark>> getBookmarks(String bookmarkType) async {
-    print('체크중');
-
     final prefs = await SharedPreferences.getInstance();
     final String? accessToken = prefs.getString('accessToken');
 
@@ -20,20 +17,18 @@ class BookmarkService {
     });
 
     if (response.statusCode == 200) {
-      Map<String, dynamic> jsonResponse = json.decode(response.body);
-
-      // 'bookmarks' 키에 해당하는 값을 추출하고, null이면 빈 리스트로 처리
-      List<dynamic> bookmarksJson = jsonResponse['bookmarks'] ?? [];
-
+      final String decodedBody = utf8.decode(response.bodyBytes);
+      final jsonResponse = json.decode(decodedBody);
+      final List<dynamic> bookmarksJson = jsonResponse['data'] ?? [];
       List<Bookmark> bookmarks = bookmarksJson
-          .map((bookmarkJson) =>
-              Bookmark.fromJson(bookmarkJson as Map<String, dynamic>))
+          .map((bookmarkJson) => Bookmark.fromJson(bookmarkJson))
           .toList();
+
       return bookmarks;
     } else {
-      // 에러 처리
-      print(accessToken);
-      print(response.statusCode);
+      print(
+          'Failed to load bookmarks with status code: ${response.statusCode}');
+
       throw Exception('Failed to load bookmarks');
     }
   }

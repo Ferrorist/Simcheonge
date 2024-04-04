@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:simcheonge_front/models/bookmark_detail.dart';
+import 'package:simcheonge_front/screens/policy_detail_screen.dart';
 import 'package:simcheonge_front/services/bookmark_service.dart';
 
 class BookmarkPolicyScreen extends StatefulWidget {
@@ -24,8 +25,16 @@ class _BookmarkPolicyScreenState extends State<BookmarkPolicyScreen> {
       setState(() {
         _isLoading = true; // 데이터 로딩 시작
       });
-      final bookmarks = await BookmarkService()
-          .getBookmarks('POL'); // 'POL'이나 'POS'에 따라 북마크를 가져옵니다.
+      final bookmarks = await BookmarkService().getBookmarks('POL');
+
+      // 디버깅 코드: 가져온 북마크 목록의 내용을 콘솔에 출력
+      print('북마크 목록:');
+      print('북마크 ㅣ $bookmarks');
+      for (var bookmark in bookmarks) {
+        print(
+            'BookmarkId: ${bookmark.bookmarkId}, Type: ${bookmark.bookmarkType}, '
+            'ReferencedId: ${bookmark.referencedId}, PolicyName: ${bookmark.policyName}');
+      }
       setState(() {
         bookmarkedItems = bookmarks;
         _isLoading = false; // 데이터 로딩 완료
@@ -61,24 +70,46 @@ class _BookmarkPolicyScreenState extends State<BookmarkPolicyScreen> {
       appBar: AppBar(
         title: const Text('내 북마크'),
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator()) // 로딩 인디케이터 표시
-          : ListView.builder(
-              itemCount: bookmarkedItems.length,
-              itemBuilder: (context, index) {
-                final item = bookmarkedItems[index];
-                String title = item.bookmarkType == 'POL'
-                    ? item.policyName ?? '정책 이름 없음'
-                    : item.postName ?? '게시물 이름 없음';
-                return ListTile(
-                  title: Text(title),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.delete),
-                    onPressed: () => _removeBookmark(item.bookmarkId, index),
-                  ),
-                );
-              },
-            ),
+      body: RefreshIndicator(
+        onRefresh: _fetchBookmarkedItems,
+        child: _isLoading
+            ? const Center(child: CircularProgressIndicator()) // 로딩 인디케이터 표시
+            : ListView.builder(
+                itemCount: bookmarkedItems.length,
+                itemBuilder: (context, index) {
+                  final bookmark = bookmarkedItems[index];
+                  return Card(
+                    margin:
+                        const EdgeInsets.symmetric(vertical: 5, horizontal: 20),
+                    child: ListTile(
+                      title: Text(
+                        bookmark.policyName ??
+                            '정책 이름 없음', // Bookmark 모델에 policyName이 있다고 가정
+                        softWrap: true,
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () {
+                        print(bookmark);
+                        print('북북북 ${bookmark.referencedId}');
+                        print('북구북 $bookmarkedItems');
+
+                        // referencedId를 이용하여 PolicyDetailScreen으로 네비게이션
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PolicyDetailScreen(
+                              policyId: bookmark.referencedId ??
+                                  0, // 여기서 referencedId를 policyId 파라미터에 전달
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
+      ),
     );
   }
 }
