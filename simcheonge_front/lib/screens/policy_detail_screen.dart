@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:simcheonge_front/models/policy_detail.dart';
 import 'package:simcheonge_front/services/policy_service.dart';
 import 'package:simcheonge_front/widgets/bookmark_widget.dart';
@@ -9,12 +10,17 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:intl/intl.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:simcheonge_front/services/bookmark_service.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 // PolicyDetail 모델 import 필요, 경로는 실제 프로젝트 구조에 따라 달라짐
 class PolicyDetailScreen extends StatefulWidget {
   final int policyId;
 
-  const PolicyDetailScreen({super.key, required this.policyId});
+  const PolicyDetailScreen({
+    super.key,
+    required this.policyId,
+  });
 
   @override
   State<PolicyDetailScreen> createState() => _PolicyDetailScreenState();
@@ -28,6 +34,7 @@ class _PolicyDetailScreenState extends State<PolicyDetailScreen> {
   void initState() {
     super.initState();
     _loadPolicyDetail();
+    _checkBookmarkStatus();
   }
 
   Future<void> _loadPolicyDetail() async {
@@ -46,6 +53,120 @@ class _PolicyDetailScreenState extends State<PolicyDetailScreen> {
     }
   }
 
+  Future<void> _checkBookmarkStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    final accessToken = prefs.getString('accessToken');
+    final url = Uri.parse('https://j10e102.p.ssafy.io/api/bookmarks');
+
+    try {
+      final response = await http.get(url, headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $accessToken",
+      });
+      if (response.statusCode == 200) {
+        List<dynamic> bookmarks = json.decode(response.body);
+        final exists = bookmarks.any((bookmark) =>
+            bookmark['bookmarkType'] == 'POL' &&
+            bookmark['referencedId'] == widget.policyId);
+        setState(() {
+          policy!.isBookmarked = exists;
+        });
+      }
+    } catch (e) {
+      print('Error checking bookmark status: $e');
+    }
+  }
+
+  Future<void> _toggleBookmark() async {
+    if (policy == null) return;
+
+    // 즐겨찾기 추가만 처리
+    if (!policy!.isBookmarked) {
+      final prefs = await SharedPreferences.getInstance();
+      final accessToken = prefs.getString('accessToken');
+      final headers = {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $accessToken",
+      };
+
+      print('isbookmarked : ${policy!.isBookmarked}');
+      final url = Uri.parse('https://j10e102.p.ssafy.io/api/bookmarks');
+      final body = json.encode({
+        "bookmarkType": "POL",
+        "policyId": widget.policyId,
+      });
+
+      try {
+        final response = await http.post(
+          url,
+          headers: headers,
+          body: body,
+        );
+        if (response.statusCode == 200 || response.statusCode == 201) {
+          setState(() {
+            policy!.isBookmarked = true; // 즐겨찾기 상태를 추가됨으로 변경
+          });
+        } else if (response.statusCode == 400) {
+          // 서버로부터의 응답이 이미 즐겨찾기에 추가된 경우
+          final responseBody = json.decode(utf8.decode(response.bodyBytes));
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("이미 등록된 북마크입니다.")),
+          );
+          setState(() {
+            policy!.isBookmarked = true; // UI를 즉시 반영하기 위해 상태 업데이트
+          });
+        } else {
+          print('Server error: ${response.body}');
+        }
+      } catch (e) {
+        print('Failed to add bookmark: $e');
+      }
+    }
+  }
+
+  Future<void> _deleteBookmarkForPolicy(int policyId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final accessToken = prefs.getString('accessToken');
+    final headers = {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer $accessToken",
+    };
+
+    // 먼저, 북마크 조회
+    final getUrl =
+        Uri.parse('https://j10e102.p.ssafy.io/api/bookmarks?bookmarkType=POL');
+    try {
+      final getResponse = await http.get(getUrl, headers: headers);
+      if (getResponse.statusCode == 200) {
+        final List<dynamic> bookmarks = json.decode(getResponse.body);
+        // 북마크 목록에서 해당 policyId를 찾습니다.
+        for (var bookmark in bookmarks) {
+          if (bookmark['referencedId'] == policyId &&
+              bookmark['bookmarkType'] == 'POL') {
+            // 북마크 삭제
+            final deleteUrl = Uri.parse(
+                'https://j10e102.p.ssafy.io/api/bookmarks/${bookmark['bookmarkId']}');
+            final deleteResponse =
+                await http.delete(deleteUrl, headers: headers);
+            if (deleteResponse.statusCode == 200) {
+              print('Bookmark deleted successfully.');
+              setState(() {
+                policy!.isBookmarked = false;
+              });
+              return; // 북마크를 성공적으로 삭제한 후 루프를 종료합니다.
+            } else {
+              print('Failed to delete bookmark: ${deleteResponse.body}');
+            }
+          }
+        }
+      } else {
+        print('Failed to fetch bookmarks: ${getResponse.body}');
+      }
+    } catch (e) {
+      print('Exception when calling API: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -55,9 +176,16 @@ class _PolicyDetailScreenState extends State<PolicyDetailScreen> {
             : Text(policy?.policyName ?? 'No Title', // 로딩 완료 후 제목 표시
                 style:
                     const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-        actions: isLoading
-            ? []
-            : [BookmarkWidget(bookmarkType: 'POL', policyId: widget.policyId)],
+        actions: [
+          if (!isLoading)
+            IconButton(
+              icon: Icon(
+                policy?.isBookmarked ?? false ? Icons.star : Icons.star_border,
+                color: Colors.blue,
+              ),
+              onPressed: _toggleBookmark,
+            ),
+        ],
       ),
       body: FutureBuilder<PolicyDetail>(
         future: PolicyService.fetchPolicyDetail(widget.policyId),

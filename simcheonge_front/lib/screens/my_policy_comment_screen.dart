@@ -132,48 +132,51 @@ class _MyPolicyCommentScreenState extends State<MyPolicyCommentScreen> {
           ),
         ),
       ),
-      body: ListView.builder(
-        itemCount: comments.length,
-        itemBuilder: (context, index) {
-          final comment = comments[index];
-          return InkWell(
-            onTap: () {
-              // 여기에 탭했을 때 실행할 로직을 추가합니다. 예를 들어, 상세 페이지로 이동
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => PolicyDetailScreen(
-                    policyId: comment.referencedId,
-                  ),
-                ),
-              );
-            },
-            child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
-              child: Row(
-                children: [
-                  Expanded(
-                      child: Text(
-                    comment.content,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+      body: RefreshIndicator(
+        onRefresh: _fetchMyPolicyComments,
+        child: ListView.builder(
+          itemCount: comments.length,
+          itemBuilder: (context, index) {
+            final comment = comments[index];
+            return InkWell(
+              onTap: () {
+                // 여기에 탭했을 때 실행할 로직을 추가합니다. 예를 들어, 상세 페이지로 이동
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => PolicyDetailScreen(
+                      policyId: comment.referencedId,
                     ),
-                  )), // 긴 텍스트 처리를 위해 Expanded 사용
+                  ),
+                );
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0, vertical: 16.0),
+                child: Row(
+                  children: [
+                    Expanded(
+                        child: Text(
+                      comment.content,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    )), // 긴 텍스트 처리를 위해 Expanded 사용
 
-                  Text(
-                    comment.createdAt,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey,
+                    Text(
+                      comment.createdAt,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }

@@ -147,15 +147,15 @@ class _HomeScreenState extends State<HomeScreen> {
                       onPressed: () => widget.changePage(4)),
                 ],
               ),
-            ),
-            const SizedBox(height: 20),
-            const Center(
-              child: Text("ⓒ 2024. 9ty6 all rights reserved."),
-            ),
-            const SizedBox(
-              height: 12,
-            )
-          ],
+              const SizedBox(height: 20),
+              const Center(
+                child: Text("ⓒ 2024. 9ty6 all rights reserved."),
+              ),
+              const SizedBox(
+                height: 12,
+              ),
+            ],
+          ),
         ),
       ),
     );

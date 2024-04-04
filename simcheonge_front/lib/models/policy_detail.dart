@@ -17,6 +17,7 @@ class PolicyDetail {
   final String policyEntryLimit;
   final String policyApplicationProcedure;
   final String policyEtc;
+  bool isBookmarked;
 
   PolicyDetail({
     required this.policyName,
@@ -37,6 +38,7 @@ class PolicyDetail {
     required this.policyEntryLimit,
     required this.policyApplicationProcedure,
     required this.policyEtc,
+    this.isBookmarked = false,
   });
 
   factory PolicyDetail.fromJson(Map<String, dynamic> json) {
@@ -59,6 +61,31 @@ class PolicyDetail {
       policyEntryLimit: json['policy_entry_limit'] ?? '',
       policyApplicationProcedure: json['policy_application_procedure'] ?? '',
       policyEtc: json['policy_etc'] ?? '',
+      isBookmarked: json['isBookmarked'] ?? false,
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'policy_name': policyName,
+      'policy_intro': policyIntro,
+      'policy_support_scale': policySupportScale,
+      'policy_period_type_code': policyPeriodTypeCode,
+      'policy_start_date': policyStartDate,
+      'policy_end_date': policyEndDate,
+      'policy_main_organization': policyMainOrganization,
+      'policy_operation_organization': policyOperationOrganization,
+      'policy_area': policyArea,
+      'policy_age_info': policyAgeInfo,
+      'policy_education_requirements': policyEducationRequirements,
+      'policy_major_requirements': policyMajorRequirements,
+      'policy_employment_status': policyEmploymentStatus,
+      'policy_site_address': policySiteAddress,
+      'policy_support_content': policySupportContent,
+      'policy_entry_limit': policyEntryLimit,
+      'policy_application_procedure': policyApplicationProcedure,
+      'policy_etc': policyEtc,
+      'isBookmarked': isBookmarked,
+    };
   }
 }

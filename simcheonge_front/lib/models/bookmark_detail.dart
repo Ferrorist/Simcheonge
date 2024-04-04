@@ -16,13 +16,14 @@ class Bookmark {
   });
 
   factory Bookmark.fromJson(Map<String, dynamic> json) {
+    print('Bookmark.fromJson: $json'); // 로깅 추가
     return Bookmark(
-      bookmarkId: json['bookmarkId'],
-      bookmarkType: json['bookmarkType'],
-      userId: json['userId'],
-      referencedId: json['referencedId'],
-      policyName: json['policyName'],
-      postName: json['postName'],
+      bookmarkId: json['bookmarkId'] as int,
+      bookmarkType: json['bookmarkType'] as String,
+      userId: json['userId'] as int,
+      referencedId: json['referencedId'] as int?,
+      policyName: json['policyName'] as String?,
+      postName: json['postName'] as String?,
     );
   }
 }
